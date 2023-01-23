@@ -4,12 +4,13 @@ import sys
 # read from arguments the number of points and the number of dimensions
 num_points = int(sys.argv[1])
 num_dimensions = int(sys.argv[2])
-name_file = str(sys.argv[3])
+bound = int(sys.argv[3])
+name_file = str(sys.argv[4])
 print(f'Generating {num_points} points in {num_dimensions} dimensions')
 
 # Lower and upper bounds for the coordinates
-lower_bound = -num_points
-upper_bound = num_points
+lower_bound = -bound
+upper_bound = bound
 
 points = set()
 while(num_points > 0):
