@@ -41,10 +41,35 @@ int main(int argc, char *argv[]){
         }
     }
     fclose(fp);
-    printf("The number of points is %d", num_points);
-
+    printf("The number of points is %d\n", num_points);
+    int p1 = 0, p2 = 1;
+    int count = 0;
     double min_distance = distance(points[0], points[1]);
-    printf("\nThe minimum distance is %f", min_distance);
+    for (int i = 0; i < num_points; i++){
+        for (int j = i + 1; j < num_points; j++){
+            double dist = distance(points[i], points[j]);
+            if (dist < min_distance){
+                p1 = i;
+                p2 = j;
+                min_distance = dist;
+                count = 1;
+            }
+            else if (dist == min_distance){
+                count++;
+            }
+        }
+    }
+    printf("The minimum distance is %f with points #%d and #%d. ", min_distance, p1, p2);
+    printf("There are %d pairs with this distance.\n", count);
+    printf("The first point coordinates are:\n");
+    for (int i = 0; i < num_dimensions; i++){
+        printf("%d ", points[p1].coordinates[i]);
+    }
+    printf("\nThe second point coordinates are:\n");
+    for (int i = 0; i < num_dimensions; i++){
+        printf("%d ", points[p2].coordinates[i]);
+    }
+
     // free the memory
     free(points);
  
