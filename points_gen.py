@@ -7,7 +7,7 @@ num_dimensions = int(sys.argv[2])
 print(f'Generating {num_points} points in {num_dimensions} dimensions')
 
 # Lower and upper bounds for the coordinates
-lower_bound = 0
+lower_bound = -num_points
 upper_bound = num_points
 
 points = set()
