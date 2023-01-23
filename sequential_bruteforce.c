@@ -42,17 +42,25 @@ int main(int argc, char *argv[])
         }
     }
     fclose(fp);
-
-    // print the points
+    printf("The number of points is %d", num_points);
+    
+    
+    // Calculate the distance between each pair of points
+    double min_dist = distance(points[0], points[1]);
     for (int i = 0; i < num_points; i++)
     {
-        for (int j = 0; j < num_dimensions; j++)
+        for (int j = i + 1; j < num_points; j++)
         {
-            printf("%d ", points[i].coordinates[j]);
+            double dist = distance(points[i], points[j]);
+            if (dist < min_dist)
+            {
+                min_dist = dist;
+            }
         }
-        printf("\n");
     }
-    
-
-    return 0;
+    printf("The closest pair of points' distance is %f", min_dist);
+    // free the memory
+    free(points);
+ 
+   return 0;
 }
