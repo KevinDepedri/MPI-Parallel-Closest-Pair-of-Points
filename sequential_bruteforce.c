@@ -33,7 +33,8 @@ int main(int argc, char *argv[]){
     points = (Point *)malloc(num_points * sizeof(Point));
     for (int i = 0; i < num_points; i++)
     {
-        points[i].coordinates = (int *)malloc(num_dimensions * sizeof(double));
+        points[i].num_dimensions = num_dimensions;
+        points[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
         for (int j = 0; j < num_dimensions; j++)
         {
             fscanf(fp, "%d", &points[i].coordinates[j]);
@@ -42,28 +43,10 @@ int main(int argc, char *argv[]){
     fclose(fp);
     printf("The number of points is %d", num_points);
 
-
-    //print the first point
-    printf("\nThe first point first coordinate is %d", points[0].coordinates[0]);
-    printf("\nThe second point first coordinate is %d", points[1].coordinates[0]);
-    // Calculate the distance between each pair of points
-    
-    Point p1;
-    p1.num_dimensions = 2;
-    p1.coordinates = (int *)malloc(2 * sizeof(int));
-    p1.coordinates[0] = 0;
-    p1.coordinates[1] = 1;
-
-    Point p2;
-    p2.num_dimensions = 2;
-    p2.coordinates = (int *)malloc(2 * sizeof(int));
-    p2.coordinates[0] = 1;
-    p2.coordinates[1] = 2;
-
-    double min_distance = distance(p1,p2);
-    printf("The minimum distance is %f", min_distance);
+    double min_distance = distance(points[0], points[1]);
+    printf("\nThe minimum distance is %f", min_distance);
     // free the memory
     free(points);
  
-   return 0;
+    return 0;
 }
