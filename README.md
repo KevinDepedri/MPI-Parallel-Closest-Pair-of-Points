@@ -12,21 +12,21 @@ TODO:
 
 - [x] $n$ points in $k$ dimensions generator
 
-- [] sequential version of $O(n^2)$
+- [ ] sequential version of $O(n^2)$
 
-- [] sequential versione of $O(n\log n)$ _channel_
+- [ ] sequential versione of $O(n\log n)$ _channel_
 
-- [] sequential $O(n\log n)$ _sorting_
+- [ ] sequential $O(n\log n)$ _sorting_
 
-- [] parallel version of $O(n^2)$
+- [ ] parallel version of $O(n^2)$
 
-- [] parallel versione of $O(n\log n)$ _channel_
+- [ ] parallel versione of $O(n\log n)$ _channel_
 
-- [] parallel $O(n\log n)$ _sorting_
+- [ ] parallel $O(n\log n)$ _sorting_
 
-- [] if cores > points
+- [ ] if cores > points versions
 
-- [] maybe double parallel version
+- [ ] maybe double parallel version
 
 # Install vcpkg
 ```bash
