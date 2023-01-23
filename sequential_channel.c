@@ -3,8 +3,7 @@
 #include <math.h>
 
 // Structure for a point in any number of dimensions
-typedef struct
-{
+typedef struct Point{
     int *coordinates;
     int num_dimensions;
 } Point;
@@ -59,12 +58,24 @@ int main(int argc, char *argv[])
         for (int j = 0; j < num_dimensions; j++)
         {   
             if (j != num_dimensions-1){
-                printf("%d-", points[i].coordinates[j]);
+                printf("%d, ", points[i].coordinates[j]);
             }else{
                 printf("%d", points[i].coordinates[j]);
             }
         }
         printf(")\n");
+    }
+
+    // Compute the distance between all the points
+    int temp_dmin, dmin_left, fmin_right = 0;
+    for (int i = 0; i < num_points; i++){
+        for (int j = 0; j < num_points; j++){
+
+            if (points[i].coordinates[0] < 0 && points[j].coordinates[0]){
+                // temp_dmin = distance(points[i], points[j]);
+                printf("%d", temp_dmin);
+            }
+        }
     }
     
     printf("END OF PROGRAM");
