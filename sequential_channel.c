@@ -5,7 +5,7 @@
 // Structure for a point in any number of dimensions
 typedef struct
 {
-    double *coordinates;
+    int *coordinates;
     int num_dimensions;
 } Point;
 
@@ -19,33 +19,54 @@ double distance(Point p1, Point p2)
     }
     return sqrt(sum);
 }
+
+// Run the main
 int main(int argc, char *argv[])
-{
+{   
+    printf("START OF PROGRAM\n");
     Point* points;
-    int num_points;
+    int num_points, num_dimensions;
+
     FILE* fp = fopen("points.txt", "r");
     if (fp == NULL)
     {
-        perror("Error opening file");
+        perror("Error opening file\n");
         return 1;
+    } else { 
+        printf("File opened correctly\n");
     }
+
     // Read the number of points and dimensions from the first line of the file
-    fscanf(fp, "%d %d", &num_points, &points[0].num_dimensions);
+    fscanf(fp, "%d %d", &num_points, &num_dimensions);
+
     // Allocate memory for the points
     points = (Point *)malloc(num_points * sizeof(Point));
     for (int i = 0; i < num_points; i++)
-    {
-        points[i].coordinates = (double *)malloc(points[0].num_dimensions * sizeof(double));
-    }
-    // Read the coordinates of the points from the file
-    for (int i = 0; i < num_points; i++)
-    {
-        for (int j = 0; j < points[0].num_dimensions; j++)
+    {   
+        points[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+        for (int j = 0; j < num_dimensions; j++)
         {
-            fscanf(fp, "%lf", &points[i].coordinates[j]);
+            fscanf(fp, "%d", &points[i].coordinates[j]);
         }
     }
-    // Close the file
     fclose(fp);
+    printf("File closed correctly\n");
+
+    // Print the points
+    for (int i = 0; i < num_points; i++)
+    {
+        printf("Point %d: (", i);
+        for (int j = 0; j < num_dimensions; j++)
+        {   
+            if (j != num_dimensions-1){
+                printf("%d-", points[i].coordinates[j]);
+            }else{
+                printf("%d", points[i].coordinates[j]);
+            }
+        }
+        printf(")\n");
+    }
+    
+    printf("END OF PROGRAM");
     return 0;
 }
