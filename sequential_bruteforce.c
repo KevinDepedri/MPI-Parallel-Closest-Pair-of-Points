@@ -21,7 +21,7 @@ double distance(Point p1, Point p2){
 int main(int argc, char *argv[]){
     Point* points;
     int num_points, num_dimensions;
-    FILE* fp = fopen("points.txt", "r");
+    FILE* fp = fopen("points_bruteforce.txt", "r");
     if (fp == NULL)
     {
         perror("Error opening file");
