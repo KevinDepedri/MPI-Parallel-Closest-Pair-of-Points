@@ -4,6 +4,7 @@ import sys
 # read from arguments the number of points and the number of dimensions
 num_points = int(sys.argv[1])
 num_dimensions = int(sys.argv[2])
+name_file = int(sys.argv[3])
 print(f'Generating {num_points} points in {num_dimensions} dimensions')
 
 # Lower and upper bounds for the coordinates
@@ -23,7 +24,7 @@ while(num_points > 0):
 
 # Save to points.txt in the first line the number of points and the number of dimensions
 # and in the following lines the coordinates of the points
-with open('points.txt', 'w') as f:
+with open('name_file.txt', 'w') as f:
     f.write(str(len(points)) + ' ' + str(num_dimensions) +'\n')
     for point in points:
         f.write(' '.join(str(x) for x in point)+'\n')
