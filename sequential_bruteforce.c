@@ -1,22 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "utils/util.h"
 
-// Structure for a point in any number of dimensions
-typedef struct{
-    int *coordinates;
-    int num_dimensions;
-} Point;
-
-// Calculates the Euclidean distance between two points
-double distance(Point p1, Point p2){
-    double sum = 0;
-    int n = p1.num_dimensions;
-    for (int i = 0; i < n; i++){
-        sum += pow((p1.coordinates[i] - p2.coordinates[i]), 2);
-    }
-    return sqrt(sum);
-}
 
 int main(int argc, char *argv[]){
     Point* points;
@@ -94,6 +80,9 @@ int main(int argc, char *argv[]){
     free(points);
     free(min_points1);
     free(min_points2);
+
+    // wait for a key press
+    getchar();
  
     return 0;
 }
