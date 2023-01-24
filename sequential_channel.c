@@ -120,7 +120,7 @@ int main(int argc, char *argv[]){
         printf("Point %d: (", i);
         for (int j = 0; j < num_dimensions; j++)
         {   
-            printf(left_channel_points[i].num_dimensions);
+            printf("\n%d\n", left_channel_points[i].num_dimensions);
             if (j != num_dimensions-1){
                 printf("%d, ", left_channel_points[i].coordinates[j]);
             }else{
@@ -135,7 +135,7 @@ int main(int argc, char *argv[]){
         printf("Point %d: (", i);
         for (int j = 0; j < num_dimensions; j++)
         {   
-            printf(right_channel_points[i].num_dimensions);
+            printf("\n%d\n", right_channel_points[i].num_dimensions);
             if (j != num_dimensions-1){
                 printf("%d, ", right_channel_points[i].coordinates[j]);
             }else{
