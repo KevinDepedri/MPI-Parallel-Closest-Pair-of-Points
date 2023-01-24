@@ -1,5 +1,6 @@
 .vscode/
 Examples/
+hpc_venv/
 *.exe
 *.ilk
 *.obj

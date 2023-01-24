@@ -179,23 +179,9 @@ int main(int argc, char *argv[]){
         free(points[i].coordinates);
     }
     free(points);
-
-    // Free memory for unoredered left/right points lists
-    // for (int i =0; i< num_points/2 ;i++){
-    //     free(left_channel_points[i].coordinates);
-    //     free(right_channel_points[i].coordinates);
-    // }
     free(left_channel_points);
     free(right_channel_points);
-
-    // Free memory for unoredered left/right points lists
-    // for (int i =0; i< num_left_channel_points ;i++){
-    //     free(ordered_left_channel_points[i].coordinates);
-    // }
     free(ordered_left_channel_points);
-    // for (int i =0; i< num_right_channel_points ;i++){
-    //     free(ordered_right_channel_points[i].coordinates);
-    // }
     free(ordered_right_channel_points);
     
     printf("Memory free\n");
