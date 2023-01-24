@@ -126,6 +126,10 @@ double closest(Point *points1, Point *points2, int n){
             j++;
         }
     }
+    // free memory
+    free(points2l);
+    free(points2r);
+
     return stripClosest(strip, j, d);
 }
 
@@ -156,10 +160,26 @@ int main(){
     // sort points by each dimension
     for (int i = 0; i < num_dimensions; i++){
         mergeSort(points, 0, num_points - 1, i);
+    // print sorted points
+    for (int i = 0; i < num_points; i++){
+        for (int j = 0; j < num_dimensions; j++){
+            printf("%d ", points[i].coordinates[j]);
+        }
+        printf("\n"); 
+    }
     }
 
     // find the closest pair of points in the sorted array
-    double min = closest(points, points, num_points);
+    int n = num_points/num_dimensions;
+    // create Px and Py
+    Point *Px = (Point *)malloc(n * sizeof(Point));
+    Point *Py = (Point *)malloc(n * sizeof(Point));
+    for (int i = 0; i < n; i++){
+        Px[i] = points[i];
+        Py[i] = points[i + n];
+    }
+
+    double min = closest(Px, Py, n);
     printf("The closest pair of points has distance %f\n", min);
 
     return 0;
