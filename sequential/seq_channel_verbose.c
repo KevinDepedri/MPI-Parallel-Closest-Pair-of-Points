@@ -10,7 +10,7 @@ int main(int argc, char *argv[]){
     Point *points;
     int num_points, num_dimensions;
 
-    FILE* fp = fopen("../point_generator/points.txt", "r");
+    FILE* fp = fopen("../point_generator/points_channel.txt", "r");
     if (fp == NULL)
     {
         perror("Error opening file\n");
@@ -142,7 +142,6 @@ int main(int argc, char *argv[]){
     int dmin_channel = dmin;
     int channel_comparisons = 0;
     for (int i=0; i < num_left_channel_points; i++){
-        printf("Cycle %d\n",i);
         for (int j=0; j < num_right_channel_points; j++){
             if (abs(left_channel_points[i].coordinates[0] - right_channel_points[j].coordinates[0]) < dmin && // To make it MORE EFFICIENT we can USE dmin_channel here
                 abs(left_channel_points[i].coordinates[1] - right_channel_points[j].coordinates[1]) < dmin){  // In this way the comparisons in the channel will be less 
