@@ -2,12 +2,16 @@
 #include <stdlib.h>
 #include <math.h>
 #include "utils/util.h"
-
+#include <time.h>
 
 int main(int argc, char *argv[]){
+    clock_t start, end;
+    double cpu_time_used;
+    start = clock();
+
     Point* points;
     int num_points, num_dimensions;
-    FILE* fp = fopen("points_bruteforce.txt", "r");
+    FILE* fp = fopen("../point_generator/points.txt", "r");
     if (fp == NULL)
     {
         perror("Error opening file");
@@ -27,7 +31,7 @@ int main(int argc, char *argv[]){
         }
     }
     fclose(fp);
-    printf("Loaded %d points in %d dimensions\n", num_points, num_dimensions);
+    // printf("Loaded %d points in %d dimensions\n", num_points, num_dimensions);
     // count and save all points indeces with minimum distance
     int *min_points1 = (int *)malloc(num_points * sizeof(int));
     int *min_points2 = (int *)malloc(num_points * sizeof(int));
@@ -81,6 +85,10 @@ int main(int argc, char *argv[]){
     free(min_points1);
     free(min_points2);
 
+    printf("Memory free\n");
+    end = clock();
+    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    printf("Time elapsed: %f\n", cpu_time_used);
     // wait for a key press
     getchar();
  

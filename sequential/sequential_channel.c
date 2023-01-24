@@ -1,30 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
+#include "utils/util.h"
 # define BOUND 100;
+#include <time.h>
+#include <Windows.h>
 
-// Structure for a point in any number of dimensions
-typedef struct Point{
-    int *coordinates;
-    int num_dimensions;
-} Point;
+int main(int argc, char *argv[]){
+     clock_t start, end;
+     double cpu_time_used;
+     start = clock(); 
 
-// Calculates the Euclidean distance between two points
-double distance(Point p1, Point p2){
-    double sum = 0;
-    int n = p1.num_dimensions;
-    for (int i = 0; i < n; i++){
-        sum += pow((p1.coordinates[i] - p2.coordinates[i]), 2);
-    }
-    return sqrt(sum);
-}
 
-int main(int argc, char *argv[]){   
     Point *points;
     int num_points, num_dimensions;
 
-    FILE* fp = fopen("../point_generator/points_channel.txt", "r");
+    FILE* fp = fopen("../point_generator/points.txt", "r");
     if (fp == NULL)
     {
         perror("Error opening file\n");
@@ -48,7 +39,7 @@ int main(int argc, char *argv[]){
     fclose(fp);
 
     // Print the points
-    for (int i = 0; i < num_points; i++)
+    /*for (int i = 0; i < num_points; i++)
     {
         printf("Point %d: (", i);
         for (int j = 0; j < num_dimensions; j++)
@@ -60,7 +51,7 @@ int main(int argc, char *argv[]){
             }
         }
         printf(")\n");
-    }
+    }*/
 
     // Compute the distance between all the points, points with x = 0 are considered on the left side
     int temp_dmin = 0;
@@ -74,7 +65,7 @@ int main(int argc, char *argv[]){
                     dmin_left = temp_dmin;
                 }
                 comparisons += 1;
-                printf("Comparison %d - Left distance between point %d and %d: %d\n", comparisons, i, j, temp_dmin);
+                // printf("Comparison %d - Left distance between point %d and %d: %d\n", comparisons, i, j, temp_dmin);
             }
             if (i != j && points[i].coordinates[0] > 0 && points[j].coordinates[0] > 0){
                 temp_dmin = distance(points[i], points[j]);
@@ -82,7 +73,7 @@ int main(int argc, char *argv[]){
                     dmin_right = temp_dmin;
                 }
                 comparisons += 1;
-                printf("Comparison %d - Right distance between point %d and %d: %d\n", comparisons, i, j, temp_dmin);
+                // printf("Comparison %d - Right distance between point %d and %d: %d\n", comparisons, i, j, temp_dmin);
             }
         }
     }
@@ -102,12 +93,12 @@ int main(int argc, char *argv[]){
     right_channel_points = (Point *)malloc(num_points/2 * sizeof(Point));
     for (int i=0; i < num_points; i++){
         if (points[i].coordinates[0] > -dmin && points[i].coordinates[0] <= 0){
-            printf("Point %d (%d,%d) in left channel\n", i, points[i].coordinates[0], points[i].coordinates[1]);
+            // printf("Point %d (%d,%d) in left channel\n", i, points[i].coordinates[0], points[i].coordinates[1]);
             left_channel_points[num_left_channel_points] = points[i];
             num_left_channel_points += 1;
         }
         if (points[i].coordinates[0] > 0 && points[i].coordinates[0] < dmin){
-            printf("Point %d (%d,%d) in right channel\n", i, points[i].coordinates[0], points[i].coordinates[1]);
+            // printf("Point %d (%d,%d) in right channel\n", i, points[i].coordinates[0], points[i].coordinates[1]);
             right_channel_points[num_right_channel_points] = points[i];
             num_right_channel_points += 1;
         }
@@ -115,7 +106,7 @@ int main(int argc, char *argv[]){
     printf("Number of points in the left/right of the channel: %d/%d\n", num_left_channel_points, num_right_channel_points);
 
     // Print the points of left channel
-    for (int i = 0; i < num_left_channel_points; i++)
+    /* for (int i = 0; i < num_left_channel_points; i++)
     {
         printf("Left point %d: (", i);
         for (int j = 0; j < num_dimensions; j++)
@@ -141,33 +132,35 @@ int main(int argc, char *argv[]){
             }
         }
         printf(")\n");
-    }
+    }*/
 
     // Order the points in the channel
     Point *ordered_left_channel_points, *ordered_right_channel_points;
     ordered_left_channel_points = (Point *)malloc(num_left_channel_points * sizeof(Point));
     ordered_right_channel_points = (Point *)malloc(num_right_channel_points * sizeof(Point));
     // Reorder left channel points
+    mergeSort(ordered_left_channel_points, num_left_channel_points, 0);
+    mergeSort(ordered_right_channel_points, num_right_channel_points, 0);
     // Reorder right channel points
 
     // Compare left channel points with right channel points (only if their horizontal and vertical offset is < dmin)
     int dmin_channel = dmin;
     int channel_comparisons = 0;
     for (int i=0; i < num_left_channel_points; i++){
-        printf("Cycle %d\n",i);
+        //printf("Cycle %d\n",i);
         for (int j=0; j < num_right_channel_points; j++){
             if (abs(left_channel_points[i].coordinates[0] - right_channel_points[j].coordinates[0]) < dmin && // To make it MORE EFFICIENT we can USE dmin_channel here
                 abs(left_channel_points[i].coordinates[1] - right_channel_points[j].coordinates[1]) < dmin){  // In this way the comparisons in the channel will be less 
                 temp_dmin = distance(left_channel_points[i], right_channel_points[j]);                        // and less as we fine lower numbers
                 channel_comparisons += 1;
-                printf("Comparison %d - Distance between left point %d and right point %d: %d\n", channel_comparisons, i, j, temp_dmin);
+                // printf("Comparison %d - Distance between left point %d and right point %d: %d\n", channel_comparisons, i, j, temp_dmin);
                 if (temp_dmin < dmin_left){
                     dmin_channel = temp_dmin;
-                    printf("New lowest distance\n");
+                    // printf("New lowest distance\n");
                 }
             } 
             else {
-                printf("We can break here for point: %d\n", i);
+                // printf("We can break here for point: %d\n", i);
                 // break;
             }
         }
@@ -183,7 +176,15 @@ int main(int argc, char *argv[]){
     free(right_channel_points);
     free(ordered_left_channel_points);
     free(ordered_right_channel_points);
-    
     printf("Memory free\n");
+
+    end = clock();
+    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    printf("Time elapsed: %f\n", cpu_time_used);
+
+    // wait for keypress to exit
+    printf("Press any key to exit...");
+    getchar();
+
     return 0;
 }
