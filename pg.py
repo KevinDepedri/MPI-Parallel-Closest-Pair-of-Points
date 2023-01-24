@@ -38,4 +38,3 @@ with open(name_file+'.txt', 'w') as f:
 
 print(f'Done')
 
-
