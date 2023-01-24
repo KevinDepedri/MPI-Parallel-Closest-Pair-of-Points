@@ -30,5 +30,14 @@ with open(name_file+'.txt', 'w') as f:
     for point in points:
         f.write(' '.join(str(x) for x in point)+'\n')
 
+import matplotlib.pyplot as plt
+if num_dimensions == 2:
+    x = [p[0] for p in points]
+    y = [p[1] for p in points]
+    plt.scatter(x, y)
+    plt.show()
+
+
+
 print(f'Done')
 
