@@ -19,7 +19,6 @@ double distance(Point p1, Point p2){
 }
 
 int main(int argc, char *argv[]){   
-    printf("START OF PROGRAM\n");
     Point* points;
     int num_points, num_dimensions;
 
@@ -28,8 +27,6 @@ int main(int argc, char *argv[]){
     {
         perror("Error opening file\n");
         return 1;
-    } else { 
-        printf("File opened correctly\n");
     }
 
     // Read the number of points and dimensions from the first line of the file
@@ -47,7 +44,6 @@ int main(int argc, char *argv[]){
         }
     }
     fclose(fp);
-    printf("File closed correctly\n");
 
     // Print the points
     for (int i = 0; i < num_points; i++)
@@ -90,5 +86,10 @@ int main(int argc, char *argv[]){
     }
     printf("Lower distance left side: %d\n", dmin_left);
     printf("Lower distance right side: %d\n", dmin_right);
+
+    for (int i =0; i< num_points ;i++){
+        free(points[i].coordinates);
+    }
+    free(points);
     return 0;
 }
