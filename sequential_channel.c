@@ -117,10 +117,9 @@ int main(int argc, char *argv[]){
     // Print the points of left channel
     for (int i = 0; i < num_left_channel_points; i++)
     {
-        printf("Point %d: (", i);
+        printf("Left point %d: (", i);
         for (int j = 0; j < num_dimensions; j++)
         {   
-            printf("\n%d\n", left_channel_points[i].num_dimensions);
             if (j != num_dimensions-1){
                 printf("%d, ", left_channel_points[i].coordinates[j]);
             }else{
@@ -132,10 +131,9 @@ int main(int argc, char *argv[]){
     // Print the points of right channel
     for (int i = 0; i < num_right_channel_points; i++)
     {
-        printf("Point %d: (", i);
+        printf("Right point %d: (", i);
         for (int j = 0; j < num_dimensions; j++)
         {   
-            printf("\n%d\n", right_channel_points[i].num_dimensions);
             if (j != num_dimensions-1){
                 printf("%d, ", right_channel_points[i].coordinates[j]);
             }else{
@@ -146,35 +144,60 @@ int main(int argc, char *argv[]){
     }
 
     // Order the points in the channel
+    Point *ordered_left_channel_points, *ordered_right_channel_points;
+    ordered_left_channel_points = (Point *)malloc(num_left_channel_points * sizeof(Point));
+    ordered_right_channel_points = (Point *)malloc(num_right_channel_points * sizeof(Point));
     // Reorder left channel points
     // Reorder right channel points
 
     // Compare left channel points with right channel points (only if their horizontal and vertical offset is < dmin)
-    int dmin_channel = BOUND;
+    int dmin_channel = dmin;
     int channel_comparisons = 0;
     for (int i=0; i < num_left_channel_points; i++){
         printf("Cycle %d\n",i);
         for (int j=0; j < num_right_channel_points; j++){
-            if (left_channel_points[i].coordinates[0] + right_channel_points[j].coordinates[0] < dmin && 
-                left_channel_points[i].coordinates[1] + right_channel_points[j].coordinates[1] < dmin){
-                temp_dmin = distance(left_channel_points[i], right_channel_points[j]);
+            if (abs(left_channel_points[i].coordinates[0] - right_channel_points[j].coordinates[0]) < dmin && // To make it MORE EFFICIENT we can USE dmin_channel here
+                abs(left_channel_points[i].coordinates[1] - right_channel_points[j].coordinates[1]) < dmin){  // In this way the comparisons in the channel will be less 
+                temp_dmin = distance(left_channel_points[i], right_channel_points[j]);                        // and less as we fine lower numbers
+                channel_comparisons += 1;
+                printf("Comparison %d - Distance between left point %d and right point %d: %d\n", channel_comparisons, i, j, temp_dmin);
                 if (temp_dmin < dmin_left){
                     dmin_channel = temp_dmin;
+                    printf("New lowest distance\n");
                 }
-                channel_comparisons += 1;
-                printf("Comparison %d - Right distance between point %d and %d: %d\n", channel_comparisons, i, j, temp_dmin);
             } 
             else {
                 printf("We can break here for point: %d\n", i);
+                // break;
             }
         }
     }
+    printf("Global lower distance: %d\n", dmin_channel);
 
-    // Free memory
+    // Free memory for initial points list
     for (int i =0; i< num_points ;i++){
         free(points[i].coordinates);
     }
     free(points);
-    printf("Memory free");
+
+    // Free memory for unoredered left/right points lists
+    // for (int i =0; i< num_points/2 ;i++){
+    //     free(left_channel_points[i].coordinates);
+    //     free(right_channel_points[i].coordinates);
+    // }
+    free(left_channel_points);
+    free(right_channel_points);
+
+    // Free memory for unoredered left/right points lists
+    // for (int i =0; i< num_left_channel_points ;i++){
+    //     free(ordered_left_channel_points[i].coordinates);
+    // }
+    free(ordered_left_channel_points);
+    // for (int i =0; i< num_right_channel_points ;i++){
+    //     free(ordered_right_channel_points[i].coordinates);
+    // }
+    free(ordered_right_channel_points);
+    
+    printf("Memory free\n");
     return 0;
 }
