@@ -2,15 +2,11 @@
 #include <stdlib.h>
 #include <math.h>
 #include "utils/util.h"
-#include <time.h>
+
 # define BOUND 100;
 
 
-int main(int argc, char *argv[]){
-    clock_t start, end;
-    double cpu_time_used;
-    start = clock();
-
+int main(int argc, char *argv[]){   
     Point *points;
     int num_points, num_dimensions;
 
@@ -37,6 +33,21 @@ int main(int argc, char *argv[]){
     }
     fclose(fp);
 
+    // Print the points
+    for (int i = 0; i < num_points; i++)
+    {
+        printf("Point %d: (", i);
+        for (int j = 0; j < num_dimensions; j++)
+        {   
+            if (j != num_dimensions-1){
+                printf("%d, ", points[i].coordinates[j]);
+            }else{
+                printf("%d", points[i].coordinates[j]);
+            }
+        }
+        printf(")\n");
+    }
+
     // Compute the distance between all the points, points with x = 0 are considered on the left side
     int temp_dmin = 0;
     int dmin_left, dmin_right, dmin = BOUND;
@@ -49,6 +60,7 @@ int main(int argc, char *argv[]){
                     dmin_left = temp_dmin;
                 }
                 comparisons += 1;
+                printf("Comparison %d - Left distance between point %d and %d: %d\n", comparisons, i, j, temp_dmin);
             }
             if (i != j && points[i].coordinates[0] > 0 && points[j].coordinates[0] > 0){
                 temp_dmin = distance(points[i], points[j]);
@@ -56,6 +68,7 @@ int main(int argc, char *argv[]){
                     dmin_right = temp_dmin;
                 }
                 comparisons += 1;
+                printf("Comparison %d - Right distance between point %d and %d: %d\n", comparisons, i, j, temp_dmin);
             }
         }
     }
@@ -75,16 +88,46 @@ int main(int argc, char *argv[]){
     right_channel_points = (Point *)malloc(num_points/2 * sizeof(Point));
     for (int i=0; i < num_points; i++){
         if (points[i].coordinates[0] > -dmin && points[i].coordinates[0] <= 0){
+            printf("Point %d (%d,%d) in left channel\n", i, points[i].coordinates[0], points[i].coordinates[1]);
             left_channel_points[num_left_channel_points] = points[i];
             num_left_channel_points += 1;
         }
         if (points[i].coordinates[0] > 0 && points[i].coordinates[0] < dmin){
+            printf("Point %d (%d,%d) in right channel\n", i, points[i].coordinates[0], points[i].coordinates[1]);
             right_channel_points[num_right_channel_points] = points[i];
             num_right_channel_points += 1;
         }
     }
     printf("Number of points in the left/right of the channel: %d/%d\n", num_left_channel_points, num_right_channel_points);
 
+    // Print the points of left channel
+    for (int i = 0; i < num_left_channel_points; i++)
+    {
+        printf("Left point %d: (", i);
+        for (int j = 0; j < num_dimensions; j++)
+        {   
+            if (j != num_dimensions-1){
+                printf("%d, ", left_channel_points[i].coordinates[j]);
+            }else{
+                printf("%d", left_channel_points[i].coordinates[j]);
+            }
+        }
+        printf(")\n");
+    }
+    // Print the points of right channel
+    for (int i = 0; i < num_right_channel_points; i++)
+    {
+        printf("Right point %d: (", i);
+        for (int j = 0; j < num_dimensions; j++)
+        {   
+            if (j != num_dimensions-1){
+                printf("%d, ", right_channel_points[i].coordinates[j]);
+            }else{
+                printf("%d", right_channel_points[i].coordinates[j]);
+            }
+        }
+        printf(")\n");
+    }
 
     // Order the points in the channel
     Point *ordered_left_channel_points, *ordered_right_channel_points;
@@ -99,16 +142,20 @@ int main(int argc, char *argv[]){
     int dmin_channel = dmin;
     int channel_comparisons = 0;
     for (int i=0; i < num_left_channel_points; i++){
+        printf("Cycle %d\n",i);
         for (int j=0; j < num_right_channel_points; j++){
             if (abs(left_channel_points[i].coordinates[0] - right_channel_points[j].coordinates[0]) < dmin && // To make it MORE EFFICIENT we can USE dmin_channel here
                 abs(left_channel_points[i].coordinates[1] - right_channel_points[j].coordinates[1]) < dmin){  // In this way the comparisons in the channel will be less 
                 temp_dmin = distance(left_channel_points[i], right_channel_points[j]);                        // and less as we fine lower numbers
                 channel_comparisons += 1;
+                printf("Comparison %d - Distance between left point %d and right point %d: %d\n", channel_comparisons, i, j, temp_dmin);
                 if (temp_dmin < dmin_left){
                     dmin_channel = temp_dmin;
+                    printf("New lowest distance\n");
                 }
             } 
             else {
+                printf("We can break here for point: %d\n", i);
                 // break;
             }
         }
@@ -126,10 +173,5 @@ int main(int argc, char *argv[]){
     free(ordered_right_channel_points);
     
     printf("Memory free\n");
-    end = clock();
-    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-    printf("Time elapsed: %f\n", cpu_time_used);
-    // wait for a key press
-    getchar();
     return 0;
 }
