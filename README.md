@@ -12,15 +12,15 @@ TODO:
 
 - [x] $n$ points in $k$ dimensions generator
 
-- [ ] sequential version of $O(n^2)$
+- [x] sequential version of $O(n^2)$
 
-- [ ] sequential versione of $O(n\log n)$ _channel_
+- [ ] sequential versione of $O(n\log n)$ _Divide&Conquer_
 
 - [ ] sequential $O(n\log n)$ _sorting_
 
 - [ ] parallel version of $O(n^2)$
 
-- [ ] parallel versione of $O(n\log n)$ _channel_
+- [ ] parallel versione of $O(n\log n)$ _Divide&Conquer_
 
 - [ ] parallel $O(n\log n)$ _sorting_
 

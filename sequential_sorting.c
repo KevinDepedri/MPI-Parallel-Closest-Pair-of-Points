@@ -85,6 +85,7 @@ double isMinor(double x, double y)
     return x < y ? x : y;
 }
 
+// utility function to find the smallest distance in a strip
 double stripClosest(Point *strip, int size, double d){
     double min = d;
     for (int i = 0; i < size; i++){
@@ -112,8 +113,21 @@ double closest(Point *points1, Point *points2, int n){
     }
     int mid = n / 2;
     Point midPoint = points1[mid];
-    double dl = closest(points1, points2, mid);
-    double dr = closest(points1 + mid, points2 + mid, n - mid);
+    Point *points2l = (Point *)malloc(mid * sizeof(Point));
+    Point *points2r = (Point *)malloc((n - mid) * sizeof(Point));
+    int li = 0, ri = 0;
+    for (int i = 0; i < n; i++){
+        if (points2[i].coordinates[0] <= midPoint.coordinates[0]){
+            points2l[li] = points2[i];
+            li++;
+        }
+        else{
+            points2r[ri] = points2[i];
+            ri++;
+        }
+    }
+    double dl = closest(points1, points2l, mid);
+    double dr = closest(points1 + mid, points2r, n - mid);
     double d = isMinor(dl, dr);
     Point *strip = (Point *)malloc(n * sizeof(Point));
     int j = 0;
@@ -123,7 +137,7 @@ double closest(Point *points1, Point *points2, int n){
             j++;
         }
     }
-    return isMinor(d, stripClosest(strip, j, d));
+    return stripClosest(strip, j, d);
 }
 
 
