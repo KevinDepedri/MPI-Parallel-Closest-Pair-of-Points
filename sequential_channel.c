@@ -62,7 +62,7 @@ int main(int argc, char *argv[]){
 
     // Compute the distance between all the points
     int temp_dmin = 0;
-    int dmin_left, dmin_right = 100;
+    int dmin_left, dmin_right, dmin = 100;
     int comparisons = 0;
     for (int i = 0; i < num_points; i++){
         for (int j = i; j < num_points; j++){ // Use j = 0 to compute worst case
@@ -84,9 +84,22 @@ int main(int argc, char *argv[]){
             }
         }
     }
+    dmin = dmin_left;
+    if (dmin_right < dmin){
+        dmin = dmin_right;
+    }
     printf("Lower distance left side: %d\n", dmin_left);
     printf("Lower distance right side: %d\n", dmin_right);
+    printf("Global lower distance: %d\n", dmin);
 
+    // Work in the channel
+    for (int i=0; i < num_points; i++){
+        if (points[i].coordinates[0] > -dmin && points[i].coordinates[0] < dmin){
+            printf("Point %d in channel\n", i);
+        }
+    }
+
+    // Free memory
     for (int i =0; i< num_points ;i++){
         free(points[i].coordinates);
     }
