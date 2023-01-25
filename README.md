@@ -16,13 +16,9 @@ TODO:
 
 - [ ] sequential versione of $O(n\log n)$ _Divide&Conquer_
 
-- [ ] sequential $O(n\log n)$ _sorting_
-
 - [ ] parallel version of $O(n^2)$
 
 - [ ] parallel versione of $O(n\log n)$ _Divide&Conquer_
-
-- [ ] parallel $O(n\log n)$ _sorting_
 
 - [ ] if cores > points versions
 
