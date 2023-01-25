@@ -14,7 +14,7 @@ TODO:
 
 - [x] sequential version of $O(n^2)$
 
-- [ ] sequential versione of $O(n\log n)$ _Divide&Conquer_
+- [x] sequential versione of $O(n\log n)$ _Divide&Conquer_
 
 - [ ] parallel version of $O(n^2)$
 
@@ -30,4 +30,11 @@ git clone https://github.com/Microsoft/vcpkg.git
 .\vcpkg\bootstrap-vcpkg.bat
 vcpkg install mpi
 vcpkg integrate install
+```
+
+# Install WSL with ubuntu
+```bash
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt install mpich
 ```

@@ -10,7 +10,7 @@ int main(int argc, char *argv[]){
     Point *points;
     int num_points, num_dimensions;
 
-    FILE* fp = fopen("../point_generator/points.txt", "r");
+    FILE* fp = fopen("../point_generator/points_channel.txt", "r");
     if (fp == NULL)
     {
         perror("Error opening file\n");
@@ -53,7 +53,7 @@ int main(int argc, char *argv[]){
     int dmin_left, dmin_right, dmin = BOUND;
     int comparisons = 0;
     for (int i = 0; i < num_points; i++){
-        for (int j = i; j < num_points; j++){ // Use j = 0 to compute worst case
+        for (int j = i; j < num_points; j++){ // IMPROVEMENT 1: Use j = 1 instead of j = 0
             if (i != j && points[i].coordinates[0] <= 0 && points[j].coordinates[0] <= 0){
                 temp_dmin = distance(points[i], points[j]);
                 if (temp_dmin < dmin_left){
@@ -130,9 +130,9 @@ int main(int argc, char *argv[]){
     }
 
     // Order the points in the channel
-    Point *ordered_left_channel_points, *ordered_right_channel_points;
-    ordered_left_channel_points = (Point *)malloc(num_left_channel_points * sizeof(Point));
-    ordered_right_channel_points = (Point *)malloc(num_right_channel_points * sizeof(Point));
+    // Point *ordered_left_channel_points, *ordered_right_channel_points;
+    // ordered_left_channel_points = (Point *)malloc(num_left_channel_points * sizeof(Point));
+    // ordered_right_channel_points = (Point *)malloc(num_right_channel_points * sizeof(Point));
     // Reorder left channel points
     mergeSort(left_channel_points, num_left_channel_points, 0);
     mergeSort(right_channel_points, num_right_channel_points, 0);
@@ -142,10 +142,9 @@ int main(int argc, char *argv[]){
     int dmin_channel = dmin;
     int channel_comparisons = 0;
     for (int i=0; i < num_left_channel_points; i++){
-        printf("Cycle %d\n",i);
         for (int j=0; j < num_right_channel_points; j++){
-            if (abs(left_channel_points[i].coordinates[0] - right_channel_points[j].coordinates[0]) < dmin && // To make it MORE EFFICIENT we can USE dmin_channel here
-                abs(left_channel_points[i].coordinates[1] - right_channel_points[j].coordinates[1]) < dmin){  // In this way the comparisons in the channel will be less 
+            if (abs(left_channel_points[i].coordinates[0] - right_channel_points[j].coordinates[0]) < dmin_channel && // IMPROVEMENT 2. Using dmin_channel instead of dmin
+                abs(left_channel_points[i].coordinates[1] - right_channel_points[j].coordinates[1]) < dmin_channel){  // In this way the comparisons in the channel will be less 
                 temp_dmin = distance(left_channel_points[i], right_channel_points[j]);                        // and less as we fine lower numbers
                 channel_comparisons += 1;
                 printf("Comparison %d - Distance between left point %d and right point %d: %d\n", channel_comparisons, i, j, temp_dmin);
@@ -156,7 +155,7 @@ int main(int argc, char *argv[]){
             } 
             else {
                 printf("We can break here for point: %d\n", i);
-                // break;
+                break;
             }
         }
     }
@@ -169,8 +168,8 @@ int main(int argc, char *argv[]){
     free(points);
     free(left_channel_points);
     free(right_channel_points);
-    free(ordered_left_channel_points);
-    free(ordered_right_channel_points);
+    // free(ordered_left_channel_points);
+    // free(ordered_right_channel_points);
     
     printf("Memory free\n");
     return 0;
