@@ -6,6 +6,7 @@ num_points = int(sys.argv[1])
 num_dimensions = int(sys.argv[2])
 bound = int(sys.argv[3])
 name_file = str(sys.argv[4])
+plot = str(sys.argv[4])
 print(f'Generating {num_points} points in {num_dimensions} dimensions')
 num_points2 = num_points
 
@@ -31,14 +32,15 @@ with open(name_file+'.txt', 'w') as f:
     for point in points:
         f.write(' '.join(str(x) for x in point)+'\n')
 
-import matplotlib.pyplot as plt
-if num_dimensions == 2:
-    x = [p[0] for p in points]
-    y = [p[1] for p in points]
-    plt.title(f'Distribution of {num_points2}points in {num_dimensions}D with a bound of {bound}')
-    plt.scatter(x, y)
-    plt.axvline(x = 0, color = 'red')
-    plt.savefig(f'{name_file}.png')
-    plt.show()
+if plot:
+    import matplotlib.pyplot as plt
+    if num_dimensions == 2:
+        x = [p[0] for p in points]
+        y = [p[1] for p in points]
+        plt.title(f'Distribution of {num_points2}points in {num_dimensions}D with a bound of {bound}')
+        plt.scatter(x, y)
+        plt.axvline(x = 0, color = 'red')
+        plt.savefig(f'{name_file}.png')
+        plt.show()
 
 print(f'Done')
