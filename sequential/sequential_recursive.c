@@ -9,6 +9,11 @@ double isMIN(double a, double b){
     return a < b ? a : b;
 }
 
+double isMINof3(double a, double b, double c){
+        double min = a < b ? a : b;
+        return min < c ? min : c;
+}
+
 double recSplit(Point* points, int dim){
     // recurrent function to split the space in half
     // when there are two points it returns the distance between them
@@ -20,7 +25,7 @@ double recSplit(Point* points, int dim){
         return distance(points[0], points[1]);
     }
     else if (dim == 3){
-        return isMIN(distance(points[0], points[1]), distance(points[0], points[2]));
+        return isMINof3(distance(points[0], points[1]), distance(points[0], points[2]), distance(points[1], points[2]));
     }
     else{
         int mid = dim / 2;

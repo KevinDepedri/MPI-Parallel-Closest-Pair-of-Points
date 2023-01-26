@@ -1,6 +1,3 @@
 @REM File to gcc compile sequential_XXX.c and utils/util.c together
-gcc -o seq_channel_verbose .\seq_channel_verbose.c utils/util.c
-gcc -o sequential_channel .\sequential_channel.c utils/util.c
 gcc -o sequential_bruteforce .\sequential_bruteforce.c utils/util.c
-gcc -o seq_channel_correct .\seq_channel_correct.c utils/util.c
-gcc -o seq_dac .\seq_dac.c utils/util.c
+gcc -o sequential_recursive .\sequential_recursive.c utils/util.c
