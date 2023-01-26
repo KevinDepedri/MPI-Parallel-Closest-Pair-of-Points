@@ -71,7 +71,10 @@ int main(){
 
     // Read the number of points and dimensions from the first line of the file
     fscanf(fp, "%d %d", &num_points, &num_dimensions);
-
+    if(num_points < 2){
+        printf("Error: the number of points must be greater than 1");
+        return 1;
+    }
     // Allocate memory for the points
     points = (Point *)malloc(num_points * sizeof(Point));
     for (int i = 0; i < num_points; i++){   
