@@ -5,9 +5,9 @@
 #include<stdio.h>
 
 // To compile in console use one of the follwing
-// gcc -g -Wall -fopenmp -o omp_pi pi.c
-// To run in the start file
-// ./omp_pi
+// gcc -g -Wall -fopenmp -o omp_hello_world hello_world.c
+// To run
+// ./omp_hello_world
 
 void Hello(void);
 
