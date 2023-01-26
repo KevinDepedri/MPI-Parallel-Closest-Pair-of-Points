@@ -14,6 +14,16 @@ double isMINof3(double a, double b, double c){
         return min < c ? min : c;
 }
 
+// diff from each distance
+int diffFromOther(Point point1, Point point2, int d){
+    for(int i = 1; i < point1.num_dimensions; i++){
+        if(point1.coordinates[i] - point2.coordinates[i] > d){
+            return 1;
+        }
+    }
+    return 0;
+}
+
 double recSplit(Point* points, int dim){
     // recurrent function to split the space in half
     // when there are two points it returns the distance between them
@@ -43,7 +53,7 @@ double recSplit(Point* points, int dim){
         mergeSort(strip, j, 1);
         double min = d;
         for (int i = 0; i < j - 1; i++){
-            for (int k = i + 1; k < j && (strip[k].coordinates[1] - strip[i].coordinates[1]) < d; k++){
+            for (int k = i + 1; k < j && diffFromOther(strip[k], strip[i], d); k++){
                 double dd = distance(strip[i], strip[k]);
                 if (dd < min){
                     min = dd;
