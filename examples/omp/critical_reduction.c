@@ -6,10 +6,10 @@
 
 #define SIZE 10
 
-// To compile in console
-// gcc -g -Wall -fopenmp -o omp_pi pi.c
-// To run in the start file
-// ./omp_pi
+// To compile in console use one of the follwing
+// gcc -g -Wall -fopenmp -o omp_critical_reduction critical_reduction.c
+// To run
+// ./omp_critical_reduction
 
 void Sum(int input_array[], int* index, int* total);
 
