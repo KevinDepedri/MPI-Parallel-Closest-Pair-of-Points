@@ -1,7 +1,8 @@
 .vscode/
-Examples/
 hpc_venv/
 *.exe
 *.ilk
 *.obj
 *.pdb
+mpi_*
+omp_*
