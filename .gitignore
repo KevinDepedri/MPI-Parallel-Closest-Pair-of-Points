@@ -4,6 +4,5 @@ hpc_venv/
 *.ilk
 *.obj
 *.pdb
-ign.c
 mpi_*
 omp_*

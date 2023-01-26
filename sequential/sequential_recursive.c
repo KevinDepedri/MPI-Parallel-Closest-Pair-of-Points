@@ -63,7 +63,7 @@ int main(){
     Point *points;
     int num_points, num_dimensions;
 
-    FILE* fp = fopen("../point_generator/points.txt", "r");
+    FILE* fp = fopen("../point_generator/1milion.txt", "r");
     if (fp == NULL){
         perror("Error opening file\n");
         return 1;
