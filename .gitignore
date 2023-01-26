@@ -5,3 +5,4 @@ hpc_venv/
 *.ilk
 *.obj
 *.pdb
+ign.c
