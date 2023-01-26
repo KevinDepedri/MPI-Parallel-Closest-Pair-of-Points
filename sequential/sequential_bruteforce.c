@@ -69,7 +69,7 @@ int main(int argc, char *argv[]){
         }
     }
     // print results
-    printf("The minimum distance is %f. ", min_distance);
+    printf("The minimum distance is %f.", min_distance);
     printf("There are %d pairs with this distance.\n", count);
     // for each point in min_points1 print point1 and point2 /n
     for (int i = 0; i < points1_count; i++){
