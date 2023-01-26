@@ -17,11 +17,11 @@ double isMINof3(double a, double b, double c){
 // diff from each distance
 int diffFromOther(Point point1, Point point2, int d){
     for(int i = 1; i < point1.num_dimensions; i++){
-        if(point1.coordinates[i] - point2.coordinates[i] > d){
-            return 1;
+        if(abs(point1.coordinates[i] - point2.coordinates[i]) > d){
+            return 0;
         }
     }
-    return 0;
+    return 1;
 }
 
 double recSplit(Point* points, int dim){
