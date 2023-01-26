@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "utils/util.h"
+#include <time.h>
 
-#define BOUND 100;
 
 double isMIN(double a, double b){
     return a < b ? a : b;
@@ -39,8 +39,9 @@ double recSplit(Point* points, int dim){
         double min = d;
         for (int i = 0; i < j - 1; i++){
             for (int k = i + 1; k < j && (strip[k].coordinates[1] - strip[i].coordinates[1]) < d; k++){
-                if (distance(strip[i], strip[k]) < min){
-                    min = distance(strip[i], strip[k]);
+                double dd = distance(strip[i], strip[k]);
+                if (dd < min){
+                    min = dd;
                 }
             }
         }
@@ -50,6 +51,10 @@ double recSplit(Point* points, int dim){
 }
 
 int main(){
+    clock_t start, end;
+    double cpu_time_used;
+    start = clock();
+
     Point *points;
     int num_points, num_dimensions;
 
@@ -87,6 +92,9 @@ int main(){
 
     //wait for user input
     printf("The closest pair of points is separated by a distance of %f", d);
+    end = clock();
+    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    printf("\nTime elapsed: %f\n", cpu_time_used);
     getchar();
 
     return 0;
