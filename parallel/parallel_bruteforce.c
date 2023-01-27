@@ -48,33 +48,35 @@ int main(int argc, char *argv[])
         }
         fclose(fp);
         // compute the number of points for each cpu
-        int points_per_cpu = num_points / size;
-        int points_left = num_points % size;
+        int points_per_cpu = num_points / (size - 1);
+        int points_left = num_points % (size - 1);
         // send the number of points to each cpu, with the index of the first point and all the points
         int first_point = 0;
         for (int i = 1; i < size - 1; i++)
         {
             MPI_Send(&points_per_cpu, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
             MPI_Send(&first_point, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-            MPI_Send(points + first_point, points_per_cpu * sizeof(Point), MPI_BYTE, i, 0, MPI_COMM_WORLD);
+            MPI_Send(points, num_points * sizeof(Point), MPI_BYTE, i, 0, MPI_COMM_WORLD);
             first_point += points_per_cpu;
         }
-        MPI_Send(&points_left, 1, MPI_INT, size - 1, 0, MPI_COMM_WORLD);
+        int last_cpu_points = points_per_cpu + points_left;
+        MPI_Send(&last_cpu_points, 1, MPI_INT, size - 1, 0, MPI_COMM_WORLD);
         MPI_Send(&first_point, 1, MPI_INT, size - 1, 0, MPI_COMM_WORLD);
-        MPI_Send(points + first_point, points_per_cpu * sizeof(Point), MPI_BYTE, size - 1, 0, MPI_COMM_WORLD);
+        MPI_Send(points, num_points * sizeof(Point), MPI_BYTE, size - 1, 0, MPI_COMM_WORLD);
 
         // receive the minimum distance from each cpu
-        double min_distance;
-        double min_distance_cpu;
+        double min_distance = distance(points[0], points[1]);
         for (int i = 1; i < size; i++)
         {
-            MPI_Recv(&min_distance_cpu, 1, MPI_DOUBLE, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            if (min_distance_cpu < min_distance)
+            double cpu_min_distance;
+            MPI_Recv(&cpu_min_distance, 1, MPI_DOUBLE, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            if (cpu_min_distance < min_distance)
             {
-                min_distance = min_distance_cpu;
+                min_distance = cpu_min_distance;
             }
         }
-        printf("The minimum distance is: %f\n", min_distance);
+        printf("The minimum distance is %f", min_distance);
+
         // free the memory
         for (int i = 0; i < num_points; i++)
         {
