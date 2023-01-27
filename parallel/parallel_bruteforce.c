@@ -48,8 +48,8 @@ int main(int argc, char *argv[])
         }
         fclose(fp);
         // compute the number of points for each cpu
-        int points_per_cpu = num_points / (size-1);
-        int points_left = num_points % (size-1);
+        int points_per_cpu = num_points / (size - 1);
+        int points_left = num_points % (size - 1);
         // send the number of points to each cpu, with the index of the first point and all the points
         int first_point = 0;
         for (int i = 1; i < size - 1; i++)
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
             }
         }
         printf("The minimum distance is %f", min_distance);
-        
+
         // free the memory
         for (int i = 0; i < num_points; i++)
         {
