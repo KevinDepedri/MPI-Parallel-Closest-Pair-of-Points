@@ -3,65 +3,65 @@
 #include "util.h"
 
 double distance(Point p1, Point p2){
-    double sum = 0;
-    int n = p1.num_dimensions;
-    for (int i = 0; i < n; i++){
-        sum += pow((p1.coordinates[i] - p2.coordinates[i]), 2);
+    double squared_sum = 0;
+    int dimensions = p1.num_dimensions;
+    for (int i = 0; i < dimensions; i++){
+        squared_sum += pow((p1.coordinates[i] - p2.coordinates[i]), 2);
     }
-    return sqrt(sum);
+    return sqrt(squared_sum);
 }
 
-void merge(Point *points, int l, int m, int r, int dim){
+void merge(Point *points, int start_index, int middle_index, int end_index, int dim){ //void merge(Point *points, int l, int m, int r, int dim
     int i, j, k;
-    int n1 = m - l + 1;
-    int n2 = r - m;
+    int num_points_left_array = middle_index - start_index + 1;
+    int num_points_right_array = end_index - middle_index;
     // allocate temp arrays
-    Point *L = (Point *)malloc(n1 * sizeof(Point));
-    Point *R = (Point *)malloc(n2 * sizeof(Point));
-    for (i = 0; i < n1; i++){
-        L[i] = points[l + i];
+    Point *left_array = (Point *)malloc(num_points_left_array * sizeof(Point));
+    Point *right_array = (Point *)malloc(num_points_right_array * sizeof(Point));
+    for (i = 0; i < num_points_left_array; i++){
+        left_array[i] = points[start_index + i];
     }
-    for (j = 0; j < n2; j++){
-        R[j] = points[m + 1 + j];
+    for (j = 0; j < num_points_right_array; j++){
+        right_array[j] = points[middle_index + 1 + j];
     }
     i = 0;
     j = 0;
-    k = l;
-    while (i < n1 && j < n2){
-        if (L[i].coordinates[dim] <= R[j].coordinates[dim]){
-            points[k] = L[i];
+    k = start_index;
+    while (i < num_points_left_array && j < num_points_right_array){
+        if (left_array[i].coordinates[dim] <= right_array[j].coordinates[dim]){
+            points[k] = left_array[i];
             i++;
         }
         else{
-            points[k] = R[j];
+            points[k] = right_array[j];
             j++;
         }
         k++;
     }
-    while (i < n1){
-        points[k] = L[i];
+    while (i < num_points_left_array){
+        points[k] = left_array[i];
         i++;
         k++;
     }
-    while (j < n2){
-        points[k] = R[j];
+    while (j < num_points_right_array){
+        points[k] = right_array[j];
         j++;
         k++;
     }
 
-    free(L);
-    free(R);
+    free(left_array);
+    free(right_array);
 }
 
-void mergeSortRec(Point *points, int l, int r, int dim){
-    if (l < r){
-        int m = l + (r - l) / 2;
-        mergeSortRec(points, l, m, dim);
-        mergeSortRec(points, m + 1, r, dim);
-        merge(points, l, m, r, dim);
+void mergeSortRec(Point *points, int start_index, int end_index, int axis){
+    if (start_index < end_index){
+        int middle_index = start_index + (end_index - start_index) / 2;
+        mergeSortRec(points, start_index, middle_index, axis);
+        mergeSortRec(points, middle_index + 1, end_index, axis);
+        merge(points, start_index, middle_index, end_index, axis);
     }
 }
 
-void mergeSort(Point *points, int dim, int axis){
-    mergeSortRec(points, 0, dim - 1, axis);
+void mergeSort(Point *points, int num_points, int axis){
+    mergeSortRec(points, 0, num_points - 1, axis);
 }
