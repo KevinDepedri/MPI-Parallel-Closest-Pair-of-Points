@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     {
         Point *points;
 
-        FILE *fp = fopen("../point_generator/1milion.txt", "r");
+        FILE *fp = fopen("../point_generator/10thousands.txt", "r");
         if (fp == NULL)
         {
             perror("Error opening file");
