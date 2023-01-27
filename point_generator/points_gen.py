@@ -7,6 +7,9 @@ num_dimensions = int(sys.argv[2])
 bound = int(sys.argv[3])
 name_file = str(sys.argv[4])
 plot = str(sys.argv[4])
+if((2*(bound)+1)**num_dimensions < num_points):
+    print(f'Error: Too many points for the given bound and dimensions')
+    exit()
 print(f'Generating {num_points} points in {num_dimensions} dimensions')
 num_points2 = num_points
 
