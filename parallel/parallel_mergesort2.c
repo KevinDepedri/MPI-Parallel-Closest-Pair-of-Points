@@ -106,32 +106,29 @@ int main(int argc, char *argv[])
     // Gather all the points in the main core
     if (rank_process == 0)
     {   
-        // Core 0 receives the ordered points from all the other cores
         Point *all_sorted_points;
         all_sorted_points = (Point *)malloc(num_points * sizeof(Point));
 
-        // transfer num points
-        int *processes_num_points;
-        processes_num_points = (int *)malloc(comm_size * sizeof(int));
-
-        Point *processes_sorted_points;
-        processes_sorted_points = (Point *)malloc(comm_size * sizeof(Point));
-        for (int process = 1; process < comm_size; process++){
-            processes_sorted_points[process] = (Point *)malloc(num_points * sizeof(Point));
+        Point **processes_sorted_points;
+        processes_sorted_points = (Point **)malloc(comm_size * sizeof(Point*));
+        for (int process = 0; process < comm_size-1; process++){
+            processes_sorted_points[process] = (Point *)malloc(num_points_per_process * sizeof(Point));
         }
+        points_in_excess = num_points % comm_size;
+        processes_sorted_points[comm_size-1] = (Point *)malloc((num_points_per_process + points_in_excess) * sizeof(Point));
 
-        for (int process = 1; process < comm_size; process++){
-            MPI_Recv(points, num_points_per_process * sizeof(Point), MPI_BYTE, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        // Core 0 receives the ordered points from all the other cores
+        processes_sorted_points[0] = &local_process_points;
+        for (int process = 1; process < comm_size-1; process++){
+            MPI_Recv(processes_sorted_points[process], num_points_per_process * sizeof(Point), MPI_BYTE, process, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         }
+        MPI_Recv(processes_sorted_points[comm_size-1], (num_points_per_process + points_in_excess) * sizeof(Point), MPI_BYTE, comm_size-1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
     else
     {   
-        // transfer num points for process
-
         // All the other cores send their ordered points to core 0
-        MPI_Send(&num_points_per_process, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-        MPI_Send(points + first_point, num_points_per_process, MPI_BYTE, i, 0, MPI_COMM_WORLD);
-        MPI_Send(points, num_points_per_process * sizeof(Point), MPI_BYTE, 0, 0, MPI_COMM_WORLD);
+        MPI_Send(&local_process_points,  num_points_per_process * sizeof(Point), MPI_BYTE, 0, 0, MPI_COMM_WORLD);
+
     }
 
     MPI_Finalize();
