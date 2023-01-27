@@ -13,6 +13,22 @@ the master merges the parts
 #include<stdbool.h>  
 #include "utils/util.h"
 
+void print_points(Point *point_list, int num_points){
+        for (int point = 0; point < num_points; point++){
+            printf("Point %d: (", point);
+            
+            for (int dimension=0; dimension < point_list[point].num_dimensions; dimension++){
+                if (dimension != point_list[point].num_dimensions - 1){
+                    printf("%d, ", point_list[point].coordinates[dimension]);
+                }
+                else
+                {
+                    printf("%d)\n", point_list[point].coordinates[dimension]);
+                }
+            }
+        }
+    }
+
 int main(int argc, char *argv[])
 {
     int rank_process, comm_size;
@@ -20,7 +36,7 @@ int main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &rank_process);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
 
-    bool verbose = false;
+    bool verbose = true;
     int num_points, num_dimensions;
 
     FILE *fp = fopen("../point_generator/points_channel_with_image/points_channel.txt", "r"); // ..\point_generator\points_channel_with_image\points_channel.txt  ../point_generator/10thousands.txt
@@ -105,10 +121,7 @@ int main(int argc, char *argv[])
     
     // Gather all the points in the main core
     if (rank_process == 0)
-    {   
-        Point *all_sorted_points;
-        all_sorted_points = (Point *)malloc(num_points * sizeof(Point));
-
+    {
         Point **processes_sorted_points;
         processes_sorted_points = (Point **)malloc(comm_size * sizeof(Point*));
         for (int process = 0; process < comm_size-1; process++){
@@ -118,11 +131,36 @@ int main(int argc, char *argv[])
         processes_sorted_points[comm_size-1] = (Point *)malloc((num_points_per_process + points_in_excess) * sizeof(Point));
 
         // Core 0 receives the ordered points from all the other cores
-        processes_sorted_points[0] = &local_process_points;
+        processes_sorted_points[0] = local_process_points;
         for (int process = 1; process < comm_size-1; process++){
             MPI_Recv(processes_sorted_points[process], num_points_per_process * sizeof(Point), MPI_BYTE, process, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         }
         MPI_Recv(processes_sorted_points[comm_size-1], (num_points_per_process + points_in_excess) * sizeof(Point), MPI_BYTE, comm_size-1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    
+
+        Point *sorted_points;
+        sorted_points = (Point *)malloc(num_points * sizeof(Point));
+        int *temporary_indexes;
+        temporary_indexes = (int *)malloc(comm_size * sizeof(int));
+        for (int process = 0; process < comm_size; process++){
+            // we have the temporary index for each subarray
+            temporary_indexes[process] = 0;
+        }
+        for(int i = 0; i < num_points; i++){
+            // check at each subarray at each temporary index which point is the smallest, and save in sorted_points[i]
+            int min = processes_sorted_points[0][temporary_indexes[0]].coordinates[0];
+            int process_with_minimum_value = 0;
+            for (int process = 0; process < comm_size; process++){
+                if((process < comm_size-1 && temporary_indexes[process] < num_points_per_process) || (process == comm_size-1 && temporary_indexes[process] < num_points_per_process + points_in_excess))
+                    continue;
+                if (processes_sorted_points[process][temporary_indexes[process]].coordinates[0] < min){
+                    min = processes_sorted_points[process][temporary_indexes[process]].coordinates[0];
+                    process_with_minimum_value = process;
+                }
+            }
+            sorted_points[i] = processes_sorted_points[process_with_minimum_value][temporary_indexes[process_with_minimum_value]];
+            temporary_indexes[process_with_minimum_value]++;
+        }
     }
     else
     {   
@@ -130,6 +168,22 @@ int main(int argc, char *argv[])
         MPI_Send(&local_process_points,  num_points_per_process * sizeof(Point), MPI_BYTE, 0, 0, MPI_COMM_WORLD);
 
     }
+
+    printf("PROCESS: %d ALL GOOD\n", rank_process);
+
+    // if (rank_process == 0){
+    //     printf("Sequence of received ordered vectors:\n");
+    //     for (int vector = 0; vector < comm_size; vector++){
+    //         for (int point = 0; point < num_points_per_process ;point++){
+    //             processes_sorted_points[vector][point].coordinates[0];
+    //         }
+    //     }
+    //     for (int points = 0; points < num_points_per_process ;points++){
+    //         processes_sorted_points[comm_size-1]
+    //     }
+    // }
+
+    
 
     MPI_Finalize();
     return 0;
