@@ -111,6 +111,19 @@ int main(int argc, char *argv[])
     // Sort the points in each core
     mergeSort(local_process_points, num_points_per_process, 0);
     
+    // Convert the struct into an MPI struct
+    const int nitems=2;
+    int          blocklengths[2] = {1,1};
+    MPI_Aint     offsets[2];
+    MPI_Datatype types[2] = {MPI_INT, MPI_INT};
+    MPI_Datatype mpi_point_type;
+
+    offsets[0] = offsetof(Point, coordinates);
+    offsets[1] = offsetof(Point, num_dimensions);
+
+    MPI_Type_create_struct(nitems, blocklengths, offsets, types, &mpi_point_type);
+    MPI_Type_commit(&mpi_point_type);
+
     // Gather all the points in the main core
     if (rank_process == 0)
     {
@@ -125,15 +138,17 @@ int main(int argc, char *argv[])
         // Core 0 receives the ordered points from all the other cores
         processes_sorted_points[0] = local_process_points;
         for (int process = 1; process < comm_size-1; process++){
-            MPI_Recv(processes_sorted_points[process], num_points_per_process * sizeof(Point), MPI_BYTE, process, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            // MPI_Recv(processes_sorted_points[process], num_points_per_process * sizeof(Point), MPI_BYTE, process, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(processes_sorted_points[process], num_points_per_process, mpi_point_type, process, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         }
-        MPI_Recv(processes_sorted_points[comm_size-1], (num_points_per_process + points_in_excess) * sizeof(Point), MPI_BYTE, comm_size-1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    
+        // MPI_Recv(processes_sorted_points[comm_size-1], (num_points_per_process + points_in_excess) * sizeof(Point), MPI_BYTE, comm_size-1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(processes_sorted_points[comm_size-1], (num_points_per_process + points_in_excess), mpi_point_type, comm_size-1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
         printf("Sequence of received ordered vectors:\n");
         for (int process = 0; process < comm_size-1; process++){
             print_points(processes_sorted_points[process], num_points_per_process);
         }
-        // print_points(processes_sorted_points[comm_size-1], num_points_per_process);
+        print_points(processes_sorted_points[comm_size-1], num_points_per_process);
 
         // Point *sorted_points;
         // sorted_points = (Point *)malloc(num_points * sizeof(Point));
@@ -162,7 +177,8 @@ int main(int argc, char *argv[])
     else
     {   
         // All the other cores send their ordered points to core 0
-        MPI_Send(&local_process_points,  num_points_per_process * sizeof(Point), MPI_BYTE, 0, 0, MPI_COMM_WORLD);
+        // MPI_Send(local_process_points,  num_points_per_process * sizeof(Point), MPI_BYTE, 0, 0, MPI_COMM_WORLD);
+        MPI_Send(local_process_points,  num_points_per_process, mpi_point_type, 0, 0, MPI_COMM_WORLD);
     }
 
     printf("PROCESS: %d ALL GOOD\n", rank_process);
