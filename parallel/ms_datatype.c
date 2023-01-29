@@ -191,21 +191,21 @@ int main(int argc, char *argv[])
         }
 
         // Print the sorted points ignoring verbose
-        for (int point = 0; point < num_points; point++)
-        {
-            printf("Point %d: (", point);
-            for (int dimension = 0; dimension < sorted_points[point].num_dimensions; dimension++)
-            {
-                if (dimension != sorted_points[point].num_dimensions - 1)
-                {
-                    printf("%d, ", sorted_points[point].coordinates[dimension]);
-                }
-                else
-                {
-                    printf("%d)\n", sorted_points[point].coordinates[dimension]);
-                }
-            }
-        }
+        // for (int point = 0; point < num_points; point++)
+        // {
+        //     printf("Point %d: (", point);
+        //     for (int dimension = 0; dimension < sorted_points[point].num_dimensions; dimension++)
+        //     {
+        //         if (dimension != sorted_points[point].num_dimensions - 1)
+        //         {
+        //             printf("%d, ", sorted_points[point].coordinates[dimension]);
+        //         }
+        //         else
+        //         {
+        //             printf("%d)\n", sorted_points[point].coordinates[dimension]);
+        //         }
+        //     }
+        // }
         //free memory
         for (int process = 0; process < comm_size; process++)
         {
