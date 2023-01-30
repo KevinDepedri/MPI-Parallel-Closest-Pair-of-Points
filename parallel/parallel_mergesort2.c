@@ -7,7 +7,7 @@
 
 #define AXIS 0
 #define MASTER_PROCESS 0
-#define INT_MAX 2000000000
+#define INT_MAX 2147483647
 
 int main(int argc, char *argv[])
 {
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 
     if (rank_process == MASTER_PROCESS)
     {
-        FILE *point_file = fopen("../point_generator/1million.txt", "r"); 
+        FILE *point_file = fopen("point_generator/1milion.txt", "r"); 
         if (point_file == NULL)
         {
             perror("Error opening file on master process\n");
@@ -223,6 +223,7 @@ int main(int argc, char *argv[])
         }
 
         // Free processes_sorted_points
+        free(processes_sorted_points);
         
         // Free all points
         for (int point = 0; point < num_points; point++)
@@ -232,12 +233,6 @@ int main(int argc, char *argv[])
         free(all_points);
     }
 
-    // Free local points
-    // printf("POINT:%d",local_points[1].coordinates[0]);
-    // for (int point = 0; point < num_points_local_process; point++)
-    // {
-    //     free(local_points[point].coordinates);
-    // }
     free(local_points);    
     printf("Memory free\n");
 
