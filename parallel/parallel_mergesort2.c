@@ -66,59 +66,74 @@ int main(int argc, char *argv[])
             }
         }
         fclose(point_file);
+
+        print_points(all_points, num_points, rank_process); 
         
         // Transfer number of points, number of dimensions and points to every process
         Point *points_to_send;
-        points_to_send = (Point *)malloc(num_point_master_process * sizeof(Point));
-        for (int process = 0; process < comm_size; process++)
+        points_to_send = (Point *)malloc(num_points_normal_processes * sizeof(Point));
+        for (int process = 1; process < comm_size; process++)
         {
-            points_to_send = all_points+process;
+            // Copy the points to send to the process
+            for (int point = 0; point < num_points_normal_processes; point++)
+            {
+                points_to_send[point].num_dimensions = num_dimensions;
+                points_to_send[point].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+                for (int dimension = 0; dimension < num_dimensions; dimension++)
+                {
+                    points_to_send[point].coordinates[dimension] = all_points[point+num_points_normal_processes*(process-1)].coordinates[dimension];
+                }
+            }
             MPI_Send(&num_points_normal_processes, 1, MPI_INT, process, 0, MPI_COMM_WORLD);
             MPI_Send(&num_dimensions, 1, MPI_INT, process, 1, MPI_COMM_WORLD);
-            sendPointsPacked(all_points, num_points_normal_processes, 0, 3, MPI_COMM_WORLD);
+            sendPointsPacked(points_to_send, num_points_normal_processes, 0, 3, MPI_COMM_WORLD);
+            printf("SEND\n");
         }
+
+        // Free points to send
+        for (int point = 0; point < num_points_normal_processes; point++)
+        {
+            free(points_to_send[point].coordinates);
+        }
+        free(points_to_send);
 
         // Store the points of the master process
         num_points_local_process = num_point_master_process;
         local_points = (Point *)malloc(num_points_local_process * sizeof(Point));
+        // FILL local points using loop as above
     }
     else
     {
         // Receive info on numbers
         MPI_Recv(&num_points_normal_processes, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        printf("REC1: %d\n", num_points_normal_processes);
         MPI_Recv(&num_dimensions, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        printf("REC2: %d\n", num_dimensions);
 
         // All the other processes receives their points
         num_points_local_process = num_points_normal_processes;
+        printf("PROCESS %d: num points local:%d", rank_process, num_points_local_process);
         local_points = (Point *)malloc(num_points_local_process * sizeof(Point));
-
-        recvPointsPacked(num_points_local_process, num_points_local_process, 0, 3, MPI_COMM_WORLD);
-
-
+        recvPointsPacked(local_points, num_points_local_process, 0, 3, MPI_COMM_WORLD);
     }
 
-
     // Compute the number of points that will be read by each core
-    num_points_normal_processes = num_points / (comm_size-1);
-    
     if (rank_process != MASTER_PROCESS)
     {
-        num_points_local_process = num_points / (comm_size-1);
         index_first_point = num_points_local_process * (rank_process-1);
         index_last_point = index_first_point + num_points_local_process - 1;
-        printf("[NORMAL-PROCESS %d/%d] will read %d points from point %d to point %d\n", rank_process, comm_size, num_points_local_process, index_first_point, index_last_point);
+        printf("[NORMAL-PROCESS %d/%d] received %d points from point %d to point %d\n", rank_process, comm_size, num_points_local_process, index_first_point, index_last_point);
     }
     else
     {
-        num_points_local_process = num_points % (comm_size-1);
         index_first_point = num_points_normal_processes * (comm_size-1);
         if (num_points_local_process > 0)
             {index_last_point = index_first_point + num_points_local_process - 1;
-            printf("[MASTER-PROCESS %d/%d] will read %d points from point %d to point %d\n", rank_process, comm_size, num_points_local_process, index_first_point, index_last_point);
+            printf("[MASTER-PROCESS %d/%d] received %d points from point %d to point %d\n", rank_process, comm_size, num_points_local_process, index_first_point, index_last_point);
         }
         else
         {
-            printf("[MASTER-PROCESS %d/%d] will read %d points (point equally divided on the other cores)\n", rank_process, comm_size, num_points_local_process);
+            printf("[MASTER-PROCESS %d/%d] received %d points (point equally divided on the other cores)\n", rank_process, comm_size, num_points_local_process);
         }
     }
 
@@ -181,6 +196,8 @@ int main(int argc, char *argv[])
         // Print the sorted points ignoring verbose
         printf("ORDERED POINTS:\n");
         print_points(all_points, num_points, rank_process); 
+
+        // Free processes_sorted_points HERE!!!!!!!!!!!!!!!!!!
     }
     else
     {
@@ -188,6 +205,18 @@ int main(int argc, char *argv[])
         sendPointsPacked(all_points, num_points_local_process, 0, 0, MPI_COMM_WORLD);
         printf("SEND DONE\n");
     }
+
+    // Free all points
+    for (int point = 0; point < num_points; point++){
+        free(all_points[point].coordinates);
+    }
+    free(all_points);
+
+    // Free local points
+    for (int point = 0; point < num_points_local_process; point++){
+        free(local_points[point].coordinates);
+    }
+    free(local_points);
 
     MPI_Finalize();
     return 0;
