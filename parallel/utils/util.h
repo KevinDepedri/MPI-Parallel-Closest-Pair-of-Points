@@ -13,6 +13,6 @@ extern void mergeSort(Point *, int, int);
 
 extern void print_points(Point *point_list, int num_points, int rank_process);
 
-// extern void sendPointsPacked(Point* points, int numPoints, int destination, int tag, MPI_Comm comm) 
+extern void sendPointsPacked(Point* points, int numPoints, int destination, int tag, MPI_Comm comm);
 
-// extern void recvPointsPacked(Point* points, int numPoints, int source, int tag, MPI_Comm comm)
+extern void recvPointsPacked(Point* points, int numPoints, int source, int tag, MPI_Comm comm);
