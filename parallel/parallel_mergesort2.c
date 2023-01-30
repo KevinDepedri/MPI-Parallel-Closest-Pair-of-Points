@@ -13,22 +13,6 @@ the master merges the parts
 #include <stdbool.h>  
 #include "utils/util.h"
 
-void print_points(Point *point_list, int num_points){
-        for (int point = 0; point < num_points; point++){
-            printf("Point %d: (", point);
-            
-            for (int dimension=0; dimension < point_list[point].num_dimensions; dimension++){
-                if (dimension != point_list[point].num_dimensions - 1){
-                    printf("%d, ", point_list[point].coordinates[dimension]);
-                }
-                else
-                {
-                    printf("%d)\n", point_list[point].coordinates[dimension]);
-                }
-            }
-        }
-    }
-
 int main(int argc, char *argv[])
 {
     int rank_process, comm_size;

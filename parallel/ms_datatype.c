@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 
     int num_points, num_dimensions;
 
-    FILE *fp = fopen("point_generator/points.txt", "r"); // ..\point_generator\points_channel_with_image\points_channel.txt  ../point_generator/10thousands.txt
+    FILE *fp = fopen("../point_generator/points.txt", "r"); // ..\point_generator\points_channel_with_image\points_channel.txt  ../point_generator/10thousands.txt
     if (fp == NULL)
     {
         printf("Error opening file on core %d", rank_process);

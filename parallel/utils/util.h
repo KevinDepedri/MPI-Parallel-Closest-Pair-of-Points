@@ -10,3 +10,5 @@ extern void merge(Point *, int, int, int, int);
 extern void mergeSortRec(Point *, int, int, int);
 
 extern void mergeSort(Point *, int, int);
+
+extern void print_points(Point *point_list, int num_points);

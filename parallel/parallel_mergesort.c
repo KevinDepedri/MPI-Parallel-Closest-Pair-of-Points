@@ -18,12 +18,12 @@ the master merges the parts
 
 void sendPoints(Point* points, int numPoints, int destination, int tag, MPI_Comm comm) {
   int bufferSize = numPoints * (sizeof(int) + sizeof(int)*points[0].num_dimensions);
-  void* buffer = malloc(bufferSize);
+  void *buffer = malloc(bufferSize);
   int position = 0;
 
-  for (int i = 0; i < numPoints; i++) {
-    MPI_Pack(&points[i].num_dimensions, 1, MPI_INT, buffer, bufferSize, &position, comm);
-    MPI_Pack(points[i].coordinates, points[i].num_dimensions, MPI_INT, buffer, bufferSize, &position, comm);
+  for (int point = 0; point < numPoints; point++) {
+    MPI_Pack(&points[point].num_dimensions, 1, MPI_INT, buffer, bufferSize, &position, comm);
+    MPI_Pack(points[point].coordinates, points[point].num_dimensions, MPI_INT, buffer, bufferSize, &position, comm);
   }
 
   MPI_Send(buffer, position, MPI_PACKED, destination, tag, comm);
@@ -60,7 +60,8 @@ int main(int argc, char *argv[])
 
     int num_points, num_dimensions;
 
-    FILE *fp = fopen("point_generator/1milion.txt", "r"); // ..\point_generator\points_channel_with_image\points_channel.txt  ../point_generator/10thousands.txt
+    //OPTIONS: ../point_generator/points_channel_with_image/points_channel.txt   ../point_generator/10thousands.txt   ../point_generator/1milion.txt
+    FILE *fp = fopen("../point_generator/points_channel_with_image/points_channel.txt", "r"); 
     if (fp == NULL)
     {
         printf("Error opening file on core %d", rank_process);
@@ -86,18 +87,20 @@ int main(int argc, char *argv[])
 
     // Compute the number of points that will be read by each core
     num_points_per_process = num_points / comm_size;
-    index_first_point = num_points_per_process * (rank_process);
+    points_in_excess = num_points % comm_size;
+    
     if (rank_process != 0)
     {
-        index_last_point = index_first_point + num_points_per_process;
-        printf("Core %d/%d will read %d points from line %d to line %d\n", rank_process, comm_size, num_points_per_process, index_first_point, index_last_point);
+        index_first_point = num_points_per_process * (rank_process) + points_in_excess;
+        index_last_point = index_first_point + num_points_per_process - 1;
+        printf("Core %d/%d will read %d points from point %d to point %d\n", rank_process, comm_size, num_points_per_process, index_first_point, index_last_point);
     }
     else
     {
-        points_in_excess = num_points % comm_size;
         num_points_per_process = num_points_per_process + points_in_excess;
-        index_last_point = index_first_point + num_points_per_process;
-        printf("Core %d/%d will read %d points from line %d to line %d\n", rank_process, comm_size, num_points_per_process, index_first_point, index_last_point);
+        index_first_point = num_points_per_process * (rank_process);
+        index_last_point = index_first_point + num_points_per_process - 1; //TO FIX THE PRINT. WE NEED ALSO TO FIX THE INDEX_FIRST_POINT FOR OTHER PROCESSES. WAIT TO DEFINE WHICH WILL BE THE CORE0 TASK, then fix it
+        printf("Core %d/%d will read %d points from point %d to point %d\n", rank_process, comm_size, num_points_per_process, index_first_point, index_last_point);
     }
 
     // Compute the size of the header (number of points and number of dimensions)
@@ -105,7 +108,7 @@ int main(int argc, char *argv[])
     // printf("HEADER SIZE: %ld\n", header_size);
 
     // Jump to the point of the file which need to be read by this core
-    long jump_size = 4 + 4 * 2 * index_first_point; // The initial 4bytes is the size of the header (number of points and number of dimensions)
+    long jump_size = 4 + 4 * 2 * (index_first_point); // The initial 4bytes is the size of the header (number of points and number of dimensions)
     if (fseek(fp, jump_size, SEEK_SET) != 0)
     {
         printf("Error: could not use fseek to perform jump inside the input point file\n");
@@ -126,7 +129,10 @@ int main(int argc, char *argv[])
         }
     }
     fclose(fp);
-
+    
+    // Print extracted points
+    printf("PROCESS: %d\n", rank_process);
+    print_points(local_process_points, num_points_per_process);
 
     // Sort the points in each core
     mergeSort(local_process_points, num_points_per_process, AXIS);
@@ -136,19 +142,22 @@ int main(int argc, char *argv[])
     {
         Point **processes_sorted_points;
         processes_sorted_points = (Point **)malloc(comm_size * sizeof(Point *));
+
+        points_in_excess = num_points % comm_size;
+        processes_sorted_points[0] = (Point *)malloc((num_points_per_process + points_in_excess) * sizeof(Point));
         for (int process = 1; process < comm_size; process++)
         {
             processes_sorted_points[process] = (Point *)malloc(num_points_per_process * sizeof(Point));
         }
-        points_in_excess = num_points % comm_size;
-        processes_sorted_points[0] = (Point *)malloc((num_points_per_process + points_in_excess) * sizeof(Point));
 
-        // save the first points from the current core
+        // Save first the points ordered from the current core (core 0)
         processes_sorted_points[0] = local_process_points;
         for (int process = 1; process < comm_size; process++)
         {
             recvPoints(processes_sorted_points[process], num_points_per_process, process, 0, MPI_COMM_WORLD);
         }
+        printf("RECEIVE DONE\n");
+
         // Merge the points from all the cores
         Point *sorted_points;
         sorted_points = (Point *)malloc(num_points * sizeof(Point));
@@ -199,6 +208,7 @@ int main(int argc, char *argv[])
     {
         // All the other cores send their ordered points to core 0
         sendPoints(local_process_points, num_points_per_process, 0, 0, MPI_COMM_WORLD);
+        printf("SEND DONE\n");
     }
 
     MPI_Finalize();

@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "util.h"
 
 double distance(Point p1, Point p2){
@@ -65,3 +66,19 @@ void mergeSortRec(Point *points, int start_index, int end_index, int axis){
 void mergeSort(Point *points, int num_points, int axis){
     mergeSortRec(points, 0, num_points - 1, axis);
 }
+
+void print_points(Point *point_list, int num_points){
+        for (int point = 0; point < num_points; point++){
+            printf("Point %d: (", point);
+            
+            for (int dimension=0; dimension < point_list[point].num_dimensions; dimension++){
+                if (dimension != point_list[point].num_dimensions - 1){
+                    printf("%d, ", point_list[point].coordinates[dimension]);
+                }
+                else
+                {
+                    printf("%d)\n", point_list[point].coordinates[dimension]);
+                }
+            }
+        }
+    }
