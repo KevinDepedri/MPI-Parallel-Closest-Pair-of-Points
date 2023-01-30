@@ -1,6 +1,8 @@
-#include <math.h>
-#include <stdlib.h>
+#include <mpi.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <math.h>
 #include "util.h"
 
 double distance(Point p1, Point p2){
@@ -67,18 +69,52 @@ void mergeSort(Point *points, int num_points, int axis){
     mergeSortRec(points, 0, num_points - 1, axis);
 }
 
-void print_points(Point *point_list, int num_points){
-        for (int point = 0; point < num_points; point++){
-            printf("Point %d: (", point);
-            
-            for (int dimension=0; dimension < point_list[point].num_dimensions; dimension++){
-                if (dimension != point_list[point].num_dimensions - 1){
-                    printf("%d, ", point_list[point].coordinates[dimension]);
-                }
-                else
-                {
-                    printf("%d)\n", point_list[point].coordinates[dimension]);
-                }
+void print_points(Point *point_list, int num_points, int rank_process){
+    printf("PROCESS: %d\n", rank_process);
+    for (int point = 0; point < num_points; point++){
+        printf("-----Point %d: (", point);
+        
+        for (int dimension=0; dimension < point_list[point].num_dimensions; dimension++){
+            if (dimension != point_list[point].num_dimensions - 1){
+                printf("%d, ", point_list[point].coordinates[dimension]);
+            }
+            else
+            {
+                printf("%d)\n", point_list[point].coordinates[dimension]);
             }
         }
     }
+}
+
+// void sendPointsPacked(Point* points, int numPoints, int destination, int tag, MPI_Comm comm) {
+//   int bufferSize = numPoints * (sizeof(int) + sizeof(int)*points[0].num_dimensions);
+//   void *buffer = malloc(bufferSize);
+//   int position = 0;
+
+//   for (int point = 0; point < numPoints; point++) {
+//     MPI_Pack(&points[point].num_dimensions, 1, MPI_INT, buffer, bufferSize, &position, comm);
+//     MPI_Pack(points[point].coordinates, points[point].num_dimensions, MPI_INT, buffer, bufferSize, &position, comm);
+//   }
+
+//   MPI_Send(buffer, position, MPI_PACKED, destination, tag, comm);
+//   free(buffer);
+// }
+
+// void recvPointsPacked(Point* points, int numPoints, int source, int tag, MPI_Comm comm) {
+//   MPI_Status status;
+//   MPI_Probe(source, tag, comm, &status);
+
+//   int count;
+//   MPI_Get_count(&status, MPI_PACKED, &count);
+//   void* buffer = malloc(count);
+
+//   MPI_Recv(buffer, count, MPI_PACKED, source, tag, comm, MPI_STATUS_IGNORE);
+
+//   int position = 0;
+//   for (int i = 0; i < numPoints; i++) {
+//     MPI_Unpack(buffer, count, &position, &points[i].num_dimensions, 1, MPI_INT, comm);
+//     points[i].coordinates = (int*)malloc(points[i].num_dimensions * sizeof(int));
+//     MPI_Unpack(buffer, count, &position, points[i].coordinates, points[i].num_dimensions, MPI_INT, comm);
+//   }
+//   free(buffer);
+// }
