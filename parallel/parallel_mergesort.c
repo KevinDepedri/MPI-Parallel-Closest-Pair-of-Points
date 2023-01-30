@@ -25,7 +25,6 @@ int main(int argc, char *argv[])
 
     int num_points, num_dimensions;
 
-    //OPTIONS: ../point_generator/points_channel_with_image/points_channel.txt   ../point_generator/10thousands.txt   ../point_generator/1milion.txt
     FILE *fp = fopen("../point_generator/1hundred.txt", "r"); 
     if (fp == NULL)
     {
@@ -84,7 +83,7 @@ int main(int argc, char *argv[])
     // printf("HEADER SIZE: %ld\n", header_size);
 
     // Jump to the point of the file which need to be read by this core
-    long jump_size = 4 + 4 * 2 * (index_first_point); // The initial 4bytes is the size of the header (number of points and number of dimensions)
+    long jump_size = 4 + 4 * num_dimensions * (index_first_point); // The initial 4bytes is the size of the header (number of points and number of dimensions)
     printf("PROCESS %d: JUMP SIZE: %ld", rank_process, jump_size);
     if (fseek(fp, jump_size, SEEK_SET) != 0)
     {
