@@ -29,11 +29,18 @@ while(num_points > 0):
         num_points -= 1
 
 # Save to points.txt in the first line the number of points and the number of dimensions
-# and in the following lines the coordinates of the points
-with open(name_file+'.txt', 'w') as f:
-    f.write(str(len(points)) + ' ' + str(num_dimensions) +'\n')
-    for point in points:
-        f.write(' '.join(str(x) for x in point)+'\n')
+# and in the following lines the coordinates of the points, adding 0s to match the largest number of digits
+with open(f'{name_file}.txt', 'w') as f:
+    f.write(f'{num_points2} {num_dimensions}\n')
+
+    max_digits = len(str(max([max(p) for p in points])))
+    # add 0s to the front to match the largest number of digits
+    for p in points:
+        for c in p:
+            f.write(f'{str(c).zfill(max_digits)} ')
+        f.write('\n')
+
+    f.close()
 
 if plot:
     import matplotlib.pyplot as plt
