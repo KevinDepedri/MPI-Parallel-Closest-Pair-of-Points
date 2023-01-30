@@ -17,38 +17,38 @@ the master merges the parts
 #define MASTER_PROCESS 0
 
 
-void sendPointsPacked(Point* points, int numPoints, int destination, int tag, MPI_Comm comm) {
-  int bufferSize = numPoints * (sizeof(int) + sizeof(int)*points[0].num_dimensions);
-  void *buffer = malloc(bufferSize);
-  int position = 0;
+// void sendPointsPacked(Point* points, int numPoints, int destination, int tag, MPI_Comm comm) {
+//   int bufferSize = numPoints * (sizeof(int) + sizeof(int)*points[0].num_dimensions);
+//   void *buffer = malloc(bufferSize);
+//   int position = 0;
 
-  for (int point = 0; point < numPoints; point++) {
-    MPI_Pack(&points[point].num_dimensions, 1, MPI_INT, buffer, bufferSize, &position, comm);
-    MPI_Pack(points[point].coordinates, points[point].num_dimensions, MPI_INT, buffer, bufferSize, &position, comm);
-  }
+//   for (int point = 0; point < numPoints; point++) {
+//     MPI_Pack(&points[point].num_dimensions, 1, MPI_INT, buffer, bufferSize, &position, comm);
+//     MPI_Pack(points[point].coordinates, points[point].num_dimensions, MPI_INT, buffer, bufferSize, &position, comm);
+//   }
 
-  MPI_Send(buffer, position, MPI_PACKED, destination, tag, comm);
-  free(buffer);
-}
+//   MPI_Send(buffer, position, MPI_PACKED, destination, tag, comm);
+//   free(buffer);
+// }
 
-void recvPointsPacked(Point* points, int numPoints, int source, int tag, MPI_Comm comm) {
-  MPI_Status status;
-  MPI_Probe(source, tag, comm, &status);
+// void recvPointsPacked(Point* points, int numPoints, int source, int tag, MPI_Comm comm) {
+//   MPI_Status status;
+//   MPI_Probe(source, tag, comm, &status);
 
-  int count;
-  MPI_Get_count(&status, MPI_PACKED, &count);
-  void* buffer = malloc(count);
+//   int count;
+//   MPI_Get_count(&status, MPI_PACKED, &count);
+//   void* buffer = malloc(count);
 
-  MPI_Recv(buffer, count, MPI_PACKED, source, tag, comm, MPI_STATUS_IGNORE);
+//   MPI_Recv(buffer, count, MPI_PACKED, source, tag, comm, MPI_STATUS_IGNORE);
 
-  int position = 0;
-  for (int i = 0; i < numPoints; i++) {
-    MPI_Unpack(buffer, count, &position, &points[i].num_dimensions, 1, MPI_INT, comm);
-    points[i].coordinates = (int*)malloc(points[i].num_dimensions * sizeof(int));
-    MPI_Unpack(buffer, count, &position, points[i].coordinates, points[i].num_dimensions, MPI_INT, comm);
-  }
-  free(buffer);
-}
+//   int position = 0;
+//   for (int i = 0; i < numPoints; i++) {
+//     MPI_Unpack(buffer, count, &position, &points[i].num_dimensions, 1, MPI_INT, comm);
+//     points[i].coordinates = (int*)malloc(points[i].num_dimensions * sizeof(int));
+//     MPI_Unpack(buffer, count, &position, points[i].coordinates, points[i].num_dimensions, MPI_INT, comm);
+//   }
+//   free(buffer);
+// }
 
 
 int main(int argc, char *argv[])
