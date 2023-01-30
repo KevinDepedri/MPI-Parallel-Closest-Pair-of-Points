@@ -69,6 +69,7 @@ int main(int argc, char *argv[])
         }
         fclose(point_file);
 
+        printf("INPUT LIST OF POINTS:\n");
         print_points(all_points, num_points, rank_process); 
         
         // Transfer number of points, number of dimensions and points to every process
@@ -101,15 +102,16 @@ int main(int argc, char *argv[])
         // Store the points of the master process
         num_points_local_process = num_point_master_process;
         local_points = (Point *)malloc(num_points_local_process * sizeof(Point));
-        for (int point = num_points_local_process * (comm_size-1); point < num_points_local_process; point++)
+        int starting_from = num_points_normal_processes * (comm_size - 1);
+        for (int i = 0; i + starting_from < num_points; i++)
+        {
+            local_points[i].num_dimensions = num_dimensions;
+            local_points[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+            for (int dimension = 0; dimension < num_dimensions; dimension++)
             {
-                local_points[point].num_dimensions = num_dimensions;
-                local_points[point].coordinates = (int *)malloc(num_dimensions * sizeof(int));
-                for (int dimension = 0; dimension < num_dimensions; dimension++)
-                {
-                    local_points[point].coordinates[dimension] = all_points[point+num_points_local_process*(comm_size-1)].coordinates[dimension];
-                }
+                local_points[i].coordinates[dimension] = all_points[i + starting_from].coordinates[dimension];
             }
+        }
     }
     else
     {
@@ -167,26 +169,22 @@ int main(int argc, char *argv[])
         {
             recvPointsPacked(processes_sorted_points[process], num_points_normal_processes, process, 0, MPI_COMM_WORLD);
         }
-        printf("RECEIVE DONE\n");
 
         // Merge the points from all the cores
-        all_points = (Point *)malloc(num_points * sizeof(Point));
-        
         int *temporary_indexes;
         temporary_indexes = (int *)malloc(comm_size * sizeof(int));
         for (int process = 0; process < comm_size; process++)
         {
             temporary_indexes[process] = 0;
         }  
-
         for (int point = 0; point < num_points; point++)
         {
-            int min = processes_sorted_points[0][temporary_indexes[0]].coordinates[AXIS];
+            int min = processes_sorted_points[1][temporary_indexes[0]].coordinates[AXIS];
             int process_with_minimum_value = 0;
 
             for (int process = 0; process < comm_size; process++)
             {
-                if ((process < comm_size && temporary_indexes[process] < num_points_normal_processes) || (process == 0 && temporary_indexes[process] < num_points_local_process))
+                if ((process == 0 && temporary_indexes[process] < num_points_local_process) || (process != 0 && temporary_indexes[process] < num_points_normal_processes))
                 {
                     if (processes_sorted_points[process][temporary_indexes[process]].coordinates[AXIS] < min)
                     {
@@ -201,7 +199,7 @@ int main(int argc, char *argv[])
 
         // Print the sorted points ignoring verbose
         printf("ORDERED POINTS:\n");
-        print_points(all_points, num_points, rank_process); 
+        // print_points(all_points, num_points, rank_process); 
 
         // Free processes_sorted_points HERE!!!!!!!!!!!!!!!!!!
     }
@@ -209,7 +207,6 @@ int main(int argc, char *argv[])
     {
         // All the other cores send their ordered points to core 0
         sendPointsPacked(local_points, num_points_local_process, 0, 0, MPI_COMM_WORLD);
-        printf("SEND DONE\n");
     }
 
     // // Free all points
