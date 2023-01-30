@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <time.h>
 #include "utils/util.h"
 
 #define AXIS 0
@@ -10,6 +11,11 @@
 
 int main(int argc, char *argv[])
 {
+    clock_t start, end;
+    double cpu_time_used;
+    start = clock();
+
+    int verbose = 0;
     int rank_process, comm_size;
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank_process);
@@ -24,7 +30,7 @@ int main(int argc, char *argv[])
 
     if (rank_process == MASTER_PROCESS)
     {
-        FILE *point_file = fopen("../point_generator/1hundred.txt", "r"); 
+        FILE *point_file = fopen("../point_generator/1million.txt", "r"); 
         if (point_file == NULL)
         {
             perror("Error opening file on master process\n");
@@ -70,8 +76,11 @@ int main(int argc, char *argv[])
         }
         fclose(point_file);
 
-        printf("INPUT LIST OF POINTS:\n");
-        print_points(all_points, num_points, rank_process); 
+        if (verbose == 1)
+        {
+            printf("INPUT LIST OF POINTS:\n");
+            print_points(all_points, num_points, rank_process);    
+        }        
         
         // Transfer number of points, number of dimensions and points to every process
         Point *points_to_send;
@@ -89,7 +98,6 @@ int main(int argc, char *argv[])
                 }
             }
             MPI_Send(&num_points_normal_processes, 1, MPI_INT, process, 0, MPI_COMM_WORLD);
-            // MPI_Send(&num_dimensions, 1, MPI_INT, process, 1, MPI_COMM_WORLD);
             sendPointsPacked(points_to_send, num_points_normal_processes, process, 3, MPI_COMM_WORLD);
         }
 
@@ -118,8 +126,6 @@ int main(int argc, char *argv[])
     {
         // Receive info on numbers
         MPI_Recv(&num_points_normal_processes, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        // MPI_Recv(&num_dimensions, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        // printf("REC2: %d\n", num_dimensions);
 
         // All the other processes receives their points
         num_points_local_process = num_points_normal_processes;
@@ -148,7 +154,9 @@ int main(int argc, char *argv[])
     }
 
     // Print received points
-    print_points(local_points, num_points_local_process, rank_process);  
+    if (verbose == 1){
+        print_points(local_points, num_points_local_process, rank_process);  
+    }
     // Sort the points in each core
     mergeSort(local_points, num_points_local_process, AXIS);
 
@@ -185,10 +193,9 @@ int main(int argc, char *argv[])
             temporary_indexes[process] = 0;
         }
 
-
         for (int point = 0; point < num_points; point++)
         {        
-            int min = INT_MAX; //processes_sorted_points[1][temporary_indexes[1]].coordinates[AXIS];
+            int min = INT_MAX;
             int process_with_minimum_value = 0;
 
             for (int process = 0; process < comm_size; process++)
@@ -202,33 +209,41 @@ int main(int argc, char *argv[])
                         min = processes_sorted_points[process][temporary_indexes[process]].coordinates[AXIS];
                         process_with_minimum_value = process;
                     }
-                    
+
                 }
 
             }
-            // printf("Lowest %d coordinate: %d", point, processes_sorted_points[process_with_minimum_value][temporary_indexes[process_with_minimum_value]].coordinates[AXIS]);
             all_points[point] = processes_sorted_points[process_with_minimum_value][temporary_indexes[process_with_minimum_value]];
             temporary_indexes[process_with_minimum_value]++;
         }
 
-        // Print the sorted points ignoring verbose
-        printf("ORDERED POINTS:\n");
-        print_points(all_points, num_points, rank_process); 
+        if (verbose == 1){
+            printf("ORDERED POINTS:\n");
+            print_points(all_points, num_points, rank_process); 
+        }
 
-        // Free processes_sorted_points HERE!!!!!!!!!!!!!!!!!!
+        // Free processes_sorted_points
+        
+        // Free all points
+        for (int point = 0; point < num_points; point++)
+        {
+            free(all_points[point].coordinates);
+        }
+        free(all_points);
     }
 
-    // // Free all points
-    // for (int point = 0; point < num_points; point++){
-    //     free(all_points[point].coordinates);
-    // }
-    // free(all_points);
-
-    // // Free local points
-    // for (int point = 0; point < num_points_local_process; point++){
+    // Free local points
+    // printf("POINT:%d",local_points[1].coordinates[0]);
+    // for (int point = 0; point < num_points_local_process; point++)
+    // {
     //     free(local_points[point].coordinates);
     // }
-    // free(local_points);
+    free(local_points);    
+    printf("Memory free\n");
+
+    end = clock();
+    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    printf("Time elapsed: %f\n", cpu_time_used);
 
     MPI_Finalize();
     return 0;
