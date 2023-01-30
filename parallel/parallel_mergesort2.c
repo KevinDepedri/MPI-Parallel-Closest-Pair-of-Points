@@ -6,6 +6,7 @@
 
 #define AXIS 0
 #define MASTER_PROCESS 0
+#define INT_MAX 2000000000
 
 int main(int argc, char *argv[])
 {
@@ -15,7 +16,7 @@ int main(int argc, char *argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
 
     int num_points, num_dimensions;
-    int num_points_normal_processes, num_point_master_process, num_points_local_process;
+    int num_points_normal_processes, num_points_master_process, num_points_local_process;
     int index_first_point, index_last_point = 0;
 
     Point *all_points;
@@ -54,7 +55,7 @@ int main(int argc, char *argv[])
         // Compute how many points we need to transfer 
         // Points are divided equally on all processes exept master process which takes the remaing points
         num_points_normal_processes = num_points / (comm_size-1);
-        num_point_master_process = num_points % (comm_size-1);
+        num_points_master_process = num_points % (comm_size-1);
 
         // Read the points and store them in this core
         all_points = (Point *)malloc(num_points * sizeof(Point));
@@ -100,7 +101,7 @@ int main(int argc, char *argv[])
         free(points_to_send);
 
         // Store the points of the master process
-        num_points_local_process = num_point_master_process;
+        num_points_local_process = num_points_master_process;
         local_points = (Point *)malloc(num_points_local_process * sizeof(Point));
         int starting_from = num_points_normal_processes * (comm_size - 1);
         for (int i = 0; i + starting_from < num_points; i++)
@@ -151,9 +152,15 @@ int main(int argc, char *argv[])
     // Sort the points in each core
     mergeSort(local_points, num_points_local_process, AXIS);
 
-    if (rank_process == MASTER_PROCESS)
+
+    if (rank_process != MASTER_PROCESS)
     {
-        // Gather all the points in the master process
+        // All the processes send their ordered points to the master process
+        sendPointsPacked(local_points, num_points_local_process, 0, 0, MPI_COMM_WORLD);
+    }
+    else
+    {
+        // The master process gather all the points from the other processes
         Point **processes_sorted_points;
         processes_sorted_points = (Point **)malloc(comm_size * sizeof(Point *));
 
@@ -176,37 +183,39 @@ int main(int argc, char *argv[])
         for (int process = 0; process < comm_size; process++)
         {
             temporary_indexes[process] = 0;
-        }  
+        }
+
+
         for (int point = 0; point < num_points; point++)
-        {
-            int min = processes_sorted_points[1][temporary_indexes[0]].coordinates[AXIS];
+        {        
+            int min = INT_MAX; //processes_sorted_points[1][temporary_indexes[1]].coordinates[AXIS];
             int process_with_minimum_value = 0;
 
             for (int process = 0; process < comm_size; process++)
             {
-                if ((process == 0 && temporary_indexes[process] < num_points_local_process) || (process != 0 && temporary_indexes[process] < num_points_normal_processes))
+
+                if ((process == 0 && temporary_indexes[process] < num_points_master_process) || (process != 0 && temporary_indexes[process] < num_points_normal_processes))
                 {
+
                     if (processes_sorted_points[process][temporary_indexes[process]].coordinates[AXIS] < min)
                     {
                         min = processes_sorted_points[process][temporary_indexes[process]].coordinates[AXIS];
                         process_with_minimum_value = process;
                     }
+                    
                 }
+
             }
+            // printf("Lowest %d coordinate: %d", point, processes_sorted_points[process_with_minimum_value][temporary_indexes[process_with_minimum_value]].coordinates[AXIS]);
             all_points[point] = processes_sorted_points[process_with_minimum_value][temporary_indexes[process_with_minimum_value]];
             temporary_indexes[process_with_minimum_value]++;
         }
 
         // Print the sorted points ignoring verbose
         printf("ORDERED POINTS:\n");
-        // print_points(all_points, num_points, rank_process); 
+        print_points(all_points, num_points, rank_process); 
 
         // Free processes_sorted_points HERE!!!!!!!!!!!!!!!!!!
-    }
-    else
-    {
-        // All the other cores send their ordered points to core 0
-        sendPointsPacked(local_points, num_points_local_process, 0, 0, MPI_COMM_WORLD);
     }
 
     // // Free all points
