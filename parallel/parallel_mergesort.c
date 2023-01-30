@@ -44,7 +44,12 @@ int main(int argc, char *argv[])
     }
     if (num_points < comm_size)
     {
-        printf("Error: the number of points must be greater than the number of cores\n");
+        printf("Error: the number of points must be greater than the number of processes\n");
+        return 1;
+    }
+    if (comm_size < 2)
+    {
+        printf("Error: cannot run the parallel program over just 1 process\n");
         return 1;
     }
 
@@ -79,7 +84,7 @@ int main(int argc, char *argv[])
     // printf("HEADER SIZE: %ld\n", header_size);
 
     // Jump to the point of the file which need to be read by this core
-    long jump_size = 4*2 + 4 * 2 * (index_first_point); // The initial 4bytes is the size of the header (number of points and number of dimensions)
+    long jump_size = 4 + 4 * 2 * (index_first_point); // The initial 4bytes is the size of the header (number of points and number of dimensions)
     printf("PROCESS %d: JUMP SIZE: %ld", rank_process, jump_size);
     if (fseek(fp, jump_size, SEEK_SET) != 0)
     {
@@ -98,6 +103,7 @@ int main(int argc, char *argv[])
         for (int dimension = 0; dimension < num_dimensions; dimension++)
         {
             fscanf(fp, "%d", &local_process_points[point].coordinates[dimension]);
+            // printf("%ld\n", ftell(fp));
         }
     }
     fclose(fp);
