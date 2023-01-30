@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
 
     // Jump to the point of the file which need to be read by this core
     long jump_size = 4 + 4 * num_dimensions * (index_first_point); // The initial 4bytes is the size of the header (number of points and number of dimensions)
-    printf("PROCESS %d: JUMP SIZE: %ld", rank_process, jump_size);
+    printf("PROCESS %d: JUMP SIZE: %ld\n", rank_process, jump_size);
     if (fseek(fp, jump_size, SEEK_SET) != 0)
     {
         printf("Error: could not use fseek to perform jump inside the input point file\n");
@@ -132,7 +132,6 @@ int main(int argc, char *argv[])
         {
             recvPointsPacked(processes_sorted_points[process], num_points_normal_processes, process, 0, MPI_COMM_WORLD);
         }
-        printf("RECEIVE DONE\n");
 
         // Merge the points from all the cores
         Point *sorted_points;
@@ -144,13 +143,11 @@ int main(int argc, char *argv[])
         {
             temporary_indexes[process] = 0;
         }  
-        printf("TEMP DONE\n");
 
         for (int point = 0; point < num_points; point++)
         {
             int min = processes_sorted_points[0][temporary_indexes[0]].coordinates[AXIS];
             int process_with_minimum_value = 0;
-            printf("POINT DONE %d\n", point);
 
             for (int process = 0; process < comm_size; process++)
             {
@@ -166,7 +163,6 @@ int main(int argc, char *argv[])
             sorted_points[point] = processes_sorted_points[process_with_minimum_value][temporary_indexes[process_with_minimum_value]];
             temporary_indexes[process_with_minimum_value]++;
         }
-        printf("REORDER DONE\n");
 
         // Print the sorted points ignoring verbose
         printf("ORDERED POINTS:\n");
