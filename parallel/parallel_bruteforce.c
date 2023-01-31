@@ -12,19 +12,13 @@ int main(int argc, char *argv[])
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
-    clock_t start, end;
-    double cpu_time_used;
-    start = clock();
     
-    int starting_index;
     int num_points;
-    int local_num;
-    double min_distance = INT_MAX;
     Point *points;
     if (rank == 0)
     {
         int num_points, num_dimensions;
-        FILE *fp = fopen("point_generator/1hundred.txt", "r");
+        FILE *fp = fopen("point_generator/points.txt", "r");
         if (fp == NULL)
         {
             perror("Error opening file");
@@ -49,9 +43,11 @@ int main(int argc, char *argv[])
             }
         }
         fclose(fp);
+        printf("[R %d] Num points: %d\n", rank, num_points);
     }
     MPI_Bcast(&num_points, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    
+    printf("[R %d] Num points: %d\n", rank, num_points);
+    int local_num, starting_index;
     if (rank == 0){
         for(int i = 1; i < size; i++){
             sendPointsPacked(points, num_points, i, 1, MPI_COMM_WORLD);
@@ -65,44 +61,27 @@ int main(int argc, char *argv[])
         recvPointsPacked(points, num_points, 0, 1, MPI_COMM_WORLD);
         starting_index = (rank - 1) * local_num;
     }
-    printf("[R %d] Starting index: %d, local_num: %d, num_points: %d\n", rank, starting_index, local_num, num_points);
-
-    // brute force algorithm
-    for (int i = starting_index; i < starting_index + local_num; i++)
-    {
-        for (int j = i + 1; j < num_points; j++)
+    double min_distance = INT_MAX;
+    if(local_num > 0){
+        for (int i = starting_index; i < starting_index + local_num; i++)
         {
-            double dd = distance(points[i], points[j]);
-            if (dd < min_distance)
+            for (int j = i + 1; j < num_points; j++)
             {
-                min_distance = dd;
+                double dd = distance(points[i], points[j]);
+                if (dd < min_distance)
+                {
+                    min_distance = dd;
+                }
             }
         }
     }
-    double global_min_distance;
-    MPI_Allreduce(&min_distance, &global_min_distance, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
-
+    double global_min;
+    MPI_Allreduce(&min_distance, &global_min, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
     if (rank == 0)
     {
-        printf("The minimum distance is %f\n", global_min_distance);
+        printf("The minimum distance is %f\n", global_min);
     }
 
-    // free memory
-    if (rank == 0)
-    {
-        for (int i = 0; i < num_points; i++)
-        {
-            free(points[i].coordinates);
-        }
-        free(points);
-        end = clock();
-        cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-        printf("Time elapsed: %f\n", cpu_time_used);
-    }
-    else
-    {
-        free(points);
-    }
 
     MPI_Finalize();
     return 0;
