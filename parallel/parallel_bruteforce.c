@@ -16,9 +16,9 @@ int main(int argc, char *argv[])
     double cpu_time_used;
     start = clock();
     
-    int starting_index = 0;
-    int num_points = 0;
-    int local_num = 0;
+    int starting_index;
+    int num_points;
+    int local_num;
     double min_distance = INT_MAX;
     Point *points;
     if (rank == 0)
@@ -65,6 +65,7 @@ int main(int argc, char *argv[])
         recvPointsPacked(points, num_points, 0, 1, MPI_COMM_WORLD);
         starting_index = (rank - 1) * local_num;
     }
+    printf("[R %d] Starting index: %d, local_num: %d, num_points: %d\n", rank, starting_index, local_num, num_points);
 
     // brute force algorithm
     for (int i = starting_index; i < starting_index + local_num; i++)
@@ -79,11 +80,11 @@ int main(int argc, char *argv[])
         }
     }
     double global_min_distance;
-    MPI_Reduce(&min_distance, &global_min_distance, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
+    MPI_Allreduce(&min_distance, &global_min_distance, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
 
     if (rank == 0)
     {
-        printf("The minimum distance is %f", global_min_distance);
+        printf("The minimum distance is %f\n", global_min_distance);
     }
 
     // free memory
