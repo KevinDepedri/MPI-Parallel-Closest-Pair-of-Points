@@ -45,5 +45,16 @@ with open(f'{name_file}.txt', 'w') as f:
 
     f.close()
 
+#plot the points if in 2D
+import matplotlib.pyplot as plt
+if num_dimensions == 2:
+    x = [p[0] for p in points]
+    y = [p[1] for p in points]
+    plt.scatter(x, y)
+    # save the plot as png
+    plt.savefig(f'{name_file}.png')
+
+
+
 
 print(f'Done')

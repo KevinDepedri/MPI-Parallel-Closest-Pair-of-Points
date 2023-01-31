@@ -17,10 +17,13 @@ int main(int argc, char *argv[])
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
-
+    int starting_index = 0;
+    int num_points = 0;
+    int local_num = 0;
+    double min_distance;
+    Point *points;
     if (rank == 0)
     {
-        Point *points;
         int num_points, num_dimensions;
         FILE *fp = fopen("../point_generator/10thousands.txt", "r");
         if (fp == NULL)
@@ -47,80 +50,71 @@ int main(int argc, char *argv[])
             }
         }
         fclose(fp);
-        // compute the number of points for each cpu
-        int points_per_cpu = num_points / (size - 1);
-        int points_left = num_points % (size - 1);
-        // send the number of points to each cpu, with the index of the first point and all the points
-        int first_point = 0;
-        for (int i = 1; i < size - 1; i++)
-        {
-            MPI_Send(&points_per_cpu, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-            MPI_Send(&first_point, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-            MPI_Send(points, num_points * sizeof(Point), MPI_BYTE, i, 0, MPI_COMM_WORLD);
-            first_point += points_per_cpu;
-        }
-        int last_cpu_points = points_per_cpu + points_left;
-        MPI_Send(&last_cpu_points, 1, MPI_INT, size - 1, 0, MPI_COMM_WORLD);
-        MPI_Send(&first_point, 1, MPI_INT, size - 1, 0, MPI_COMM_WORLD);
-        MPI_Send(points, num_points * sizeof(Point), MPI_BYTE, size - 1, 0, MPI_COMM_WORLD);
-
-        // receive the minimum distance from each cpu
-        double min_distance = distance(points[0], points[1]);
-        for (int i = 1; i < size; i++)
-        {
-            double cpu_min_distance;
-            MPI_Recv(&cpu_min_distance, 1, MPI_DOUBLE, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            if (cpu_min_distance < min_distance)
-            {
-                min_distance = cpu_min_distance;
-            }
-        }
-        printf("The minimum distance is %f", min_distance);
-
-        // free the memory
-        for (int i = 0; i < num_points; i++)
-        {
-            free(points[i].coordinates);
-        }
-        free(points);
     }
-    else
+    MPI_Bcast(&num_points, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    
+    if (rank == 0){
+        for(int i = 1; i < size; i++){
+            sendPointsPacked(points, num_points, i, 1, MPI_COMM_WORLD);
+        }
+        local_num = num_points % size(-1);
+        starting_index = num_points - local_num;
+    }
+    else{
+        local_num = num_points / size(-1);
+        points = (Point *)malloc(num_points * sizeof(Point));
+        receivePointsPacked(points, num_points, 0, 1, MPI_COMM_WORLD);
+        starting_index = (rank - 1) * local_num;
+    }
+
+    // brute force algorithm
+    for (int i = starting_index; i < starting_index + local_num; i++)
     {
-        // receive the number of points
-        int num_points, first_point;
-        MPI_Recv(&num_points, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        MPI_Recv(&first_point, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        // allocate memory for the points
-        Point *points = (Point *)malloc(num_points * sizeof(Point));
-        // receive the points
-        MPI_Recv(points, num_points * sizeof(Point), MPI_BYTE, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        // compute the minimum distance
-        double min_distance = distance(points[first_point], points[0]);
-
-        // Find the minimum distance between any two points
-        for (int i = first_point; i < first_point + num_points; i++)
+        for (int j = i + 1; j < num_points; j++)
         {
-            for (int j = 0; j < num_points; j++)
+            double distance = euclidean_distance(points[i], points[j]);
+            if (distance < min_distance)
             {
-                if (i != j)
-                {
-                    double distance_ij = distance(points[i], points[j]);
-                    if (distance_ij < min_distance)
-                    {
-                        min_distance = distance_ij;
-                    }
-                }
+                min_distance = distance;
             }
         }
-        // send the minimum distance to the master
-        MPI_Send(&min_distance, 1, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
-        // free the memory
-        for (int i = 0; i < num_points; i++)
-        {
-            free(points[i].coordinates);
-        }
-        free(points);
     }
+
+
+
+
+
+
+
+
+    //     // compute the number of points for each cpu
+    //     int points_per_cpu = num_points / (size - 1);
+    //     int points_left = num_points % (size - 1);
+    //     local_n = points_per_cpu;
+    //     // send the number of points to each cpu
+        
+    //     for (int process = 1; process < size; process++)
+    //     {
+    //         // send all points to the process
+    //         MPI_Send(&num_points, 1, MPI_INT, process, 0, MPI_COMM_WORLD);
+    //         sendPointsPacked(points, num_points, process, 1, MPI_COMM_WORLD);
+    //         //send the starting index of the points
+    //         MPI_Send(&starting_index, 1, MPI_INT, process, 2, MPI_COMM_WORLD);
+    //         // send the number of points to the process
+    //         MPI_Send(&points_per_cpu, 1, MPI_INT, process, 3, MPI_COMM_WORLD);
+    //         starting_index += points_per_cpu;
+    //     }       
+
+    // }
+    // else{
+    //     MPI_Recv(&local_n, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    //     Point *local_points = (Point *)malloc(local_n * sizeof(Point));
+    //     receivePointsPacked(local_points, local_n, 0, 1, MPI_COMM_WORLD);
+    //     MPI_Recv(&starting_index, 1, MPI_INT, 0, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    // }
+
+    // compute the minimum distance between 
+
     MPI_Finalize();
     return 0;
 }
