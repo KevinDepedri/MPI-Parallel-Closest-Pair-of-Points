@@ -1,7 +1,6 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <time.h>
 #include "utils/util.h"
 
@@ -215,7 +214,7 @@ int main(int argc, char *argv[])
     int rank_process, comm_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank_process);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
-    char path[] = "../point_generator/1million.txt";
+    char path[] = "../point_generator/1hundred.txt";
 
     int num_points, num_dimensions;
 
@@ -251,6 +250,12 @@ int main(int argc, char *argv[])
         fclose(point_file);
     }
 
+    // Points are divided equally on all processes exept master process which takes the remaing points
+    int num_points_normal_processes, num_points_master_process, num_points_local_process;
+    num_points_normal_processes = num_points / (comm_size-1);
+    num_points_master_process = num_points % (comm_size-1);
+    Point *local_points;
+
     Point *all_points = NULL;
     all_points = parallel_order_points(all_points, path, rank_process, comm_size, verbose);
     if (rank_process == MASTER_PROCESS)
@@ -262,9 +267,107 @@ int main(int argc, char *argv[])
         }
     }
 
+    MPI_Barrier(MPI_COMM_WORLD);
+    /* IMPLEMENT FROM HERE 
+
+    1. DIVIDE POINTS OVER PROCESSES + 2 EXTRA COORDINATES FOR EACH PROCESS (used to compute boundary). PROCESS 1 AND LAST ONE (master) WILL HAVE JUST 1 COORDINATE
+    2. SEND POINTS
+    3. COMPUTE MIN DISTANCE FOR EACH PROCESS
+    4. ALLREDUCE MIN DISTANCE THROUGH MASTER PROCESS AND SEND IT BACK TO ALL PROCESSES
+    5. COPUTE BOUNDARY BETWEEN PROCESSES
+    6. GET POINTS INTO THE LEFT STRIP USING THE COMMON MIN-DISTANCE (x_i - x_0 < min_distance)
+    7. SEND POINT OF THE LEFT STRIP TO THE LEFT PROCESS
+    8. EACH PROCESS EXCEPT PROCESS 0(last one) BUILD ITS RIGHT STRIP AND MERGE IT WITH THE RECEIVED LEFT STRIP
+    9. REORDER POINTS IN THE STRIP OVER Y
+    10. COMPUTE MIN DISTANCE FOR EACH STRIP (line 44 of sequential_recursive)
+    11. REDUCE ALL DISTANCES BACK TO MASTER PROCESS
+    12. RETURN MIN DISTANCE
+    */
+
+    // POINT 1
+    int left_x_out_of_region = INT_MAX, right_x_out_of_region = INT_MAX;
     if (rank_process == MASTER_PROCESS)
     {
-        // print_points(all_points, num_points, rank_process);
+        // Transfer total number of points and the correct slice of points to work on for every process
+        Point *points_to_send;
+        points_to_send = (Point *)malloc(num_points_normal_processes * sizeof(Point));
+        int left_to_send, right_to_send;
+        for (int process = 1; process < comm_size; process++)
+        {
+            for (int point = 0; point < num_points_normal_processes; point++)
+            {
+                points_to_send[point].num_dimensions = num_dimensions;
+                points_to_send[point].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+                for (int dimension = 0; dimension < num_dimensions; dimension++)
+                {
+                    points_to_send[point].coordinates[dimension] = all_points[point+num_points_normal_processes*(process-1)].coordinates[dimension];
+                }
+            }
+            MPI_Send(&num_points_normal_processes, 1, MPI_INT, process, 0, MPI_COMM_WORLD);
+            sendPointsPacked(points_to_send, num_points_normal_processes, process, 1, MPI_COMM_WORLD);
+            
+            // Transfer also the left and right out_of_region x coordinate for each process
+            if (process == 1){
+                left_to_send = INT_MAX;
+                right_to_send = all_points[num_points_normal_processes*(process)].coordinates[AXIS];
+            }
+            else{
+                left_to_send = all_points[num_points_normal_processes*(process-1)-1].coordinates[AXIS];
+                if (process == comm_size - 1 && num_points_master_process != 0)
+                    right_to_send = all_points[num_points_normal_processes*(process)].coordinates[AXIS];
+                else
+                    right_to_send = INT_MAX;
+            }
+            MPI_Send(&left_to_send, 1, MPI_INT, process, 2, MPI_COMM_WORLD);
+            MPI_Send(&right_to_send, 1, MPI_INT, process, 3, MPI_COMM_WORLD);
+        }
+
+        // Free points_to_send once the send for all the processes is done 
+        for (int point = 0; point < num_points_normal_processes; point++)
+        {
+            free(points_to_send[point].coordinates);
+        }
+        free(points_to_send);
+
+        // Store the points of the master process and its out_of_region values
+        num_points_local_process = num_points_master_process;
+        local_points = (Point *)malloc(num_points_local_process * sizeof(Point));
+        int starting_from = num_points_normal_processes * (comm_size - 1);
+        for (int i = 0; i + starting_from < num_points; i++)
+        {
+            local_points[i].num_dimensions = num_dimensions;
+            local_points[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+            for (int dimension = 0; dimension < num_dimensions; dimension++)
+            {
+                local_points[i].coordinates[dimension] = all_points[i + starting_from].coordinates[dimension];
+            }
+        }
+        left_x_out_of_region = all_points[starting_from-1].coordinates[AXIS];
+        right_x_out_of_region = INT_MAX;
+    }
+    else
+    {
+        // Receive number of points and the points data that will be processed by this process
+        MPI_Recv(&num_points_normal_processes, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        num_points_local_process = num_points_normal_processes;
+        local_points = (Point *)malloc(num_points_local_process * sizeof(Point));
+        recvPointsPacked(local_points, num_points_local_process, 0, 1, MPI_COMM_WORLD);
+
+        // Receive the left and right out_of_region x coordinate for this process
+        MPI_Recv(&left_x_out_of_region, 1, MPI_INT, 0, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(&right_x_out_of_region, 1, MPI_INT, 0, 3, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    }
+    print_points(local_points, num_points_local_process, rank_process);
+    printf("LEFT OUT VALUE: %d, RIGHT OUT VALUE: %d\n", left_x_out_of_region, right_x_out_of_region);
+
+    // WORK STARTS HERE
+
+
+    // END OF IMPLEMENTATION
+    if (rank_process == MASTER_PROCESS)
+    {
+        printf("ORDERED POINTS:\n");
+        print_points(all_points, num_points, rank_process);
 
         // Free all points
         for (int point = 0; point < num_points; point++)
