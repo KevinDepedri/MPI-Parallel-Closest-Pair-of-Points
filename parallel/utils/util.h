@@ -16,3 +16,11 @@ extern void print_points(Point *, int, int);
 extern void sendPointsPacked(Point*, int, int, int, MPI_Comm);
 
 extern void recvPointsPacked(Point*, int, int, int, MPI_Comm);
+
+extern double isMIN(double, double);
+
+extern double isMINof3(double, double, double);
+
+extern double recSplit(Point*, int );
+
+extern Point *parallel_order_points(Point *, char[], int, int, int);
