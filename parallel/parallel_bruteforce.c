@@ -1,31 +1,30 @@
 // mpi version of sequential_bruteforce.c
-#include "utils/util.h"
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+#define INT_MAX 2147483647
+#include "utils/util.h"
 
-/*
-IDEA:
-- divide the points in # of cpus
-- each cpu calculates the distance between the points in its part
-- each cpu sends the minimum distance to the master
-- the master calculates the minimum of the minimums
-*/
 int main(int argc, char *argv[])
 {
     int rank, size;
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
+    clock_t start, end;
+    double cpu_time_used;
+    start = clock();
+    
     int starting_index = 0;
     int num_points = 0;
     int local_num = 0;
-    double min_distance;
+    double min_distance = INT_MAX;
     Point *points;
     if (rank == 0)
     {
         int num_points, num_dimensions;
-        FILE *fp = fopen("../point_generator/10thousands.txt", "r");
+        FILE *fp = fopen("point_generator/1hundred.txt", "r");
         if (fp == NULL)
         {
             perror("Error opening file");
@@ -57,13 +56,13 @@ int main(int argc, char *argv[])
         for(int i = 1; i < size; i++){
             sendPointsPacked(points, num_points, i, 1, MPI_COMM_WORLD);
         }
-        local_num = num_points % size(-1);
+        local_num = num_points % (size-1);
         starting_index = num_points - local_num;
     }
     else{
-        local_num = num_points / size(-1);
+        local_num = num_points / (size-1);
         points = (Point *)malloc(num_points * sizeof(Point));
-        receivePointsPacked(points, num_points, 0, 1, MPI_COMM_WORLD);
+        recvPointsPacked(points, num_points, 0, 1, MPI_COMM_WORLD);
         starting_index = (rank - 1) * local_num;
     }
 
@@ -72,48 +71,37 @@ int main(int argc, char *argv[])
     {
         for (int j = i + 1; j < num_points; j++)
         {
-            double distance = euclidean_distance(points[i], points[j]);
-            if (distance < min_distance)
+            double dd = distance(points[i], points[j]);
+            if (dd < min_distance)
             {
-                min_distance = distance;
+                min_distance = dd;
             }
         }
     }
+    double global_min_distance;
+    MPI_Reduce(&min_distance, &global_min_distance, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
 
+    if (rank == 0)
+    {
+        printf("The minimum distance is %f", global_min_distance);
+    }
 
-
-
-
-
-
-
-    //     // compute the number of points for each cpu
-    //     int points_per_cpu = num_points / (size - 1);
-    //     int points_left = num_points % (size - 1);
-    //     local_n = points_per_cpu;
-    //     // send the number of points to each cpu
-        
-    //     for (int process = 1; process < size; process++)
-    //     {
-    //         // send all points to the process
-    //         MPI_Send(&num_points, 1, MPI_INT, process, 0, MPI_COMM_WORLD);
-    //         sendPointsPacked(points, num_points, process, 1, MPI_COMM_WORLD);
-    //         //send the starting index of the points
-    //         MPI_Send(&starting_index, 1, MPI_INT, process, 2, MPI_COMM_WORLD);
-    //         // send the number of points to the process
-    //         MPI_Send(&points_per_cpu, 1, MPI_INT, process, 3, MPI_COMM_WORLD);
-    //         starting_index += points_per_cpu;
-    //     }       
-
-    // }
-    // else{
-    //     MPI_Recv(&local_n, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    //     Point *local_points = (Point *)malloc(local_n * sizeof(Point));
-    //     receivePointsPacked(local_points, local_n, 0, 1, MPI_COMM_WORLD);
-    //     MPI_Recv(&starting_index, 1, MPI_INT, 0, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    // }
-
-    // compute the minimum distance between 
+    // free memory
+    if (rank == 0)
+    {
+        for (int i = 0; i < num_points; i++)
+        {
+            free(points[i].coordinates);
+        }
+        free(points);
+        end = clock();
+        cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+        printf("Time elapsed: %f\n", cpu_time_used);
+    }
+    else
+    {
+        free(points);
+    }
 
     MPI_Finalize();
     return 0;
