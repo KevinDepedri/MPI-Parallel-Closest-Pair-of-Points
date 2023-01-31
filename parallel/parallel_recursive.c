@@ -51,14 +51,17 @@ int main(int argc, char *argv[])
         }
         if (comm_size < 2)
         {
-            perror("Error: cannot run the parallel program over just 1 process\n");
+            perror("Error: cannot run parallel application on 1 process\n");
             return -1;
         }
         fclose(point_file);
     }
+    
     // Send num_points to all the processes, it is used to compute the num_points_...
-    MPI_Bcast(&num_points, 1, MPI_INT, MASTER_PROCESS, MPI_COMM_WORLD);
-    MPI_Bcast(&num_dimensions, 1, MPI_INT, MASTER_PROCESS, MPI_COMM_WORLD);
+    if(comm_size > 1){
+        MPI_Bcast(&num_points, 1, MPI_INT, MASTER_PROCESS, MPI_COMM_WORLD);
+        MPI_Bcast(&num_dimensions, 1, MPI_INT, MASTER_PROCESS, MPI_COMM_WORLD);
+    }
 
     // Points are divided equally on all processes exept master process which takes the remaing points
     int num_points_normal_processes, num_points_master_process, num_points_local_process;
@@ -77,23 +80,16 @@ int main(int argc, char *argv[])
         }
     }
 
-
-
-    MPI_Barrier(MPI_COMM_WORLD);
-    /* IMPLEMENT FROM HERE 
-    1. DIVIDE POINTS OVER PROCESSES + 2 EXTRA COORDINATES FOR EACH PROCESS (used to compute boundary). PROCESS 1 AND LAST ONE (master) WILL HAVE JUST 1 COORDINATE
-    2. SEND POINTS
-    3. COMPUTE MIN DISTANCE FOR EACH PROCESS
-    4. ALLREDUCE MIN DISTANCE THROUGH MASTER PROCESS AND SEND IT BACK TO ALL PROCESSES
-    5. COPUTE BOUNDARY BETWEEN PROCESSES
-    6. GET POINTS INTO THE LEFT STRIP USING THE COMMON MIN-DISTANCE (x_i - x_0 < min_distance)
-    7. SEND POINT OF THE LEFT STRIP TO THE LEFT PROCESS
-    8. EACH PROCESS EXCEPT PROCESS 0(last one) BUILD ITS RIGHT STRIP AND MERGE IT WITH THE RECEIVED LEFT STRIP
-    9. REORDER POINTS IN THE STRIP OVER Y
-    10. COMPUTE MIN DISTANCE FOR EACH STRIP (line 44 of sequential_recursive)
-    11. REDUCE ALL DISTANCES BACK TO MASTER PROCESS
-    12. RETURN MIN DISTANCE
-    */
+    if(comm_size <= 2)
+    {
+        if(rank_process == MASTER_PROCESS){
+        printf("Launching sequential algorithm...\n");
+        printf("SUPER FINAL GLOBAL DMIN: %f\n", recSplit(all_points, num_points));
+        }
+        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Finalize();
+        return 0;
+    }
 
     // POINT 1 AND 2 - divide points and send them with thei out_of_region valie
     int left_x_out_of_region = INT_MAX, right_x_out_of_region = INT_MAX;
@@ -105,7 +101,6 @@ int main(int argc, char *argv[])
         int left_to_send, right_to_send;
         for (int process = 1; process < comm_size; process++)
         {
-            // TODO: eventually send master process #points
             for (int point = 0; point < num_points_normal_processes; point++)
             {
                 points_to_send[point].num_dimensions = num_dimensions;
@@ -169,7 +164,6 @@ int main(int argc, char *argv[])
         MPI_Recv(&left_x_out_of_region, 1, MPI_INT, 0, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         MPI_Recv(&right_x_out_of_region, 1, MPI_INT, 0, 3, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
-    // print_points(local_points, num_points_local_process, rank_process);
 
     // POINT 3 - compute min distance for eahc process
     double local_dmin = INT_MAX;
@@ -191,7 +185,6 @@ int main(int argc, char *argv[])
 
     if(rank_process != MASTER_PROCESS && (rank_process != comm_size - 1 || num_points_master_process != 0))
         right_boundary = (right_x_out_of_region + local_points[num_points_local_process-1].coordinates[AXIS])/2.0;
-    // printf("PROCESS:%d LEFT BOUNDARY: %f, RIGHT BOUNDARY: %f\n\n", rank_process, left_boundary, right_boundary);
     
     // POINT 5 - get the points in the strips for each process
     // get for both left and write side, points where x_i - dmin <= boundary
@@ -211,6 +204,10 @@ int main(int argc, char *argv[])
             }
             num_points_left_strip++;
         }
+        else
+            break;
+    }
+    for(int point = num_points_local_process - 1; point >= 0; point--){
         if (local_points[point].coordinates[AXIS] > right_boundary - global_dmin)
         {
             right_strip_points[num_points_right_strip].num_dimensions = num_dimensions;
@@ -221,8 +218,9 @@ int main(int argc, char *argv[])
             }
             num_points_right_strip++;
         }
+        else
+            break;
     }
-    // printf("PROCESS: %d, LEFT: %d, RIGHT: %d\n",rank_process, num_points_left_strip, num_points_right_strip);
 
     // POINT 6 AND 7 AND 8 - get point of left strip move the point to the left process, merge the moved left points with the right points of the target process
     if (rank_process != 1  && rank_process != MASTER_PROCESS)
@@ -281,8 +279,6 @@ int main(int argc, char *argv[])
                 local_strip_points[i+num_points_right_strip].coordinates[dimension] = received_points[i].coordinates[dimension];
             }
         }
-        // printf("NEW RESULTS:\n"); 
-        // print_points(local_strip_points, num_points_right_strip + num_points_received, rank_process);
 
         // POINT 9 - reorder point in the strip over y
         int j = num_points_right_strip + num_points_received- 1;
@@ -316,9 +312,6 @@ int main(int argc, char *argv[])
     // END OF IMPLEMENTATION
     if (rank_process == MASTER_PROCESS)
     {
-        // printf("ORDERED POINTS:\n");
-        // print_points(all_points, num_points, rank_process);
-
         // Free all points
         for (int point = 0; point < num_points; point++)
         {
