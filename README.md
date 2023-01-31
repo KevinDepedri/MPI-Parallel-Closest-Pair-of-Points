@@ -16,13 +16,21 @@ TODO:
 
 - [x] sequential versione of $O(n\log n)$ _Divide&Conquer_
 
-- [ ] parallel version of $O(n^2)$
+- [x] parallel version of $O(n^2)$
 
-- [ ] parallel versione of $O(n\log n)$ _Divide&Conquer_
+- [x] parallel versione of $O(n\log n)$ _Divide&Conquer_
 
-- [ ] if cores > points versions
+- [ ] print points with min_dist
 
-- [ ] maybe double parallel version
+- [ ] code cleanup
+
+- [ ] complexity in bitrate
+
+- [ ] comparison between setups in cluster
+
+- [ ] report
+
+- [ ] presentation
 
 # Install vcpkg
 ```bash
