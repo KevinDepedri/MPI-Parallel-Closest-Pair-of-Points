@@ -54,7 +54,4 @@ if num_dimensions == 2:
     # save the plot as png
     plt.savefig(f'{name_file}.png')
 
-
-
-
 print(f'Done')
