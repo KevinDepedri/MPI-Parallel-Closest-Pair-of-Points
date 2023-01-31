@@ -195,10 +195,10 @@ Point *parallel_order_points(Point *all_points, char path[], int rank_process, i
         }
 
         // Free processes_sorted_points
-        free(processes_sorted_points);
+        free(processes_sorted_points); //TODO: COORDINATES??
     }
 
-    free(local_points);
+    free(local_points); //TODO: COORDINATES??
 
     return all_points;
 }

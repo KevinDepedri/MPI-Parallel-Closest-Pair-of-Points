@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
         }
 
         // Free processes_sorted_points
-        free(processes_sorted_points);
+        free(processes_sorted_points); //TODO: COORDINATES??
         
         // Free all points
         for (int point = 0; point < num_points; point++)
@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
         free(all_points);
     }
 
-    free(local_points);   
+    free(local_points); //TODO: COORDINATES??
 
     if (rank_process == MASTER_PROCESS)
     {
