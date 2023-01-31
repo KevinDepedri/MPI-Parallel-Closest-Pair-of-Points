@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
         if (point_file == NULL)
         {
             perror("Error opening file on master process\n");
-            return -1;    
+            return -1;
         }
 
         // Read the number of points and dimensions from the first line of the file
@@ -58,10 +58,9 @@ int main(int argc, char *argv[])
     }
     
     // Send num_points to all the processes, it is used to compute the num_points_...
-    if(comm_size > 1){
-        MPI_Bcast(&num_points, 1, MPI_INT, MASTER_PROCESS, MPI_COMM_WORLD);
-        MPI_Bcast(&num_dimensions, 1, MPI_INT, MASTER_PROCESS, MPI_COMM_WORLD);
-    }
+    MPI_Bcast(&num_points, 1, MPI_INT, MASTER_PROCESS, MPI_COMM_WORLD);
+    MPI_Bcast(&num_dimensions, 1, MPI_INT, MASTER_PROCESS, MPI_COMM_WORLD);
+    
 
     // Points are divided equally on all processes exept master process which takes the remaing points
     int num_points_normal_processes, num_points_master_process, num_points_local_process;
@@ -87,6 +86,14 @@ int main(int argc, char *argv[])
         printf("SUPER FINAL GLOBAL DMIN: %f\n", recSplit(all_points, num_points));
         }
         MPI_Barrier(MPI_COMM_WORLD);
+
+        free(all_points);
+
+        printf("Memory free\n");
+        end = clock();
+        cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+        printf("Time elapsed: %f\n", cpu_time_used);
+
         MPI_Finalize();
         return 0;
     }
