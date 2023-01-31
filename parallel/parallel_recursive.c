@@ -11,9 +11,9 @@
 
 int main(int argc, char *argv[])
 {
-    // clock_t start, end;
-    // double cpu_time_used;
-    // start = clock();
+    clock_t start, end;
+    double cpu_time_used;
+    start = clock();
 
     int verbose = 0;
 
@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     int rank_process, comm_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank_process);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
-    char path[] = "../point_generator/1hundred.txt";
+    char path[] = "../point_generator/1million.txt";
 
     int num_points, num_dimensions;
 
@@ -81,7 +81,6 @@ int main(int argc, char *argv[])
 
     MPI_Barrier(MPI_COMM_WORLD);
     /* IMPLEMENT FROM HERE 
-
     1. DIVIDE POINTS OVER PROCESSES + 2 EXTRA COORDINATES FOR EACH PROCESS (used to compute boundary). PROCESS 1 AND LAST ONE (master) WILL HAVE JUST 1 COORDINATE
     2. SEND POINTS
     3. COMPUTE MIN DISTANCE FOR EACH PROCESS
@@ -176,7 +175,7 @@ int main(int argc, char *argv[])
     double local_dmin = INT_MAX;
     if (num_points_local_process > 1)
         local_dmin = recSplit(local_points, num_points_local_process);
-    // printf("PROCESS:%d LEFT OUT VALUE: %d, RIGHT OUT VALUE: %d, DMIN:%f\n", rank_process, left_x_out_of_region, right_x_out_of_region, local_dmin);
+    printf("PROCESS:%d DMIN:%f\n", rank_process, local_dmin);
 
     // POINT 4 - allreduce to find the global dmin
     double global_dmin;
@@ -185,22 +184,21 @@ int main(int argc, char *argv[])
         printf("GLOBAL DMIN: %f\n", global_dmin);
     
     // POINT 5 - compute the boundary between processes
-    double left_boundary = INT_MAX, right_boundary = INT_MAX;
+    double left_boundary = -INT_MAX, right_boundary = INT_MAX;
 
     if (rank_process != 1 && num_points_local_process != 0)
         left_boundary = (left_x_out_of_region + local_points[0].coordinates[AXIS])/2.0;
-    // printf("\nPROCESS: %d, VALORE: %d\n",rank_process, num_points_master_process);
 
-    if(rank_process != 0 && (rank_process != comm_size - 1 || num_points_master_process != 0))
+    if(rank_process != MASTER_PROCESS && (rank_process != comm_size - 1 || num_points_master_process != 0))
         right_boundary = (right_x_out_of_region + local_points[num_points_local_process-1].coordinates[AXIS])/2.0;
-    printf("PROCESS:%d LEFT BOUNDARY: %f, RIGHT BOUNDARY: %f\n\n", rank_process, left_boundary, right_boundary);
+    // printf("PROCESS:%d LEFT BOUNDARY: %f, RIGHT BOUNDARY: %f\n\n", rank_process, left_boundary, right_boundary);
     
     // POINT 5 - get the points in the strips for each process
     // get for both left and write side, points where x_i - dmin <= boundary
     int num_points_left_strip = 0, num_points_right_strip = 0;
     Point *left_strip_points = (Point *)malloc(num_points_local_process * sizeof(Point));
     Point *right_strip_points = (Point *)malloc(num_points_local_process * sizeof(Point));
-    // TODO: IMPROVEMENT: USE 2 FOR LOOPS IN THE TWO DIRECTION AND BREAK AS SOON AS A VALUE IS OUT OF DELTA
+    // TODO: IMPROVEMENT: USE 2 'FOR' LOOPS IN THE TWO DIRECTION AND BREAK AS SOON AS A VALUE IS OUT OF DELTA
     for (int point = 0; point < num_points_local_process; point++)
     {
         if (local_points[point].coordinates[AXIS] < left_boundary + global_dmin)
@@ -224,23 +222,102 @@ int main(int argc, char *argv[])
             num_points_right_strip++;
         }
     }
-    printf("PROCESS: %d, LEFT: %d, RIGHT: %d\n",rank_process, num_points_left_strip, num_points_right_strip);
+    // printf("PROCESS: %d, LEFT: %d, RIGHT: %d\n",rank_process, num_points_left_strip, num_points_right_strip);
 
-    // POINT 6 - move the point to the left process if process not == 1 nor if the 0th process hasn't any points
-    // if (rank_process != 1 && rank_process != 0)
-    // {
-    //     // Send the number of points to the right process
-    //     MPI_Send(&num_points_right_strip, 1, MPI_INT, rank_process+1, 0, MPI_COMM_WORLD);
-    //     // Send the points to the right process
-    //     sendPointsPacked(right_strip_points, num_points_right_strip, rank_process+1, 1, MPI_COMM_WORLD);
-    // }
+    // POINT 6 AND 7 AND 8 - get point of left strip move the point to the left process, merge the moved left points with the right points of the target process
+    if (rank_process != 1  && rank_process != MASTER_PROCESS)
+    {
+        // Send the number of points to the left process
+        MPI_Send(&num_points_left_strip, 1, MPI_INT, rank_process-1, 0, MPI_COMM_WORLD);
+        
+        // Send the points to the left process
+        if (num_points_left_strip != 0)
+            sendPointsPacked(left_strip_points, num_points_left_strip, rank_process-1, 1, MPI_COMM_WORLD);
+    }
+    if(rank_process == MASTER_PROCESS){
+        // Send the number of points to the left process
+        MPI_Send(&num_points_left_strip, 1, MPI_INT, comm_size-1, 0, MPI_COMM_WORLD);
+       
+        // Send the points to the left process
+        if (num_points_left_strip != 0)
+            sendPointsPacked(left_strip_points, num_points_left_strip, comm_size-1, 1, MPI_COMM_WORLD);
+    }
+
+    if(rank_process != MASTER_PROCESS){
+        // Receive the number of points from the next process
+        int num_points_received;
+        if(rank_process != comm_size - 1)
+            MPI_Recv(&num_points_received, 1, MPI_INT, rank_process+1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        else
+            MPI_Recv(&num_points_received, 1, MPI_INT, MASTER_PROCESS, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        
+        // Receive the points
+        Point *received_points = (Point *)malloc(num_points_received * sizeof(Point));
+        if (num_points_received != 0){
+            if(rank_process != comm_size - 1)
+                recvPointsPacked(received_points, num_points_received, rank_process+1, 1, MPI_COMM_WORLD);
+            else
+                recvPointsPacked(received_points, num_points_received, MASTER_PROCESS, 1, MPI_COMM_WORLD);
+        }
+        
+        
+        // merge right_strip_points and received_points
+        Point *local_strip_points = (Point *)malloc((num_points_right_strip + num_points_received) * sizeof(Point));
+        for (int i = 0; i < num_points_right_strip; i++)
+        {
+            local_strip_points[i].num_dimensions = num_dimensions;
+            local_strip_points[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+            for (int dimension = 0; dimension < num_dimensions; dimension++)
+            {
+                local_strip_points[i].coordinates[dimension] = right_strip_points[i].coordinates[dimension];
+            }
+        }
+        for (int i = 0; i < num_points_received; i++)
+        {
+            local_strip_points[i+num_points_right_strip].num_dimensions = num_dimensions;
+            local_strip_points[i+num_points_right_strip].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+            for (int dimension = 0; dimension < num_dimensions; dimension++)
+            {
+                local_strip_points[i+num_points_right_strip].coordinates[dimension] = received_points[i].coordinates[dimension];
+            }
+        }
+        // printf("NEW RESULTS:\n"); 
+        // print_points(local_strip_points, num_points_right_strip + num_points_received, rank_process);
+
+        // POINT 9 - reorder point in the strip over y
+        int j = num_points_right_strip + num_points_received- 1;
+        mergeSort(local_strip_points, j, 1);
+        
+        //10. COMPUTE MIN DISTANCE FOR EACH STRIP (line 44 of sequential_recursive)
+        double min = global_dmin;
+        for (int i = 0; i < j - 1; i++){
+            for (int k = i + 1; k < j && (local_strip_points[k].coordinates[1] - local_strip_points[i].coordinates[1]) < global_dmin; k++){
+                double dd = distance(local_strip_points[i], local_strip_points[k]);
+                if (dd < min){
+                    min = dd;
+                }
+            }
+        }
+        global_dmin = min;
+        free(local_strip_points);
+
+    }
+    
+    //11. REDUCE ALL DISTANCES BACK TO MASTER PROCESS
+    double super_final_dmin;
+    MPI_Allreduce(&global_dmin, &super_final_dmin, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
+    
+    //12. RETURN MIN DISTANCE
+    if (rank_process == MASTER_PROCESS)
+        printf("SUPER FINAL GLOBAL DMIN: %f\n", super_final_dmin);
+    
 
 
     // END OF IMPLEMENTATION
     if (rank_process == MASTER_PROCESS)
     {
-        printf("ORDERED POINTS:\n");
-        print_points(all_points, num_points, rank_process);
+        // printf("ORDERED POINTS:\n");
+        // print_points(all_points, num_points, rank_process);
 
         // Free all points
         for (int point = 0; point < num_points; point++)
@@ -250,13 +327,14 @@ int main(int argc, char *argv[])
     }
     free(all_points);
 
-    // if (rank_process == MASTER_PROCESS)
-    // {
-        // printf("Memory free\n");
-        // end = clock();
-        // cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-        // printf("Time elapsed: %f\n", cpu_time_used);
-    // }
+    MPI_Barrier(MPI_COMM_WORLD);
+    if (rank_process == MASTER_PROCESS)
+    {
+        printf("Memory free\n");
+        end = clock();
+        cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+        printf("Time elapsed: %f\n", cpu_time_used);
+    }
 
     MPI_Finalize();
     return 0;
