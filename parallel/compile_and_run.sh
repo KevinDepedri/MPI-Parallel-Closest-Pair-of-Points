@@ -1,5 +1,5 @@
 echo 'COMPILE'
-mpicc -std=c99 -g -Wall -o mpi_recursive2 parallel_recursive2.c utils/*.c -lm
+mpicc -std=c99 -g -Wall -o mpi_recursive2 parallel_recursive2.c utils/util.c -lm
 echo 'PARALLEL RUN 6 CORES'
 mpiexec -n 6 mpi_recursive2
 # echo 'PARALLEL RUN 4 CORES'

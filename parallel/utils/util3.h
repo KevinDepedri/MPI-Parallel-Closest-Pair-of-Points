@@ -28,6 +28,8 @@ extern double isMIN(double, double);
 
 extern double isMINof3(double, double, double);
 
+extern void printPoint(Point);
+
 extern void recSplit(Point*, int, Pairs*);
 
 extern Point *parallel_mergesort(Point *, char[], int, int, int);

@@ -9,17 +9,6 @@
 #define INT_MAX 2147483647
 #define VERBOSE 0
 
-void printPoint(Point p)
-{
-    printf("(");
-    for (int i = 0; i < p.num_dimensions; i++)
-    {
-        printf("%d, ", p.coordinates[i]);
-    }
-    printf(")");
-}
-
-
 int main(int argc, char *argv[])
 {
     clock_t start, end;
@@ -30,7 +19,7 @@ int main(int argc, char *argv[])
     int rank_process, comm_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank_process);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
-    char path[] = "point_generator/1hundred.txt";
+    char path[] = "../point_generator/1hundred.txt";
 
     int num_points, num_dimensions;
 
@@ -185,16 +174,27 @@ int main(int argc, char *argv[])
     double local_dmin = INT_MAX;
     Pairs *pairs;
     pairs = (Pairs *)malloc(sizeof(Pairs));
-    pairs->points1 = (Point *)malloc(num_points_local_process/2+1 * sizeof(Point));
-    pairs->points2 = (Point *)malloc(num_points_local_process/2+1 * sizeof(Point));
+    pairs->points1 = (Point *)malloc((num_points_local_process)+1 * sizeof(Point));
+    pairs->points2 = (Point *)malloc((num_points_local_process)+1 * sizeof(Point));
+    
+    // printf(*pairs);
+    // for (int i = 0; i < (num_points_local_process/2); i++)
+    // {
+    //     pairs->points1[i].num_dimensions = num_dimensions;
+    //     pairs->points1[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+    //     pairs->points2[i].num_dimensions = num_dimensions;
+    //     pairs->points2[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+    // }
+
     pairs->num_pairs = INT_MAX;
     pairs->min_distance = INT_MAX;
+
     if (num_points_local_process > 1){
         recSplit(local_points, num_points_local_process, pairs);
         local_dmin = pairs->min_distance;
         int num_pairs = pairs->num_pairs;
         printf("[PROCESS %d] NP: %d\n", rank_process, num_pairs);
-        for (int i = 0; i < pairs->num_pairs; i++)
+        for (int i = 0; i <num_pairs; i++)
         {
             printf("[");
             printPoint(pairs->points1[i]);
@@ -203,6 +203,12 @@ int main(int argc, char *argv[])
         }
     }
     printf("PROCESS:%d DMIN:%f\n", rank_process, local_dmin);
+   
+    // Useless everything here below
+    MPI_Barrier(MPI_COMM_WORLD);
+    // free(pairs->points1);
+    // free(pairs->points2);
+    // free(pairs);
 
     // POINT 4 - allreduce to find the global dmin
     double global_dmin;

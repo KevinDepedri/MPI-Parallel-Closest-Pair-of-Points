@@ -133,37 +133,65 @@ double isMINof3(double a, double b, double c){
         return min < c ? min : c;
 }
 
+void printPoint(Point p)
+{
+    printf("(");
+    for (int i = 0; i < p.num_dimensions; i++)
+    {
+        if (i != p.num_dimensions-1)
+            printf("%d, ", p.coordinates[i]);
+        else
+            printf("%d", p.coordinates[i]);
+
+    }
+    printf(")");
+}
+
+// Point update_point(Point point_to_update, Point new_values){
+//     point_to_update.num_dimensions = new_values.num_dimensions;
+//     point_to_update.coordinates = (int *)malloc(point_to_update.num_dimensions * sizeof(int));
+//     for (int dimension = 0; dimension < point_to_update.num_dimensions; dimension++)
+//         point_to_update.coordinates[dimension] = new_values.coordinates[dimension];
+//     return point_to_update;
+// }
+
 void update_pair_pointer(Point point1, Point point2, Pairs* p){
     double current_distance = distance(point1, point2);
     if(current_distance < p->min_distance){
         p->min_distance = current_distance;
+
+        // p->points1[0] = update_point(p->points1[0], point1);
+        // p->points2[0] = update_point(p->points2[0], point2);
         p->points1[0] = point1;
         p->points2[0] = point2;
         p->num_pairs = 1;
     }
     else if (current_distance == p->min_distance)
-    {
+    {   
+        // p->points1[p->num_pairs] = update_point(p->points1[p->num_pairs], point1);
+        // p->points2[p->num_pairs] = update_point(p->points2[p->num_pairs], point2);
         p->points1[p->num_pairs] = point1;
         p->points2[p->num_pairs] = point2;
         p->num_pairs++;
     }
+    return; // I HAVE ADDED IT SINCE IT WAS MISSING
 }
-
 
 void recSplit(Point* points, int dim, Pairs* p){
     if (dim == 2){
         update_pair_pointer(points[0], points[1], p);
+        return; // I HAVE ADDED IT SINCE IT WAS MISSING
     }
     else if (dim == 3){
         update_pair_pointer(points[0], points[1], p);
         update_pair_pointer(points[0], points[2], p);
         update_pair_pointer(points[2], points[1], p);
+        return; // I HAVE ADDED IT SINCE IT WAS MISSING
     }
     else{
         int mid = dim / 2;
         recSplit(points, mid, p);
         recSplit(points + mid, dim - mid, p);
-        //double d = isMIN(d1->min_distance, d2->min_distance);
         double d = p->min_distance;
         
         Point *strip = (Point *)malloc(dim * sizeof(Point));
@@ -176,27 +204,37 @@ void recSplit(Point* points, int dim, Pairs* p){
         }
         
         mergeSort(strip, j, 1);
-        //int num_pairs_tmp = 0;
-        //double min = d;
         for (int i = 0; i < j - 1; i++){
             for (int k = i + 1; k < j && (strip[k].coordinates[1] - strip[i].coordinates[1]) < d; k++){
-                double dd = distance(strip[i], strip[k]);
-                if (dd < p->min_distance){
-                    p->min_distance = dd;
+                double current_distance = distance(strip[i], strip[k]);
+                if (current_distance < p->min_distance){
+                    p->min_distance = current_distance;
+                    
+                    // p->points1[0] = update_point(p->points1[0], strip[i]);
+                    // p->points2[0] = update_point(p->points2[0], strip[k]);
                     p->points1[0] = strip[i];
                     p->points2[0] = strip[k];
-                    p->num_pairs = 1;
+
+                    // IF WE DO NOT COMMENT THE LINE BELOW IT WORKS WITH 3, 4, 5 CORES. NOT WITH 6
+                    p->num_pairs = 1; //WITH THIS COMMENTED IT WORKS BUT WE MISS SOME PRINTS
+                    // DUPLICATED PRINTS ARE PRESENT ONLY WHEN WORKING ON 10THOUSANDS,
+                    // NOT ON 1HUNDRED, WHY??
                 }
-                else if (dd == p->min_distance){
+                else if (current_distance == p->min_distance){
+
+                    // p->points1[p->num_pairs] = update_point(p->points1[p->num_pairs], strip[i]);
+                    // p->points2[p->num_pairs] = update_point(p->points2[p->num_pairs], strip[k]);
                     p->points1[p->num_pairs] = strip[i];
                     p->points2[p->num_pairs] = strip[k];
-                    p->num_pairs++;
+
+                    // IF WE DO NOT COMMENT THE LINE BELOW IT WORKS WITH 3, 4, 5 CORES. NOT WITH 6
+                    p->num_pairs++; //WITH THIS COMMENTED IT WORKS BUT WE HAVE MISS SOME PRINTS
+                    // DUPLICATED PRINTS ARE PRESENT ONLY WHEN WORKING ON 10THOUSANDS,
+                    // NOT ON 1HUNDRED, WHY??
                 }
             }
         }
         free(strip);
-        //p->min_distance = min;
-        //p->num_pairs = num_pairs_tmp;
     }
 }
 

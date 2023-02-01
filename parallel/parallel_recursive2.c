@@ -50,11 +50,11 @@ int main(int argc, char *argv[])
             perror("Error: the number of points must be greater than the number of processes\n");
             return -1;
         }
-        if (comm_size < 2)
-        {
-            perror("Error: cannot run parallel application on 1 process\n");
-            return -1;
-        }
+        // if (comm_size < 2)
+        // {
+        //     perror("Error: cannot run parallel application on 1 process\n");
+        //     return -1;
+        // }
         fclose(point_file);
     }
 
