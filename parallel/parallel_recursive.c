@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
     Point *local_points;
 
     Point *all_points = NULL;
-    all_points = parallel_order_points(all_points, path, rank_process, comm_size, VERBOSE);
+    all_points = parallel_mergesort(all_points, path, rank_process, comm_size, VERBOSE);
     if (rank_process == MASTER_PROCESS)
     {
         if (all_points == NULL)

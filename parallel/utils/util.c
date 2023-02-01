@@ -168,7 +168,7 @@ double recSplit(Point* points, int dim){
     }
 }
 
-Point *parallel_order_points(Point *all_points, char path[], int rank_process, int comm_size, int verbose){
+Point *parallel_mergesort(Point *all_points, char path[], int rank_process, int comm_size, int verbose){
 
     int num_points, num_dimensions;
     int num_points_normal_processes, num_points_master_process, num_points_local_process;
