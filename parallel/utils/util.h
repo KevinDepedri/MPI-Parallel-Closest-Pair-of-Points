@@ -24,3 +24,5 @@ extern double isMINof3(double, double, double);
 extern double recSplit(Point*, int );
 
 extern Point *parallel_mergesort(Point *, char[], int, int, int);
+
+extern double parallel_closestpair(Point *, int, int, int, int, int, int);
