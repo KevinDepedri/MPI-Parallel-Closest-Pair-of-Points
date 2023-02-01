@@ -132,7 +132,7 @@ double isMINof3(double a, double b, double c){
         return min < c ? min : c;
 }
 
-double recSplit(Point* points, int dim){
+double sequential_closestpair_recursive(Point* points, int dim){
     if (dim == 2)
         return distance(points[0], points[1]);
     
@@ -141,8 +141,8 @@ double recSplit(Point* points, int dim){
     
     else{
         int mid = dim / 2;
-        double d1 = recSplit(points, mid);
-        double d2 = recSplit(points + mid, dim - mid);
+        double d1 = sequential_closestpair_recursive(points, mid);
+        double d2 = sequential_closestpair_recursive(points + mid, dim - mid);
         double d = isMIN(d1, d2);
         Point *strip = (Point *)malloc(dim * sizeof(Point));
         int j = 0;
@@ -427,7 +427,7 @@ double parallel_closestpair(Point *all_points, int num_points, int num_dimension
     // POINT 3 - compute min distance for eahc process
     double local_dmin = INT_MAX;
     if (num_points_local_process > 1)
-        local_dmin = recSplit(local_points, num_points_local_process);
+        local_dmin = sequential_closestpair_recursive(local_points, num_points_local_process);
     printf("PROCESS:%d DMIN:%f\n", rank_process, local_dmin);
 
     // POINT 4 - allreduce to find the global dmin
