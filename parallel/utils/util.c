@@ -13,9 +13,9 @@
 double distance(Point p1, Point p2){
     double squared_sum = 0;
     int dimensions = p1.num_dimensions;
-    for (int i = 0; i < dimensions; i++){
+    for (int i = 0; i < dimensions; i++)
         squared_sum += pow((p1.coordinates[i] - p2.coordinates[i]), 2);
-    }
+    
     return sqrt(squared_sum);
 }
 
@@ -26,12 +26,12 @@ void merge(Point *points, int start_index, int middle_index, int end_index, int 
     // allocate temp arrays
     Point *left_array = (Point *)malloc(num_points_left_array * sizeof(Point));
     Point *right_array = (Point *)malloc(num_points_right_array * sizeof(Point));
-    for (i = 0; i < num_points_left_array; i++){
+    for (i = 0; i < num_points_left_array; i++)
         left_array[i] = points[start_index + i];
-    }
-    for (j = 0; j < num_points_right_array; j++){
+    
+    for (j = 0; j < num_points_right_array; j++)
         right_array[j] = points[middle_index + 1 + j];
-    }
+    
     i = 0;
     j = 0;
     k = start_index;
@@ -80,13 +80,12 @@ void print_points(Point *point_list, int num_points, int rank_process){
         printf("-----Point %d: (", point);
         
         for (int dimension=0; dimension < point_list[point].num_dimensions; dimension++){
-            if (dimension != point_list[point].num_dimensions - 1){
+            if (dimension != point_list[point].num_dimensions - 1)
                 printf("%d, ", point_list[point].coordinates[dimension]);
-            }
+            
             else
-            {
                 printf("%d)\n", point_list[point].coordinates[dimension]);
-            }
+            
         }
     }
 }
@@ -134,12 +133,12 @@ double isMINof3(double a, double b, double c){
 }
 
 double recSplit(Point* points, int dim){
-    if (dim == 2){
+    if (dim == 2)
         return distance(points[0], points[1]);
-    }
-    else if (dim == 3){
+    
+    else if (dim == 3)
         return isMINof3(distance(points[0], points[1]), distance(points[0], points[2]), distance(points[1], points[2]));
-    }
+    
     else{
         int mid = dim / 2;
         double d1 = recSplit(points, mid);
@@ -200,9 +199,7 @@ Point *parallel_mergesort(Point *all_points, char path[], int rank_process, int 
             all_points[point].num_dimensions = num_dimensions;
             all_points[point].coordinates = (int *)malloc(num_dimensions * sizeof(int));
             for (int dimension = 0; dimension < num_dimensions; dimension++)
-            {
                 fscanf(point_file, "%d", &all_points[point].coordinates[dimension]);
-            }
         }
         fclose(point_file);
 
@@ -222,9 +219,7 @@ Point *parallel_mergesort(Point *all_points, char path[], int rank_process, int 
                 points_to_send[point].num_dimensions = num_dimensions;
                 points_to_send[point].coordinates = (int *)malloc(num_dimensions * sizeof(int));
                 for (int dimension = 0; dimension < num_dimensions; dimension++)
-                {
                     points_to_send[point].coordinates[dimension] = all_points[point+num_points_normal_processes*(process-1)].coordinates[dimension];
-                }
             }
             MPI_Send(&num_points_normal_processes, 1, MPI_INT, process, 0, MPI_COMM_WORLD);
             sendPointsPacked(points_to_send, num_points_normal_processes, process, 1, MPI_COMM_WORLD);
@@ -232,9 +227,8 @@ Point *parallel_mergesort(Point *all_points, char path[], int rank_process, int 
 
         // Free points to send once the send for all the processes is done 
         for (int point = 0; point < num_points_normal_processes; point++)
-        {
             free(points_to_send[point].coordinates);
-        }
+
         free(points_to_send);
 
         // Store the points of the master process
@@ -246,9 +240,7 @@ Point *parallel_mergesort(Point *all_points, char path[], int rank_process, int 
             local_points[i].num_dimensions = num_dimensions;
             local_points[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
             for (int dimension = 0; dimension < num_dimensions; dimension++)
-            {
                 local_points[i].coordinates[dimension] = all_points[i + starting_from].coordinates[dimension];
-            }
         }
     }
     else
@@ -272,7 +264,8 @@ Point *parallel_mergesort(Point *all_points, char path[], int rank_process, int 
         {
             index_first_point = num_points_normal_processes * (comm_size-1);
             if (num_points_local_process > 0)
-                {index_last_point = index_first_point + num_points_local_process - 1;
+            {
+                index_last_point = index_first_point + num_points_local_process - 1;
                 printf("[MASTER-PROCESS %d/%d] received %d points from point %d to point %d\n", rank_process, comm_size, num_points_local_process, index_first_point, index_last_point);
             }
             else
@@ -302,24 +295,18 @@ Point *parallel_mergesort(Point *all_points, char path[], int rank_process, int 
 
         processes_sorted_points[0] = (Point *)malloc((num_points_local_process) * sizeof(Point));
         for (int process = 1; process < comm_size; process++)
-        {
             processes_sorted_points[process] = (Point *)malloc(num_points_normal_processes * sizeof(Point));
-        }
 
         // Save first the points ordered from the current process (master), then receive the ones from the other processes
         processes_sorted_points[0] = local_points;
         for (int process = 1; process < comm_size; process++)
-        {
             recvPointsPacked(processes_sorted_points[process], num_points_normal_processes, process, 0, MPI_COMM_WORLD);
-        }
 
         // Merge the ordere points from all the processes
         int *temporary_indexes;
         temporary_indexes = (int *)malloc(comm_size * sizeof(int));
         for (int process = 0; process < comm_size; process++)
-        {
             temporary_indexes[process] = 0;
-        }
 
         // For each position of the final ordered array of points define an initial minimum value and the process that encompasses this value
         for (int point = 0; point < num_points; point++)
