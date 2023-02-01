@@ -19,7 +19,7 @@ double distance(Point p1, Point p2){
     return sqrt(squared_sum);
 }
 
-void merge(Point *points, int start_index, int middle_index, int end_index, int dim){ //void merge(Point *points, int l, int m, int r, int dim
+void merge(Point *points, int start_index, int middle_index, int end_index, int dim){
     int i, j, k;
     int num_points_left_array = middle_index - start_index + 1;
     int num_points_right_array = end_index - middle_index;

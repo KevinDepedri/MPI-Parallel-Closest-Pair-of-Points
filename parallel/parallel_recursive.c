@@ -7,6 +7,7 @@
 #define AXIS 0
 #define MASTER_PROCESS 0
 #define INT_MAX 2147483647
+#define VERBOSE 0
 
 
 int main(int argc, char *argv[])
@@ -14,8 +15,6 @@ int main(int argc, char *argv[])
     clock_t start, end;
     double cpu_time_used;
     start = clock();
-
-    int verbose = 0;
 
     MPI_Init(&argc, &argv);
     int rank_process, comm_size;
@@ -69,7 +68,7 @@ int main(int argc, char *argv[])
     Point *local_points;
 
     Point *all_points = NULL;
-    all_points = parallel_order_points(all_points, path, rank_process, comm_size, verbose);
+    all_points = parallel_order_points(all_points, path, rank_process, comm_size, VERBOSE);
     if (rank_process == MASTER_PROCESS)
     {
         if (all_points == NULL)
