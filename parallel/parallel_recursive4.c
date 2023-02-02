@@ -490,6 +490,13 @@ int main(int argc, char *argv[])
             }
         }
     }
+    //free global_points1 and global_points2
+    for(int i = 0; i < global_num_pairs; i++){
+        free(global_points1[i].coordinates);
+        free(global_points2[i].coordinates);
+    }
+    free(global_points1);
+    free(global_points2);
     
     //12. RETURN MIN DISTANCE
     if (rank_process == MASTER_PROCESS)
