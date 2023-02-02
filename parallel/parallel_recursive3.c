@@ -375,14 +375,13 @@ int main(int argc, char *argv[])
             // clean pairs from repeated points (even if inverted)
             int *cleaned_list_indexes = (int *)malloc(pairs->num_pairs * sizeof(int));
             int cleaned_list_size = 0;
-            // eg if points pair are (1,2)(3,4) and (3,4)(1,2) then only one pair is printed
-            for (int i = 0; i < num_pairs; i++)
+            for (int i = 0; i < pairs->num_pairs; i++)
             {
                 int flag = 0;
-                for (int j = i + 1; j < num_pairs)
+                for (int j = i + 1; j < pairs->num_pairs; j++)
                 {
-                    if ((differPoint(pairs->points1[i], pairs->points1[j]) && differPoint(pairs->points2[i], pairs->points2[j])) &&
-                        (differPoint(pairs->points1[i], pairs->points1[j]) || differPoint(pairs->points2[i], pairs->points2[j])))
+                    if (!((differPoint(pairs->points1[i], pairs->points1[j]) && differPoint(pairs->points2[i], pairs->points2[j])) &&
+                        (differPoint(pairs->points1[i], pairs->points2[j]) || differPoint(pairs->points2[i], pairs->points1[j]))))
                     {
                         flag = 1;
                         break;
