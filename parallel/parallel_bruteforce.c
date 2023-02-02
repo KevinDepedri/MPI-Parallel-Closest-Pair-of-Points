@@ -122,6 +122,7 @@ int main(int argc, char *argv[])
             printPoint(points[min_points2[i]]);
             printf("\n");
         }
+        printf("[R %d] Number of pairs with minimum distance: %d\n", rank, points1_count);
     }
     if (rank == 0)
     {
