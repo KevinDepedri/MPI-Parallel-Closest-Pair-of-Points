@@ -20,7 +20,7 @@ TODO:
 
 - [x] parallel versione of $O(n\log n)$ _Divide&Conquer_
 
-- [ ] print points with min_dist
+- [x] print points with min_dist
 
 - [ ] code cleanup
 

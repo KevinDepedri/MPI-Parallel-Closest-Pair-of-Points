@@ -3,7 +3,16 @@ typedef struct{
     int num_dimensions;
 } Point;
 
+typedef struct{
+    Point *points1;
+    Point *points2;
+    int num_pairs;
+    double min_distance;
+} Pairs;
+
 extern double distance(Point, Point);
+
+extern int differPoint(Point, Point);
 
 extern void merge(Point *, int, int, int, int);
 
@@ -21,8 +30,14 @@ extern double isMIN(double, double);
 
 extern double isMINof3(double, double, double);
 
+extern void printPoint(Point);
+
+extern void recSplit(Point*, int, Pairs*, int);
+
 extern double sequential_closestpair_recursive(Point*, int );
 
 extern Point *parallel_mergesort(Point *, char[], int, int, int);
 
 extern double parallel_closestpair(Point *, int, int, int, int, int, int);
+
+extern double parallel_closestpair2(Point *, int, int, int, int, int, int);

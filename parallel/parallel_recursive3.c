@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "utils/util3.h"
+#include "utils/util.h"
 
 #define AXIS 0
 #define MASTER_PROCESS 0
@@ -13,10 +13,9 @@
 /* COSE DA FARE
 0. Importare file da argomento
 1. Sistemare notazione funzioni e variabili
-2. Verificare che ogni malloc abbia il proprio free (effettuando test sul codice per essere sicuri che non cambino i risultati/crash del codice)
+2. Verificare che ogni malloc abbia il proprio free (ALMOST DONE)
 3. Definire come gestire print/VERBOSE
 4. Valutare come migliorare la leggibilitá del codice
-5. Verificare usando distance.py che i risultati siano corretti
 */
 
 int main(int argc, char *argv[])
@@ -29,7 +28,7 @@ int main(int argc, char *argv[])
     int rank_process, comm_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank_process);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
-    char path[] = "../point_generator/1M5d.txt";
+    char path[] = "../point_generator/10K5d.txt";
     // char path[] = argv[1];
 
     int num_points, num_dimensions;
@@ -75,7 +74,7 @@ int main(int argc, char *argv[])
     int num_points_normal_processes, num_points_master_process, num_points_local_process;
     num_points_normal_processes = num_points / (comm_size-1);
     num_points_master_process = num_points % (comm_size-1);
-    Point *local_points;
+    Point *local_points = NULL;
 
     Point *all_points = NULL;
     all_points = parallel_mergesort(all_points, path, rank_process, comm_size, VERBOSE);
@@ -91,7 +90,7 @@ int main(int argc, char *argv[])
 
     if(comm_size <= 2)
     {
-        Pairs *pairs;
+        Pairs *pairs = NULL;
         pairs = (Pairs *)malloc(sizeof(Pairs));
 
         pairs->points1 = (Point *)malloc((num_points) * sizeof(Point));
@@ -108,11 +107,14 @@ int main(int argc, char *argv[])
             printf("Launching sequential algorithm...\n");
             recSplit(all_points, num_points, pairs, rank_process);
             printf("SUPER FINAL GLOBAL DMIN: %f\n", pairs->min_distance);
+
+            // Insert here print of pairs??
         }
         MPI_Barrier(MPI_COMM_WORLD);
 
+        // Free all_points and also pairs
         free(all_points);
-        // free(pairs);
+        free(pairs);
 
         if(rank_process == MASTER_PROCESS){
             printf("Memory free\n");
@@ -136,23 +138,20 @@ int main(int argc, char *argv[])
         Point *points_to_send;
         points_to_send = (Point *)malloc(num_points_normal_processes * sizeof(Point));
         int left_to_send, right_to_send;
-        for (int process = 1; process < comm_size; process++)
-        {
-            for (int point = 0; point < num_points_normal_processes; point++)
-            {
+        for (int process = 1; process < comm_size; process++){
+
+            for (int point = 0; point < num_points_normal_processes; point++){
                 points_to_send[point].num_dimensions = num_dimensions;
                 points_to_send[point].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+            
                 for (int dimension = 0; dimension < num_dimensions; dimension++)
-                {
                     points_to_send[point].coordinates[dimension] = all_points[point+num_points_normal_processes*(process-1)].coordinates[dimension];
-                }
             }
             MPI_Send(&num_points_normal_processes, 1, MPI_INT, process, 0, MPI_COMM_WORLD);
             sendPointsPacked(points_to_send, num_points_normal_processes, process, 1, MPI_COMM_WORLD);
             
             // Transfer also the left and right out_of_region x coordinate for each process
-            if (process == 1)
-            {
+            if (process == 1){
                 left_to_send = INT_MAX;
                 right_to_send = all_points[num_points_normal_processes*(process)].coordinates[AXIS];
             }
@@ -169,9 +168,8 @@ int main(int argc, char *argv[])
 
         // Free points_to_send once the send for all the processes is done 
         for (int point = 0; point < num_points_normal_processes; point++)
-        {
             free(points_to_send[point].coordinates);
-        }
+
         free(points_to_send);
 
         // Store the points of the master process and its out_of_region values
@@ -332,6 +330,7 @@ int main(int argc, char *argv[])
                 local_strip_points[i+num_points_right_strip].coordinates[dimension] = received_points[i].coordinates[dimension];
             }
         }
+        free(received_points);
 
         // POINT 9 - reorder point in the strip over y
         int j = num_points_right_strip + num_points_received;
@@ -408,18 +407,18 @@ int main(int argc, char *argv[])
             printf("Found a total of %d pairs of points with DMIN=%f\n", number_pairs_min_distance, global_dmin);
     }
 
-    // Free all points
+    // Free all points and local points
     if (rank_process == MASTER_PROCESS)
-    {
+    {   
+        // Deallocating the internal parameter on all_points leads to the same effect also on local_points
         for (int point = 0; point < num_points; point++)
-        {
             free(all_points[point].coordinates);
-        }
     }
     free(all_points);
-
-    // Free local points (verify how to implement it correctly)
-    // free(local_points); 
+    free(local_points); 
+    free(pairs);
+    free(left_strip_points);
+    free(right_strip_points);
 
     MPI_Barrier(MPI_COMM_WORLD);
     if (rank_process == MASTER_PROCESS)

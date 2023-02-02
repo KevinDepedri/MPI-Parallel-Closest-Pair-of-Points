@@ -19,6 +19,14 @@ double distance(Point p1, Point p2){
     return sqrt(squared_sum);
 }
 
+int differPoint(Point p1, Point p2){
+    for (int i = 0; i < p1.num_dimensions; i++)
+        if (p1.coordinates[i] != p2.coordinates[i])
+            return 1;
+    
+    return 0;
+}
+
 void merge(Point *points, int start_index, int middle_index, int end_index, int dim){
     int i, j, k;
     int num_points_left_array = middle_index - start_index + 1;
@@ -90,12 +98,12 @@ void print_points(Point *point_list, int num_points, int rank_process){
     }
 }
 
-void sendPointsPacked(Point* points, int numPoints, int destination, int tag, MPI_Comm comm) {
+void sendPointsPacked(Point* points, int numPoints, int destination, int tag, MPI_Comm comm){
   int bufferSize = numPoints * (sizeof(int) + sizeof(int)*points[0].num_dimensions);
   void *buffer = malloc(bufferSize);
   int position = 0;
 
-  for (int point = 0; point < numPoints; point++) {
+  for (int point = 0; point < numPoints; point++){
     MPI_Pack(&points[point].num_dimensions, 1, MPI_INT, buffer, bufferSize, &position, comm);
     MPI_Pack(points[point].coordinates, points[point].num_dimensions, MPI_INT, buffer, bufferSize, &position, comm);
   }
@@ -104,7 +112,7 @@ void sendPointsPacked(Point* points, int numPoints, int destination, int tag, MP
   free(buffer);
 }
 
-void recvPointsPacked(Point* points, int numPoints, int source, int tag, MPI_Comm comm) {
+void recvPointsPacked(Point* points, int numPoints, int source, int tag, MPI_Comm comm){
   MPI_Status status;
   MPI_Probe(source, tag, comm, &status);
 
@@ -130,6 +138,83 @@ double isMIN(double a, double b){
 double isMINof3(double a, double b, double c){
         double min = a < b ? a : b;
         return min < c ? min : c;
+}
+
+void printPoint(Point p){
+    printf("(");
+    for (int i = 0; i < p.num_dimensions; i++){
+        if (i != p.num_dimensions-1)
+            printf("%d, ", p.coordinates[i]);
+        else
+            printf("%d", p.coordinates[i]);
+    }
+    printf(")");
+}
+
+void update_pair_pointer(Point point1, Point point2, Pairs* p, int rank){
+    double current_distance = distance(point1, point2);
+    
+    if(current_distance < p->min_distance){
+        p->min_distance = current_distance;
+        p->points1[0] = point1;
+        p->points2[0] = point2;
+        p->num_pairs = 1;
+        
+    }
+    else if (current_distance == p->min_distance){   
+        p->points1[p->num_pairs] = point1;
+        p->points2[p->num_pairs] = point2;
+        p->num_pairs++;
+    }
+    return;
+}
+
+void recSplit(Point* points, int dim, Pairs* p, int rank){
+    if (dim == 2){
+        update_pair_pointer(points[0], points[1], p, rank);
+        return;
+    }
+    else if (dim == 3){
+        update_pair_pointer(points[0], points[1], p, rank);
+        update_pair_pointer(points[0], points[2], p, rank);
+        update_pair_pointer(points[2], points[1], p, rank);
+        return;
+    }
+    else{
+        int mid = dim / 2;
+        recSplit(points, mid, p, rank);
+        recSplit(points + mid, dim - mid, p, rank);
+        double d = p->min_distance;
+        
+        Point *strip = (Point *)malloc(dim * sizeof(Point));
+        int num_points_in_strip = 0;
+        for (int i = 0; i < dim; i++){
+            if (abs(points[i].coordinates[0] - points[mid].coordinates[0]) <= d){
+                strip[num_points_in_strip] = points[i];
+                num_points_in_strip++;
+            }
+        }
+        
+        mergeSort(strip, num_points_in_strip, 1);
+        for (int i = 0; i < num_points_in_strip - 1; i++){
+            for (int k = i + 1; k < num_points_in_strip && abs(strip[k].coordinates[1] - strip[i].coordinates[1]) <= d; k++){
+                double current_distance = distance(strip[i], strip[k]);
+                if (current_distance < p->min_distance){
+                    p->min_distance = current_distance;
+                    p->points1[0] = strip[i];
+                    p->points2[0] = strip[k];
+                    p->num_pairs = 1;
+                    
+                }
+                else if (current_distance == p->min_distance){
+                    p->points1[p->num_pairs] = strip[i];
+                    p->points2[p->num_pairs] = strip[k];
+                    p->num_pairs++;
+                }
+            }
+        }
+        free(strip);
+    }
 }
 
 double sequential_closestpair_recursive(Point* points, int dim){
@@ -559,4 +644,13 @@ double parallel_closestpair(Point *all_points, int num_points, int num_dimension
     MPI_Allreduce(&global_dmin, &super_final_dmin, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
 
     return super_final_dmin;
+}
+
+double parallel_closestpair2(Point *all_points, int num_points, int num_dimensions, int rank_process, int comm_size, 
+                            int num_points_normal_processes, int num_points_master_process){
+    
+    //Move new version here when ready
+
+    double a=0;
+    return a;
 }

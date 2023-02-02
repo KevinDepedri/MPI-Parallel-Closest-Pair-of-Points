@@ -6,16 +6,6 @@
 #define INT_MAX 2147483647
 #include "utils/util.h"
 
-void printPoint(Point p)
-{
-    printf("(");
-    for (int i = 0; i < p.num_dimensions; i++)
-    {
-        printf("%d, ", p.coordinates[i]);
-    }
-    printf(")");
-}
-
 int main(int argc, char *argv[])
 {
     int rank, size;
@@ -32,7 +22,7 @@ int main(int argc, char *argv[])
     if (rank == 0)
     {
         int num_dimensions;
-        FILE *fp = fopen("point_generator/points.txt", "r");
+        FILE *fp = fopen("../point_generator/10K5d.txt", "r");
         if (fp == NULL)
         {
             perror("Error opening file");
@@ -52,9 +42,8 @@ int main(int argc, char *argv[])
             points[i].num_dimensions = num_dimensions;
             points[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
             for (int j = 0; j < num_dimensions; j++)
-            {
                 fscanf(fp, "%d", &points[i].coordinates[j]);
-            }
+            
         }
         fclose(fp);
     }
@@ -63,9 +52,8 @@ int main(int argc, char *argv[])
     if (rank == 0)
     {
         for (int i = 1; i < size; i++)
-        {
             sendPointsPacked(points, num_points, i, 1, MPI_COMM_WORLD);
-        }
+        
         local_num = num_points % (size - 1);
         starting_index = num_points - local_num;
     }
@@ -134,9 +122,8 @@ int main(int argc, char *argv[])
 
     // Free the memory
     for (int i = 0; i < num_points; i++)
-    {
         free(points[i].coordinates);
-    }
+    
     free(points);
     free(min_points1);
     free(min_points2);
