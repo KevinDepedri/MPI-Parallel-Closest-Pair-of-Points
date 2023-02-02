@@ -8,6 +8,7 @@
 #define MASTER_PROCESS 0
 #define INT_MAX 2147483647
 #define VERBOSE 0
+#define PRINT_PAIRS_OF_POINTS 1
 
 /* COSE DA FARE
 0. Importare file da argomento
@@ -28,8 +29,8 @@ int main(int argc, char *argv[])
     int rank_process, comm_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank_process);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
-    char path[] = "../point_generator/1H2d.txt";
-    //char path[] = argv[1]
+    char path[] = "../point_generator/1M5d.txt";
+    // char path[] = argv[1];
 
     int num_points, num_dimensions;
 
@@ -87,24 +88,45 @@ int main(int argc, char *argv[])
         }
     }
 
-    // if(comm_size <= 2)
-    // {
-    //     if(rank_process == MASTER_PROCESS){
-    //         printf("Launching sequential algorithm...\n");
-    //         printf("SUPER FINAL GLOBAL DMIN: %f\n", recSplit(all_points, num_points).min_distance);
-    //     }
-    //     MPI_Barrier(MPI_COMM_WORLD);
 
-    //     free(all_points);
+    if(comm_size <= 2)
+    {
+        Pairs *pairs;
+        pairs = (Pairs *)malloc(sizeof(Pairs));
 
-    //     printf("Memory free\n");
-    //     end = clock();
-    //     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-    //     printf("Time elapsed: %f\n", cpu_time_used);
+        pairs->points1 = (Point *)malloc((num_points) * sizeof(Point));
+        pairs->points2 = (Point *)malloc((num_points) * sizeof(Point));
+        for (int i = 0; i < (num_points); i++)
+        {
+            pairs->points1[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+            pairs->points2[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+        }
+        pairs->num_pairs = 0;
+        pairs->min_distance = INT_MAX;
 
-    //     MPI_Finalize();
-    //     return 0;
-    // }
+        if(rank_process == MASTER_PROCESS){
+            printf("Launching sequential algorithm...\n");
+            recSplit(all_points, num_points, pairs, rank_process);
+            printf("SUPER FINAL GLOBAL DMIN: %f\n", pairs->min_distance);
+        }
+        MPI_Barrier(MPI_COMM_WORLD);
+
+        free(all_points);
+        // free(pairs);
+
+        if(rank_process == MASTER_PROCESS){
+            printf("Memory free\n");
+            end = clock();
+            cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+            printf("Time elapsed: %f\n", cpu_time_used);
+        }
+
+        MPI_Finalize();
+        return 0;
+    }
+
+    if(rank_process == MASTER_PROCESS)
+        printf("Launching parallel algorithm...\n");
 
     // POINT 1 AND 2 - divide points and send them with their out_of_region values to each process
     int left_x_out_of_region = INT_MAX, right_x_out_of_region = INT_MAX;
@@ -225,7 +247,7 @@ int main(int argc, char *argv[])
 
     for (int point = 0; point < num_points_local_process; point++)
     {
-        if (local_points[point].coordinates[AXIS] < left_boundary + global_dmin)
+        if (local_points[point].coordinates[AXIS] <= left_boundary + global_dmin)
         {
             left_strip_points[num_points_left_strip].num_dimensions = num_dimensions;
             left_strip_points[num_points_left_strip].coordinates = (int *)malloc(num_dimensions * sizeof(int));
@@ -239,7 +261,7 @@ int main(int argc, char *argv[])
             break;
     }
     for(int point = num_points_local_process - 1; point >= 0; point--){
-        if (local_points[point].coordinates[AXIS] > right_boundary - global_dmin)
+        if (local_points[point].coordinates[AXIS] >= right_boundary - global_dmin)
         {
             right_strip_points[num_points_right_strip].num_dimensions = num_dimensions;
             right_strip_points[num_points_right_strip].coordinates = (int *)malloc(num_dimensions * sizeof(int));
@@ -342,28 +364,28 @@ int main(int argc, char *argv[])
     
     //11. REDUCE ALL DISTANCES BACK TO MASTER PROCESS
     MPI_Allreduce(&local_dmin, &global_dmin, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
-
-    int loca_number_pairs_min_distance = 0, number_pairs_min_distance = 0;
-    if(global_dmin == pairs->min_distance){
-         for(int i = 0; i < pairs->num_pairs; i++){
-            //  if( (i == 0) || ( (differPoint(pairs->points1[i],pairs->points2[i-1]) && differPoint(pairs->points2[i],pairs->points1[i-1])) && 
-            //                    (differPoint(pairs->points1[i],pairs->points1[i-1]) || differPoint(pairs->points2[i],pairs->points2[i-1])) ) ){
-                if (VERBOSE==0){
-                    printPoint(pairs->points1[i]);
-                    printPoint(pairs->points2[i]);
-                    printf("\n");
-                }
-                loca_number_pairs_min_distance++;
-            //  }
-        }
-    }
-    MPI_Reduce(&loca_number_pairs_min_distance, &number_pairs_min_distance, 1, MPI_INT, MPI_SUM, MASTER_PROCESS, MPI_COMM_WORLD);
-    if (rank_process==MASTER_PROCESS)
-        printf("Found a total of %d pairs of points with dmin=%f\n", number_pairs_min_distance, global_dmin);
-    
-    //12. RETURN MIN DISTANCE
     if (rank_process == MASTER_PROCESS)
         printf("---NEW GLOBAL DMIN: %f\n", global_dmin);
+
+    if (PRINT_PAIRS_OF_POINTS == 1){
+        int loca_number_pairs_min_distance = 0, number_pairs_min_distance = 0;
+        if(global_dmin == pairs->min_distance){
+            for(int i = 0; i < pairs->num_pairs; i++){
+                if( (i == 0) || ( (differPoint(pairs->points1[i],pairs->points2[i-1]) && differPoint(pairs->points2[i],pairs->points1[i-1])) && 
+                                (differPoint(pairs->points1[i],pairs->points1[i-1]) || differPoint(pairs->points2[i],pairs->points2[i-1])) ) ){
+                    if (VERBOSE==0){
+                        printPoint(pairs->points1[i]);
+                        printPoint(pairs->points2[i]);
+                        printf("\n");
+                    }
+                    loca_number_pairs_min_distance++;
+                }
+            }
+        }
+        MPI_Reduce(&loca_number_pairs_min_distance, &number_pairs_min_distance, 1, MPI_INT, MPI_SUM, MASTER_PROCESS, MPI_COMM_WORLD);
+        if (rank_process==MASTER_PROCESS)
+            printf("Found a total of %d pairs of points with DMIN=%f\n", number_pairs_min_distance, global_dmin);
+    }
 
     // Free all points
     if (rank_process == MASTER_PROCESS)
