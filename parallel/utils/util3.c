@@ -159,32 +159,32 @@ void printPoint(Point p)
 
 void update_pair_pointer(Point point1, Point point2, Pairs* p, int rank){
     double current_distance = distance(point1, point2);
-    // if (rank == 2){
-    //     printf("RANK:%d ",rank);
-    // }
+    if (rank == 1){
+        printf("RANK:%d ",rank);
+    }
     if(current_distance < p->min_distance){
         p->min_distance = current_distance;
         p->points1[0] = point1;
         p->points2[0] = point2;
         p->num_pairs = 1;
-        // if (rank == 2){
-        //     printf("RESET TO: ");
-        // }
+        if (rank == 1){
+            printf("RESET TO: ");
+        }
     }
     else if (current_distance == p->min_distance)
     {   
         p->points1[p->num_pairs] = point1;
         p->points2[p->num_pairs] = point2;
         p->num_pairs++;
-        // if (rank == 2){
-        //     printf("ADDED: ");
-        // }
+        if (rank == 1){
+            printf("ADDED: ");
+        }
     }
-    // if (rank == 2){
-    //     printPoint(point1);
-    //     printPoint(point2);
-    //     printf("WITH DISTANCE: %f\n",current_distance);
-    // }
+    if (rank == 1){
+        printPoint(point1);
+        printPoint(point2);
+        printf("WITH DISTANCE: %f\n",current_distance);
+    }
     return;
 }
 
@@ -208,46 +208,47 @@ void recSplit(Point* points, int dim, Pairs* p, int rank){
         Point *strip = (Point *)malloc(dim * sizeof(Point));
         int j = 0;
         for (int i = 0; i < dim; i++){
-            if (abs(points[i].coordinates[0] - points[mid].coordinates[0]) < d){ //Here the strip is assumed to be on the MID POINT, 
-                strip[j] = points[i];                                            //In the parallel scenario we put in between two points.
-                j++;                                                             //IS IT THE SAME??
+            if (abs(points[i].coordinates[0] - points[mid].coordinates[0]) < d){
+                strip[j] = points[i];
+                j++;
             }
-            // if (rank == 1){
-            //     printf("ADD TO STRIP: ");
-            //     printPoint(points[i]);
-            //     printf("\n");
-            // }
+            if (rank == 1){
+                printf("ADD TO STRIP: ");
+                printPoint(points[i]);
+                printf("IN POSITION: %d",i);
+                printf("\n");
+            }
         }
         
         mergeSort(strip, j, 1);
         for (int i = 0; i < j - 1; i++){
-            for (int k = i + 1; k < j && abs(strip[k].coordinates[1] - strip[i].coordinates[1]) <= d; k++){ //Do we NEED ABSOLUTE VALUE HERE??
+            for (int k = i + 1; k < j && abs(strip[k].coordinates[1] - strip[i].coordinates[1]) <= d; k++){
                 double current_distance = distance(strip[i], strip[k]);
-                // if (rank == 2){
-                //     printf("STRIP-RANK:%d ",rank);
-                // }
+                if (rank == 1){
+                    printf("STRIP-RANK:%d ",rank);
+                }
                 if (current_distance < p->min_distance){
                     p->min_distance = current_distance;
                     p->points1[0] = strip[i];
                     p->points2[0] = strip[k];
                     p->num_pairs = 1;
-                    // if (rank == 2){
-                    //     printf("RESET TO: ");
-                    // }
+                    if (rank == 1){
+                        printf("RESET TO: ");
+                    }
                 }
                 else if (current_distance == p->min_distance){
                     p->points1[p->num_pairs] = strip[i];
                     p->points2[p->num_pairs] = strip[k];
                     p->num_pairs++;
-                    // if (rank == 2){
-                    //     printf("ADDED: ");
-                    // }
+                    if (rank == 1){
+                        printf("ADDED: ");
+                    }
                 }
-                // if (rank == 2){
-                //     printPoint(strip[i]);
-                //     printPoint(strip[k]);
-                //     printf("WITH DISTANCE: %f\n",current_distance);
-                // }
+                if (rank == 1){
+                    printPoint(strip[i]);
+                    printPoint(strip[k]);
+                    printf("WITH DISTANCE: %f\n",current_distance);
+                }
             }
         }
         free(strip);
