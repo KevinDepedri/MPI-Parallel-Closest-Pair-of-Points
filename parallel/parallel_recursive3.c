@@ -369,17 +369,39 @@ int main(int argc, char *argv[])
 
     if (PRINT_PAIRS_OF_POINTS == 1){
         int loca_number_pairs_min_distance = 0, number_pairs_min_distance = 0;
-        if(global_dmin == pairs->min_distance){
-            for(int i = 0; i < pairs->num_pairs; i++){
-                if( (i == 0) || ( (differPoint(pairs->points1[i],pairs->points2[i-1]) && differPoint(pairs->points2[i],pairs->points1[i-1])) && 
-                                (differPoint(pairs->points1[i],pairs->points1[i-1]) || differPoint(pairs->points2[i],pairs->points2[i-1])) ) ){
-                    if (VERBOSE==0){
-                        printPoint(pairs->points1[i]);
-                        printPoint(pairs->points2[i]);
-                        printf("\n");
+
+        if (global_dmin == pairs->min_distance)
+        {
+            // clean pairs from repeated points (even if inverted)
+            int *cleaned_list_indexes = (int *)malloc(pairs->num_pairs * sizeof(int));
+            int cleaned_list_size = 0;
+            // eg if points pair are (1,2)(3,4) and (3,4)(1,2) then only one pair is printed
+            for (int i = 0; i < num_pairs; i++)
+            {
+                int flag = 0;
+                for (int j = i + 1; j < num_pairs)
+                {
+                    if ((differPoint(pairs->points1[i], pairs->points1[j]) && differPoint(pairs->points2[i], pairs->points2[j])) &&
+                        (differPoint(pairs->points1[i], pairs->points1[j]) || differPoint(pairs->points2[i], pairs->points2[j])))
+                    {
+                        flag = 1;
+                        break;
                     }
-                    loca_number_pairs_min_distance++;
                 }
+                if (flag == 0)
+                {
+                    cleaned_list_indexes[cleaned_list_size] = i;
+                    cleaned_list_size++;
+                }
+            }
+            for(int i = 0; i < cleaned_list_size; i++){
+                if (VERBOSE == 0)
+                {
+                    printPoint(pairs->points1[cleaned_list_indexes[i]]);
+                    printPoint(pairs->points2[cleaned_list_indexes[i]]);
+                    printf("\n");
+                }
+                loca_number_pairs_min_distance++;
             }
         }
         MPI_Reduce(&loca_number_pairs_min_distance, &number_pairs_min_distance, 1, MPI_INT, MPI_SUM, MASTER_PROCESS, MPI_COMM_WORLD);
