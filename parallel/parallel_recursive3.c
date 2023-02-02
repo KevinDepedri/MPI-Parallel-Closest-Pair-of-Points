@@ -9,6 +9,7 @@
 #define INT_MAX 2147483647
 #define VERBOSE 0
 
+
 int main(int argc, char *argv[])
 {
     clock_t start, end;
@@ -19,7 +20,7 @@ int main(int argc, char *argv[])
     int rank_process, comm_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank_process);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
-    char path[] = "../point_generator/1hundred.txt";
+    char path[] = "../point_generator/1million.txt";
 
     int num_points, num_dimensions;
 
@@ -96,7 +97,7 @@ int main(int argc, char *argv[])
     //     return 0;
     // }
 
-    // POINT 1 AND 2 - divide points and send them with thei out_of_region valie
+    // POINT 1 AND 2 - divide points and send them with their out_of_region values
     int left_x_out_of_region = INT_MAX, right_x_out_of_region = INT_MAX;
     if (rank_process == MASTER_PROCESS)
     {
@@ -174,17 +175,13 @@ int main(int argc, char *argv[])
     double local_dmin = INT_MAX;
     Pairs *pairs;
     pairs = (Pairs *)malloc(sizeof(Pairs));
-    pairs->points1 = (Point *)malloc((num_points_local_process)+1 * sizeof(Point));
-    pairs->points2 = (Point *)malloc((num_points_local_process)+1 * sizeof(Point));
-    
-    // printf(*pairs);
-    // for (int i = 0; i < (num_points_local_process/2); i++)
-    // {
-    //     pairs->points1[i].num_dimensions = num_dimensions;
-    //     pairs->points1[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
-    //     pairs->points2[i].num_dimensions = num_dimensions;
-    //     pairs->points2[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
-    // }
+    pairs->points1 = (Point *)malloc((num_points_local_process) * sizeof(Point));
+    pairs->points2 = (Point *)malloc((num_points_local_process) * sizeof(Point));
+    for (int i = 0; i < (num_points_local_process); i++)
+    {
+        pairs->points1[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+        pairs->points2[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+    }
 
     pairs->num_pairs = INT_MAX;
     pairs->min_distance = INT_MAX;
@@ -192,23 +189,8 @@ int main(int argc, char *argv[])
     if (num_points_local_process > 1){
         recSplit(local_points, num_points_local_process, pairs);
         local_dmin = pairs->min_distance;
-        int num_pairs = pairs->num_pairs;
-        printf("[PROCESS %d] NP: %d\n", rank_process, num_pairs);
-        for (int i = 0; i <num_pairs; i++)
-        {
-            printf("[");
-            printPoint(pairs->points1[i]);
-            printPoint(pairs->points2[i]);
-            printf("]\n");
-        }
     }
     printf("PROCESS:%d DMIN:%f\n", rank_process, local_dmin);
-   
-    // Useless everything here below
-    MPI_Barrier(MPI_COMM_WORLD);
-    // free(pairs->points1);
-    // free(pairs->points2);
-    // free(pairs);
 
     // POINT 4 - allreduce to find the global dmin
     double global_dmin;
@@ -226,14 +208,14 @@ int main(int argc, char *argv[])
         right_boundary = (right_x_out_of_region + local_points[num_points_local_process-1].coordinates[AXIS])/2.0;
     
     // POINT 5 - get the points in the strips for each process
-    // get for both left and write side, points where x_i - dmin <= boundary
+    // get for both left and right side, points where x_i - dmin <= boundary
     int num_points_left_strip = 0, num_points_right_strip = 0;
     Point *left_strip_points = (Point *)malloc(num_points_local_process * sizeof(Point));
     Point *right_strip_points = (Point *)malloc(num_points_local_process * sizeof(Point));
 
     for (int point = 0; point < num_points_local_process; point++)
     {
-        if (local_points[point].coordinates[AXIS] < left_boundary + global_dmin)
+        if (local_points[point].coordinates[AXIS] <= left_boundary + global_dmin)
         {
             left_strip_points[num_points_left_strip].num_dimensions = num_dimensions;
             left_strip_points[num_points_left_strip].coordinates = (int *)malloc(num_dimensions * sizeof(int));
@@ -243,11 +225,11 @@ int main(int argc, char *argv[])
             }
             num_points_left_strip++;
         }
-        else
-            break;
-    }
-    for(int point = num_points_local_process - 1; point >= 0; point--){
-        if (local_points[point].coordinates[AXIS] > right_boundary - global_dmin)
+    //     else
+    //         break;
+    // }
+    // for(int point = num_points_local_process - 1; point >= 0; point--){
+        if (local_points[point].coordinates[AXIS] >= right_boundary - global_dmin)
         {
             right_strip_points[num_points_right_strip].num_dimensions = num_dimensions;
             right_strip_points[num_points_right_strip].coordinates = (int *)malloc(num_dimensions * sizeof(int));
@@ -256,9 +238,10 @@ int main(int argc, char *argv[])
                 right_strip_points[num_points_right_strip].coordinates[dimension] = local_points[point].coordinates[dimension];
             }
             num_points_right_strip++;
-        }
-        else
-            break;
+        // }
+        // else
+        //     break;
+    }
     }
 
     // POINT 6 AND 7 AND 8 - get point of left strip move the point to the left process, merge the moved left points with the right points of the target process
@@ -331,22 +314,40 @@ int main(int argc, char *argv[])
                 if (dd < min){
                     min = dd;
                 }
+                if(dd < pairs->min_distance){
+                    pairs->min_distance = dd;
+                    pairs->points1[0] = local_strip_points[i];
+                    pairs->points2[0] = local_strip_points[k];
+                    pairs->num_pairs = 1;
+                }
+                else if(dd == pairs->min_distance){
+                    pairs->points1[pairs->num_pairs] = local_strip_points[i];
+                    pairs->points2[pairs->num_pairs] = local_strip_points[k];
+                    pairs->num_pairs++;
+                }
             }
         }
         global_dmin = min;
         free(local_strip_points);
-
     }
     
     //11. REDUCE ALL DISTANCES BACK TO MASTER PROCESS
     double super_final_dmin;
     MPI_Allreduce(&global_dmin, &super_final_dmin, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
+    if(super_final_dmin == pairs->min_distance){
+         for(int i = 0; i < pairs->min_distance; i++){
+             if( (i == 0) || ((differPoint(pairs->points1[i],pairs->points1[i-1]) || differPoint(pairs->points2[i],pairs->points2[i-1])) && 
+                            (differPoint(pairs->points1[i],pairs->points2[i-1]) && differPoint(pairs->points2[i],pairs->points1[i-1]))) ){
+             printPoint(pairs->points1[i]);
+             printPoint(pairs->points2[i]);
+             printf("\n");
+             }
+        }
+    }
     
     //12. RETURN MIN DISTANCE
     if (rank_process == MASTER_PROCESS)
         printf("SUPER FINAL GLOBAL DMIN: %f\n", super_final_dmin);
-    
-
 
     // END OF IMPLEMENTATION
     if (rank_process == MASTER_PROCESS)
@@ -358,6 +359,7 @@ int main(int argc, char *argv[])
         }
     }
     free(all_points);
+    // free(local_points); // JUST HERE FOR NOW
 
     MPI_Barrier(MPI_COMM_WORLD);
     if (rank_process == MASTER_PROCESS)

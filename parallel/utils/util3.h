@@ -12,6 +12,8 @@ typedef struct{
 
 extern double distance(Point, Point);
 
+extern int differPoint(Point, Point);
+
 extern void merge(Point *, int, int, int, int);
 
 extern void mergeSortRec(Point *, int, int, int);

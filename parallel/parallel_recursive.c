@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
         }
         fclose(point_file);
 
-        if (verbose == 1)
+        if (VERBOSE == 1)
         {
             printf("INPUT LIST OF POINTS:\n");
             print_points(all_points, num_points, rank_process);    
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
         recvPointsPacked(local_points, num_points_local_process, 0, 1, MPI_COMM_WORLD);
     }
 
-    if (verbose == 1){
+    if (VERBOSE == 1){
         // Compute the number of points that will be read by each core and print it
         if (rank_process != MASTER_PROCESS)
         {
@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
             temporary_indexes[process_with_minimum_value]++;
         }
 
-        if (verbose == 1){
+        if (VERBOSE == 1){
             printf("ORDERED POINTS:\n");
             print_points(all_points, num_points, rank_process); 
         }
