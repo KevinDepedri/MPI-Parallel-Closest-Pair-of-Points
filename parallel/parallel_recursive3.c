@@ -8,7 +8,8 @@
 #define MASTER_PROCESS 0
 #define INT_MAX 2147483647
 #define VERBOSE 0
-#define PRINT_PAIRS_OF_POINTS 1
+#define ENUMERATE_PAIRS_OF_POINTS 1
+#define PRINT_PAIRS_OF_POINTS 0
 
 /* COSE DA FARE
 0. Importare file da argomento
@@ -236,7 +237,7 @@ int main(int argc, char *argv[])
     printf("PROCESS:%d DMIN:%f\n", rank_process, local_dmin);
 
 
-    // POINT 3 - allreduce to find the global dmin
+    // POINT 3 - Allreduce the local_dmin of each process to find the global_dmin and give this value to all the processes
     double global_dmin = INT_MAX;
     MPI_Allreduce(&local_dmin, &global_dmin, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
     if (rank_process == MASTER_PROCESS)
@@ -379,12 +380,12 @@ int main(int argc, char *argv[])
         free(local_strip_points);
     }
     
-    //11. REDUCE ALL DISTANCES BACK TO MASTER PROCESS
+    // POINT 8 - Allreduce the local_dmin of each process to find the global_dmin and give this value to all the processes. Then work on the pairs of points
     MPI_Allreduce(&local_dmin, &global_dmin, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
     if (rank_process == MASTER_PROCESS)
         printf("---NEW GLOBAL DMIN: %f\n", global_dmin);
 
-    if (PRINT_PAIRS_OF_POINTS == 1){
+    if (ENUMERATE_PAIRS_OF_POINTS == 1){
         int loca_number_pairs_min_distance = 0, number_pairs_min_distance = 0;
 
         if (global_dmin == pairs->min_distance)
@@ -392,27 +393,24 @@ int main(int argc, char *argv[])
             // clean pairs from repeated points (even if inverted)
             int *cleaned_list_indexes = (int *)malloc(pairs->num_pairs * sizeof(int));
             int cleaned_list_size = 0;
-            for (int i = 0; i < pairs->num_pairs; i++)
-            {
+            for (int i = 0; i < pairs->num_pairs; i++){
                 int flag = 0;
                 for (int j = i + 1; j < pairs->num_pairs; j++)
                 {
                     if (!((differPoint(pairs->points1[i], pairs->points1[j]) && differPoint(pairs->points2[i], pairs->points2[j])) &&
-                        (differPoint(pairs->points1[i], pairs->points2[j]) || differPoint(pairs->points2[i], pairs->points1[j]))))
-                    {
+                        (differPoint(pairs->points1[i], pairs->points2[j]) || differPoint(pairs->points2[i], pairs->points1[j])))){
                         flag = 1;
                         break;
                     }
                 }
-                if (flag == 0)
-                {
+                if (flag == 0){
                     cleaned_list_indexes[cleaned_list_size] = i;
                     cleaned_list_size++;
                 }
             }
+
             for(int i = 0; i < cleaned_list_size; i++){
-                if (VERBOSE == 0)
-                {
+                if (PRINT_PAIRS_OF_POINTS == 0){
                     printPoint(pairs->points1[cleaned_list_indexes[i]]);
                     printPoint(pairs->points2[cleaned_list_indexes[i]]);
                     printf("\n");
@@ -438,12 +436,16 @@ int main(int argc, char *argv[])
         for (int point = 0; point < num_points_local_process; point++)
             free(local_points[point].coordinates);
     free(local_points);
-
-    // Free pairs ....
-    free(pairs);
+    // Left and right point are copy of local points and so are already deallocated in their internal parameters by the calls above
     free(left_partial_strip_points);
     free(right_partial_strip_points);
 
+    // Received points are re-hosted, and strip_points are partially based on tnum_points_local_strip
+    // Free pairs ....
+    free(pairs);
+
+    
+    // Use a barrier to alling all the cores and then get the execution time
     MPI_Barrier(MPI_COMM_WORLD);
     if (rank_process == MASTER_PROCESS)
     {
@@ -453,6 +455,7 @@ int main(int argc, char *argv[])
         printf("Time elapsed: %f\n", cpu_time_used);
     }
 
+    // Finalize the MPI application
     MPI_Finalize();
     return 0;
 }
