@@ -11,7 +11,7 @@ int main(int argc, char *argv[]){
 
     Point* points;
     int num_points, num_dimensions;
-    FILE* fp = fopen("../point_generator/10thousands.txt", "r");
+    FILE* fp = fopen("../point_generator/1H2d.txt", "r");
     if (fp == NULL)
     {
         perror("Error opening file");
