@@ -56,6 +56,10 @@ int main(int argc, char *argv[])
             perror("Error: the number of points must be greater than the number of processes\n");
             return -1;
         }
+        if (comm_size < 2){
+            perror("Error: cannot run parallel application over just 1 process\n");
+            return -1;
+        }
         fclose(point_file);
     }
     
@@ -76,11 +80,12 @@ int main(int argc, char *argv[])
     // Pairs will store the pairs of points with minimum distance and their distance data
     Pairs *pairs = NULL;
 
-    // If the code is ran on two or less processes, then run the sequential version of the problem.
-    // Indeed, in this implementation process 0 is supposed to be the MASTER_PROCESS, which just supervises the operations, manages the transfer 
+    // If the code is ran on two processes, then it run the sequential version of the problem.
+    // Indeed, in this parallel implementation process 0 is supposed to be the MASTER_PROCESS, which just supervises the operations, manages the transfer 
     // of data and carries out computation over a reduced number of points (the reminder dividing the points on all the other processes). 
     // For this reason, when working with 2 processes MASTER_PROCESS will be idle. Therefore, all the computation will be done sequentially on process 1.
-    if(comm_size <= 2)
+    // For the same reason working on just one process is not feasible since the MASTER_PROCESS is not designed to carry out all the computations alone.
+    if(comm_size == 2)
     {
         pairs = (Pairs *)malloc(sizeof(Pairs));
 
@@ -106,6 +111,12 @@ int main(int argc, char *argv[])
         MPI_Barrier(MPI_COMM_WORLD);
 
         // Free all_points and also pairs
+        if (rank_process == MASTER_PROCESS)
+        {   
+            // Deallocating the internal parameter on all_points leads to the same effect also on local_points
+            for (int point = 0; point < num_points; point++)
+                free(all_points[point].coordinates);
+        }   
         free(all_points);
         free(pairs);
 
@@ -141,7 +152,7 @@ int main(int argc, char *argv[])
         // Transfer total number of points and the correct slice of points to work on for every process
         Point *points_to_send;
         points_to_send = (Point *)malloc(num_points_normal_processes * sizeof(Point));
-        int left_to_send, right_to_send;
+        int left_x_to_send = 0, right_x_to_send = 0;
         for (int process = 1; process < comm_size; process++){
 
             for (int point = 0; point < num_points_normal_processes; point++){
@@ -156,18 +167,18 @@ int main(int argc, char *argv[])
             
             // Transfer also the left and right out_of_region x coordinate for each process
             if (process == 1){
-                left_to_send = INT_MAX;
-                right_to_send = all_points[num_points_normal_processes*(process)].coordinates[AXIS];
+                left_x_to_send = INT_MAX;
+                right_x_to_send = all_points[num_points_normal_processes*(process)].coordinates[AXIS];
             }
             else{
-                left_to_send = all_points[num_points_normal_processes*(process-1)-1].coordinates[AXIS]; 
+                left_x_to_send = all_points[num_points_normal_processes*(process-1)-1].coordinates[AXIS]; 
                 if (process != comm_size - 1 || num_points_master_process != 0)
-                    right_to_send = all_points[num_points_normal_processes*(process)].coordinates[AXIS];
+                    right_x_to_send = all_points[num_points_normal_processes*(process)].coordinates[AXIS];
                 else
-                    right_to_send = INT_MAX;
+                    right_x_to_send = INT_MAX;
             }
-            MPI_Send(&left_to_send, 1, MPI_INT, process, 2, MPI_COMM_WORLD);
-            MPI_Send(&right_to_send, 1, MPI_INT, process, 3, MPI_COMM_WORLD);
+            MPI_Send(&left_x_to_send, 1, MPI_INT, process, 2, MPI_COMM_WORLD);
+            MPI_Send(&right_x_to_send, 1, MPI_INT, process, 3, MPI_COMM_WORLD);
         }
 
         // Free points_to_send once the send for all the processes is done 
@@ -340,11 +351,13 @@ int main(int argc, char *argv[])
         mergeSort(local_strip_points, num_points_local_strip, 1);
         double dmin_local_strip = global_dmin;
 
-        // 
+        // Compare each point with the next point ordered according to y. As soon as the distance is greater than dmin_local_strip then break that cycle.
         for (int i = 0; i < num_points_local_strip - 1; i++){
             for (int k = i + 1; k < num_points_local_strip && abs(local_strip_points[k].coordinates[1] - local_strip_points[i].coordinates[1]) <= global_dmin; k++){
                 double current_distance = distance(local_strip_points[i], local_strip_points[k]);
-                if (current_distance < dmin_local_strip){
+                
+                // If the new distance is smaller than the dmin_local_strip then update it, then save a new min_distance in pairs and push the two points inside pairs
+                if (current_distance < dmin_local_strip){ // IS IT REDUNDAND?? WE CAN MERGE THIS IF WITH THE ONE BELOW AND PUT THE CONDITIONS IN &&
                     dmin_local_strip = current_distance;
                 }
                 if(current_distance < pairs->min_distance){
@@ -353,6 +366,7 @@ int main(int argc, char *argv[])
                     pairs->points2[0] = local_strip_points[k];
                     pairs->num_pairs = 1;
                 }
+                // If the new distance is equal to the smalles one found, then push the two points inside pairs and increment the num_pairs found with that distance
                 else if(current_distance == pairs->min_distance){
                     pairs->points1[pairs->num_pairs] = local_strip_points[i];
                     pairs->points2[pairs->num_pairs] = local_strip_points[k];
@@ -360,6 +374,7 @@ int main(int argc, char *argv[])
                 }
             }
         }
+        // Update each local_dmin with the new dmin_local_strip just found. Then free local_strip_points
         local_dmin = dmin_local_strip;
         free(local_strip_points);
     }
@@ -410,15 +425,21 @@ int main(int argc, char *argv[])
             printf("Found a total of %d pairs of points with DMIN=%f\n", number_pairs_min_distance, global_dmin);
     }
 
-    // Free all points and local points
+    // Free all points, its internal parameter are deallocated only by MASTER_PROCESS since it is the only process which has them
     if (rank_process == MASTER_PROCESS)
-    {   
-        // Deallocating the internal parameter on all_points leads to the same effect also on local_points
         for (int point = 0; point < num_points; point++)
             free(all_points[point].coordinates);
-    }
     free(all_points);
-    free(local_points); 
+
+    // Free local points, its internal parameter are deallocated only by the processes different from MASTER_PROCESS. since it is the only process which has them
+    // This because the one inside master process are deallocated once free(all_points) is performed since they are built as a copy of the addresse of all_points. 
+    // Instead local_points in other processes are rebuilt by MPI coying the values. For this reason they need to be deallocated singularly.
+    if (rank_process != MASTER_PROCESS)
+        for (int point = 0; point < num_points_local_process; point++)
+            free(local_points[point].coordinates);
+    free(local_points);
+
+    // Free pairs ....
     free(pairs);
     free(left_partial_strip_points);
     free(right_partial_strip_points);

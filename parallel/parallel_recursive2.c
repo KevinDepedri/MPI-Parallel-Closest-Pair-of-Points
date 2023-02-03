@@ -59,6 +59,10 @@ int main(int argc, char *argv[])
             perror("Error: the number of points must be greater than the number of processes\n");
             return -1;
         }
+        if (comm_size < 2){
+            perror("Error: cannot run parallel application over just 1 process\n");
+            return -1;
+        }
         fclose(point_file);
     }
 
@@ -80,11 +84,12 @@ int main(int argc, char *argv[])
     // Define a variable where the minimum distance will be stored and initialize it to MAX_INT
     double super_final_dmin = INT_MAX;
 
-    // If the code is ran on two or less processes, then run the sequential version of the problem.
-    // Indeed, in this implementation process 0 is supposed to be the MASTER_PROCESS, which just supervises the operations, manages the transfer 
+    // If the code is ran on two processes, then it run the sequential version of the problem.
+    // Indeed, in this parallel implementation process 0 is supposed to be the MASTER_PROCESS, which just supervises the operations, manages the transfer 
     // of data and carries out computation over a reduced number of points (the reminder dividing the points on all the other processes). 
     // For this reason, when working with 2 processes MASTER_PROCESS will be idle. Therefore, all the computation will be done sequentially on process 1.
-    if(comm_size <= 2)
+    // For the same reason working on just one process is not feasible since the MASTER_PROCESS is not designed to carry out all the computations alone.
+    if(comm_size == 2)
     {
         if(rank_process == MASTER_PROCESS){
             printf("Launching sequential algorithm...\n");
