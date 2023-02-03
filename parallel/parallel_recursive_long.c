@@ -9,7 +9,7 @@
 #define INT_MAX 2147483647
 #define VERBOSE 0
 #define ENUMERATE_PAIRS_OF_POINTS 1
-#define PRINT_PAIRS_OF_POINTS 0
+#define PRINT_PAIRS_OF_POINTS 1
 
 /* COSE DA FARE
 0. Importare file da argomento
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     int rank_process, comm_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank_process);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
-    char path[] = "../point_generator/1H2d.txt";
+    char path[] = "../point_generator/10K5d.txt";
     // char path[] = argv[1];
 
     // Get the total number of points and the number of dimensions
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
     
     // Get the points data for all the points and order them according to x coordinate
     Point *all_points = NULL;
-    all_points = parallel_mergesort(all_points, path, rank_process, comm_size, VERBOSE); // PUT HERE BACK THE NON COMPRESSED VERSION
+    all_points = parallelMergeSort(all_points, path, rank_process, comm_size, VERBOSE); // PUT HERE BACK THE NON COMPRESSED VERSION
     if (rank_process == MASTER_PROCESS)
     {
         if (all_points == NULL){
@@ -76,6 +76,11 @@ int main(int argc, char *argv[])
             return -1;
         }
     }
+
+
+    // PASTE FROM HERE
+
+    // TO HERE
 
     // Points are divided equally on all processes exept master process which takes the remaing points
     int num_points_normal_processes = 0, num_points_master_process = 0, num_points_local_process = 0;
@@ -107,9 +112,7 @@ int main(int argc, char *argv[])
                 double global_dmin = pairs->min_distance;
                 printf("---GLOBAL DMIN: %f\n", global_dmin);
 
-                getUniquePairs(pairs, global_dmin, rank_process, comm_size, ENUMERATE_PAIRS_OF_POINTS, ENUMERATE_PAIRS_OF_POINTS);
-            
-            free(pairs);
+                getUniquePairs(pairs, global_dmin, rank_process, comm_size, ENUMERATE_PAIRS_OF_POINTS, PRINT_PAIRS_OF_POINTS);
           
             // Free all points and pairs
             for (int point = 0; point < num_points; point++)
@@ -386,7 +389,7 @@ int main(int argc, char *argv[])
     if (rank_process == MASTER_PROCESS)
         printf("---NEW GLOBAL DMIN: %f\n", global_dmin);
 
-    getUniquePairs(pairs, global_dmin, rank_process, comm_size, ENUMERATE_PAIRS_OF_POINTS, ENUMERATE_PAIRS_OF_POINTS);
+    getUniquePairs(pairs, global_dmin, rank_process, comm_size, ENUMERATE_PAIRS_OF_POINTS, PRINT_PAIRS_OF_POINTS);
 
     // Free all points, its internal parameter are deallocated only by MASTER_PROCESS since it is the only process which has them
     if (rank_process == MASTER_PROCESS)

@@ -6,3 +6,4 @@ hpc_venv/
 *.pdb
 mpi_*
 omp_*
+new_core.*

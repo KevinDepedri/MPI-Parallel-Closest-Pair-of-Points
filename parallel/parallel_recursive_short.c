@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     int rank_process, comm_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank_process);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
-    char path[] = "../point_generator/1H2d.txt";
+    char path[] = "../point_generator/10K5d.txt";
     // char path[] = argv[1];
 
     // Get the total number of points and the number of dimensions
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 
     // Get the points data for all the points and order them according to x coordinate
     Point *all_points = NULL;
-    all_points = parallel_mergesort(all_points, path, rank_process, comm_size, VERBOSE);
+    all_points = parallelMergeSort(all_points, path, rank_process, comm_size, VERBOSE);
     if (rank_process == MASTER_PROCESS)
     {
         if (all_points == NULL)
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
             double global_dmin = pairs->min_distance;
             printf("---GLOBAL DMIN: %f\n", global_dmin);
 
-            getUniquePairs(pairs, global_dmin, rank_process, comm_size, ENUMERATE_PAIRS_OF_POINTS, ENUMERATE_PAIRS_OF_POINTS);
+            getUniquePairs(pairs, global_dmin, rank_process, comm_size, ENUMERATE_PAIRS_OF_POINTS, PRINT_PAIRS_OF_POINTS);
         
         free(pairs);
         }
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
         if(rank_process == MASTER_PROCESS)
             printf("Launching parallel algorithm...\n");
 
-        parallel_closestpair2(all_points, num_points, num_dimensions, rank_process, comm_size,num_points_normal_processes, 
+        parallelClosestPair(all_points, num_points, num_dimensions, rank_process, comm_size,num_points_normal_processes, 
                               num_points_master_process, ENUMERATE_PAIRS_OF_POINTS, PRINT_PAIRS_OF_POINTS);
     }
 

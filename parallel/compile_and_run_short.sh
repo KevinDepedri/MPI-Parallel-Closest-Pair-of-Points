@@ -1,20 +1,20 @@
-echo 'COMPILE'
-mpicc -std=c99 -g -Wall -o mpi_recursive2 parallel_recursive2.c utils/util.c -lm
+echo 'COMPILE SHORT VERSION'
+mpicc -std=c99 -g -Wall -o mpi_recursive_short parallel_recursive_short.c utils/util.c -lm
 echo 'PARALLEL RUN 6 CORES'
-mpiexec -n 6 mpi_recursive2
+mpiexec -n 6 mpi_recursive_short
 echo '--------------------------------------------------------------------------'
 echo 'PARALLEL RUN 5 CORES'
-mpiexec -n 5 mpi_recursive2
+mpiexec -n 5 mpi_recursive_short
 echo '--------------------------------------------------------------------------'
 echo 'SEQUENTIAL RUN 4 CORES'
-mpiexec -n 4 mpi_recursive2
+mpiexec -n 4 mpi_recursive_short
 echo '--------------------------------------------------------------------------'
 echo 'PARALLEL RUN 3 CORES'
-mpiexec -n 3 mpi_recursive2
+mpiexec -n 3 mpi_recursive_short
 echo '--------------------------------------------------------------------------'
 echo 'PARALLEL RUN 2 CORES'
-mpiexec -n 2 mpi_recursive2
+mpiexec -n 2 mpi_recursive_short
 echo '--------------------------------------------------------------------------'
 echo 'SEQUENTIAL RUN 1 CORES'
-mpiexec -n 1 mpi_recursive2
+mpiexec -n 1 mpi_recursive_short
 echo '--------------------------------------------------------------------------'
