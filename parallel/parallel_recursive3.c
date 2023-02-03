@@ -14,7 +14,6 @@
 /* COSE DA FARE
 0. Importare file da argomento
 1. Sistemare notazione funzioni e variabili
-2. Verificare che ogni malloc abbia il proprio free (ALMOST DONE)
 3. Definire come gestire print/VERBOSE
 4. Valutare come migliorare la leggibilitá del codice
 */
@@ -31,7 +30,7 @@ int main(int argc, char *argv[])
     int rank_process, comm_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank_process);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
-    char path[] = "../point_generator/10K5d.txt";
+    char path[] = "../point_generator/1M5d.txt";
     // char path[] = argv[1];
 
     // Get the total number of points and the number of dimensions
@@ -345,6 +344,8 @@ int main(int argc, char *argv[])
             for (int dimension = 0; dimension < num_dimensions; dimension++)
                 local_strip_points[i+num_points_right_partial_strip].coordinates[dimension] = received_points[i].coordinates[dimension];
         }
+        for (int point = 0; point < num_points_received; point++)
+            free(received_points[point].coordinates);
         free(received_points);
 
 
@@ -377,6 +378,8 @@ int main(int argc, char *argv[])
         }
         // Update each local_dmin with the new dmin_local_strip just found. Then free local_strip_points
         local_dmin = dmin_local_strip;
+        // for (int point = 0; point < num_points_local_strip; point++)  // Using this we have crazy point coordinates with 1Hh2d using 6 cores
+        //     free(local_strip_points[point].coordinates);
         free(local_strip_points);
     }
     
@@ -410,13 +413,14 @@ int main(int argc, char *argv[])
             }
 
             for(int i = 0; i < cleaned_list_size; i++){
-                if (PRINT_PAIRS_OF_POINTS == 0){
+                if (PRINT_PAIRS_OF_POINTS == 1){
                     printPoint(pairs->points1[cleaned_list_indexes[i]]);
                     printPoint(pairs->points2[cleaned_list_indexes[i]]);
                     printf("\n");
                 }
                 loca_number_pairs_min_distance++;
             }
+            free(cleaned_list_indexes);
         }
         MPI_Reduce(&loca_number_pairs_min_distance, &number_pairs_min_distance, 1, MPI_INT, MPI_SUM, MASTER_PROCESS, MPI_COMM_WORLD);
         if (rank_process==MASTER_PROCESS)
@@ -432,18 +436,21 @@ int main(int argc, char *argv[])
     // Free local points, its internal parameter are deallocated only by the processes different from MASTER_PROCESS. since it is the only process which has them
     // This because the one inside master process are deallocated once free(all_points) is performed since they are built as a copy of the addresse of all_points. 
     // Instead local_points in other processes are rebuilt by MPI coying the values. For this reason they need to be deallocated singularly.
-    if (rank_process != MASTER_PROCESS)
-        for (int point = 0; point < num_points_local_process; point++)
-            free(local_points[point].coordinates);
+    // if (rank_process != MASTER_PROCESS)
+
+    for (int point = 0; point < num_points_local_process; point++)
+        free(local_points[point].coordinates);
     free(local_points);
+
     // Left and right point are copy of local points and so are already deallocated in their internal parameters by the calls above
+    for (int point = 0; point < num_points_left_partial_strip; point++)
+        free(left_partial_strip_points[point].coordinates);
     free(left_partial_strip_points);
+
+    for (int point = 0; point < num_points_right_partial_strip; point++)
+        free(right_partial_strip_points[point].coordinates);
     free(right_partial_strip_points);
-
-    // Received points are re-hosted, and strip_points are partially based on tnum_points_local_strip
-    // Free pairs ....
     free(pairs);
-
     
     // Use a barrier to alling all the cores and then get the execution time
     MPI_Barrier(MPI_COMM_WORLD);
