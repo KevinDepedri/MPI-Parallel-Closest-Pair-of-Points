@@ -107,6 +107,9 @@ int main(int argc, char *argv[])
         num_points_normal_processes = num_points / (comm_size-1);
         num_points_master_process = num_points % (comm_size-1);
 
+        if(rank_process == MASTER_PROCESS)
+            printf("Launching parallel algorithm...\n");
+
         super_final_dmin = parallel_closestpair(all_points, num_points, num_dimensions, rank_process, comm_size, 
                                                     num_points_normal_processes, num_points_master_process);
     }

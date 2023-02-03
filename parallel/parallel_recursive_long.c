@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     int rank_process, comm_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank_process);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
-    char path[] = "../point_generator/1M5d.txt";
+    char path[] = "../point_generator/1H2d.txt";
     // char path[] = argv[1];
 
     // Get the total number of points and the number of dimensions
@@ -62,6 +62,9 @@ int main(int argc, char *argv[])
         }
         fclose(point_file);
     }
+    // Send num_points to all the processes, it is used to compute the num_points variables
+    MPI_Bcast(&num_points, 1, MPI_INT, MASTER_PROCESS, MPI_COMM_WORLD);
+    MPI_Bcast(&num_dimensions, 1, MPI_INT, MASTER_PROCESS, MPI_COMM_WORLD);
     
     // Get the points data for all the points and order them according to x coordinate
     Point *all_points = NULL;
@@ -76,7 +79,6 @@ int main(int argc, char *argv[])
 
     // Points are divided equally on all processes exept master process which takes the remaing points
     int num_points_normal_processes = 0, num_points_master_process = 0, num_points_local_process = 0;
-    Point *local_points = NULL;
     // Pairs will store the pairs of points with minimum distance and their distance data
     Pairs *pairs = NULL;
 
@@ -87,39 +89,36 @@ int main(int argc, char *argv[])
     // For the same reason working on just one process is not feasible since the MASTER_PROCESS is not designed to carry out all the computations alone.
     if(comm_size == 2)
     {
-        pairs = (Pairs *)malloc(sizeof(Pairs));
-
-        pairs->points1 = (Point *)malloc((num_points) * sizeof(Point));
-        pairs->points2 = (Point *)malloc((num_points) * sizeof(Point));
-        for (int i = 0; i < (num_points); i++){
-            pairs->points1[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
-            pairs->points2[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
-        }
-
-        pairs->num_pairs = 0;
-        pairs->min_distance = INT_MAX;
-
         if(rank_process == MASTER_PROCESS){
-            printf("Launching sequential algorithm...\n");
-            recSplit(all_points, num_points, pairs, rank_process);
-            printf("SUPER FINAL GLOBAL DMIN: %f\n", pairs->min_distance);
+            // Pairs will store the pairs of points with minimum distance and their distance data
+            pairs = (Pairs *)malloc(sizeof(Pairs));
 
-            if (PRINT_PAIRS_OF_POINTS == 1){
-                // Insert here print of pairs??
+            pairs->points1 = (Point *)malloc((num_points) * sizeof(Point));
+            pairs->points2 = (Point *)malloc((num_points) * sizeof(Point));
+            for (int i = 0; i < (num_points); i++){
+                pairs->points1[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+                pairs->points2[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
             }
-        }
-        MPI_Barrier(MPI_COMM_WORLD);
+            pairs->num_pairs = 0;
+            pairs->min_distance = INT_MAX;
 
-        // Free all_points and also pairs
-        if (rank_process == MASTER_PROCESS)
-        {   
-            // Deallocating the internal parameter on all_points leads to the same effect also on local_points
+                printf("Launching sequential algorithm...\n");
+                recSplit(all_points, num_points, pairs, rank_process);
+                double global_dmin = pairs->min_distance;
+                printf("---GLOBAL DMIN: %f\n", global_dmin);
+
+                getUniquePairs(pairs, global_dmin, rank_process, comm_size, ENUMERATE_PAIRS_OF_POINTS, ENUMERATE_PAIRS_OF_POINTS);
+            
+            free(pairs);
+          
+            // Free all points and pairs
             for (int point = 0; point < num_points; point++)
                 free(all_points[point].coordinates);
+            free(all_points);
+            free(pairs);
         }   
-        free(all_points);
-        free(pairs);
 
+        MPI_Barrier(MPI_COMM_WORLD);
         if(rank_process == MASTER_PROCESS){
             printf("Memory free\n");
             end = clock();
@@ -133,9 +132,6 @@ int main(int argc, char *argv[])
     // If the code is ran on more than two processes, then run the parallel version of the problem.
     else
     {
-        // Send num_points to all the processes, it is used to compute the num_points variables
-        MPI_Bcast(&num_points, 1, MPI_INT, MASTER_PROCESS, MPI_COMM_WORLD);
-        MPI_Bcast(&num_dimensions, 1, MPI_INT, MASTER_PROCESS, MPI_COMM_WORLD);
 
         // Points are divided equally on all processes exept master process which takes the remaing points
         num_points_normal_processes = num_points / (comm_size-1);
@@ -144,6 +140,8 @@ int main(int argc, char *argv[])
 
     if(rank_process == MASTER_PROCESS)
         printf("Launching parallel algorithm...\n");
+
+    Point *local_points = NULL;
 
     // POINT 1 - divide points and send them with their out_of_region values to each process
     int left_x_out_of_region = INT_MAX, right_x_out_of_region = INT_MAX;
@@ -388,44 +386,7 @@ int main(int argc, char *argv[])
     if (rank_process == MASTER_PROCESS)
         printf("---NEW GLOBAL DMIN: %f\n", global_dmin);
 
-    if (ENUMERATE_PAIRS_OF_POINTS == 1){
-        int loca_number_pairs_min_distance = 0, number_pairs_min_distance = 0;
-
-        if (global_dmin == pairs->min_distance)
-        {
-            // clean pairs from repeated points (even if inverted)
-            int *cleaned_list_indexes = (int *)malloc(pairs->num_pairs * sizeof(int));
-            int cleaned_list_size = 0;
-            for (int i = 0; i < pairs->num_pairs; i++){
-                int flag = 0;
-                for (int j = i + 1; j < pairs->num_pairs; j++)
-                {
-                    if (!((differPoint(pairs->points1[i], pairs->points1[j]) && differPoint(pairs->points2[i], pairs->points2[j])) &&
-                        (differPoint(pairs->points1[i], pairs->points2[j]) || differPoint(pairs->points2[i], pairs->points1[j])))){
-                        flag = 1;
-                        break;
-                    }
-                }
-                if (flag == 0){
-                    cleaned_list_indexes[cleaned_list_size] = i;
-                    cleaned_list_size++;
-                }
-            }
-
-            for(int i = 0; i < cleaned_list_size; i++){
-                if (PRINT_PAIRS_OF_POINTS == 1){
-                    printPoint(pairs->points1[cleaned_list_indexes[i]]);
-                    printPoint(pairs->points2[cleaned_list_indexes[i]]);
-                    printf("\n");
-                }
-                loca_number_pairs_min_distance++;
-            }
-            free(cleaned_list_indexes);
-        }
-        MPI_Reduce(&loca_number_pairs_min_distance, &number_pairs_min_distance, 1, MPI_INT, MPI_SUM, MASTER_PROCESS, MPI_COMM_WORLD);
-        if (rank_process==MASTER_PROCESS)
-            printf("Found a total of %d pairs of points with DMIN=%f\n", number_pairs_min_distance, global_dmin);
-    }
+    getUniquePairs(pairs, global_dmin, rank_process, comm_size, ENUMERATE_PAIRS_OF_POINTS, ENUMERATE_PAIRS_OF_POINTS);
 
     // Free all points, its internal parameter are deallocated only by MASTER_PROCESS since it is the only process which has them
     if (rank_process == MASTER_PROCESS)

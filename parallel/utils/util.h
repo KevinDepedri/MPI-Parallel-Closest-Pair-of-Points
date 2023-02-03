@@ -32,12 +32,16 @@ extern double isMINof3(double, double, double);
 
 extern void printPoint(Point);
 
-extern void recSplit(Point*, int, Pairs*, int);
-
+// ------------------------------------------------------
+extern void recSplit(Point*, int, Pairs*, int); //TO REMOVE SOON
 extern double sequential_closestpair_recursive(Point*, int );
+// ------------------------------------------------------
 
 extern Point *parallel_mergesort(Point *, char[], int, int, int);
 
-extern double parallel_closestpair(Point *, int, int, int, int, int, int);
+// ------------------------------------------------------
+extern double parallel_closestpair(Point *, int, int, int, int, int, int); //TO REMOVE SOON
+extern void parallel_closestpair2(Point *, int, int, int, int, int, int, int, int);
+// ------------------------------------------------------
 
-extern double parallel_closestpair2(Point *, int, int, int, int, int, int);
+extern void getUniquePairs(Pairs*, double, int, int, int, int);
