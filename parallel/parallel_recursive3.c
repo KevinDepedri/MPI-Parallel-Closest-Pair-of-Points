@@ -338,8 +338,9 @@ int main(int argc, char *argv[])
 
         // POINT 7 - Reorder point in the local_strip_points over y. Then each process compute the min distance for its strip
         mergeSort(local_strip_points, num_points_local_strip, 1);
-        
         double dmin_local_strip = global_dmin;
+
+        // 
         for (int i = 0; i < num_points_local_strip - 1; i++){
             for (int k = i + 1; k < num_points_local_strip && abs(local_strip_points[k].coordinates[1] - local_strip_points[i].coordinates[1]) <= global_dmin; k++){
                 double current_distance = distance(local_strip_points[i], local_strip_points[k]);
