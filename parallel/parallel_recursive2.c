@@ -8,7 +8,15 @@
 #define MASTER_PROCESS 0
 #define INT_MAX 2147483647
 #define VERBOSE 0
+#define PRINT_PAIRS_OF_POINTS 1
 
+/* COSE DA FARE
+0. Importare file da argomento
+1. Sistemare notazione funzioni e variabili
+2. Verificare che ogni malloc abbia il proprio free (ALMOST DONE)
+3. Definire come gestire print/VERBOSE
+4. Valutare come migliorare la leggibilitá del codice
+*/
 
 int main(int argc, char *argv[])
 {
@@ -23,6 +31,7 @@ int main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &rank_process);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
     char path[] = "../point_generator/1hundred.txt";
+    // char path[] = argv[1];
 
     // Get the total number of points and the number of dimensions
     int num_points, num_dimensions;
@@ -50,11 +59,6 @@ int main(int argc, char *argv[])
             perror("Error: the number of points must be greater than the number of processes\n");
             return -1;
         }
-        // if (comm_size < 2)
-        // {
-        //     perror("Error: cannot run parallel application on 1 process\n");
-        //     return -1;
-        // }
         fclose(point_file);
     }
 
@@ -65,24 +69,27 @@ int main(int argc, char *argv[])
     {
         if (all_points == NULL)
         {
-            perror("Error in executing parallel_order_points\n");
+            perror("Error in executing parallel_mergesort\n");
             return -1;
         }
     }
+
+    // Points are divided equally on all processes exept master process which takes the remaing points
+    int num_points_normal_processes, num_points_master_process;
 
     // Define a variable where the minimum distance will be stored and initialize it to MAX_INT
     double super_final_dmin = INT_MAX;
 
     // If the code is ran on two or less processes, then run the sequential version of the problem.
-    // Indeed, in this implementation process 0 is supposed to be the MASTER_PROCESS, which just supervises the operationns, manages the transfer 
+    // Indeed, in this implementation process 0 is supposed to be the MASTER_PROCESS, which just supervises the operations, manages the transfer 
     // of data and carries out computation over a reduced number of points (the reminder dividing the points on all the other processes). 
-    // For this reason, when working with 2 processes MASTER_PROCESS will be idle. Therefore, all the computation will be done sequentially.
+    // For this reason, when working with 2 processes MASTER_PROCESS will be idle. Therefore, all the computation will be done sequentially on process 1.
     if(comm_size <= 2)
     {
         if(rank_process == MASTER_PROCESS){
             printf("Launching sequential algorithm...\n");
             super_final_dmin = sequential_closestpair_recursive(all_points, num_points);
-    }
+        }
     }
     // If the code is ran on more than two processes, then run the parallel version of the problem.
     else
@@ -92,7 +99,6 @@ int main(int argc, char *argv[])
         MPI_Bcast(&num_dimensions, 1, MPI_INT, MASTER_PROCESS, MPI_COMM_WORLD);
 
         // Points are divided equally on all processes exept master process which takes the remaing points
-        int num_points_normal_processes, num_points_master_process;
         num_points_normal_processes = num_points / (comm_size-1);
         num_points_master_process = num_points % (comm_size-1);
 
