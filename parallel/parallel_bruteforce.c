@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
     if (rank == 0)
     {
         int num_dimensions;
-        FILE *fp = fopen("../point_generator/10K5d.txt", "r");
+        FILE *fp = fopen("/home/kevin.depedri/points/250M5d.txt", "r");
         if (fp == NULL)
         {
             perror("Error opening file");
