@@ -9,8 +9,8 @@
 
 # Set name of job, output and error file
 #PBS -N Rec85CoreNormal
-#PBS -o Rec85Core.txt
-#PBS -e Rec85Core_error.txt
+#PBS -o Rec85CoreNormal.txt
+#PBS -e Rec85CoreNormal_error.txt
 
 # Load the library and execute the parallel application
 module load mpich-3.2

@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -l select=1:ncpus=4:mem=5gb
+#PBS -l select=2:ncpus=2:mem=5gb -l place=pack:excl
 
 # Set max execution time
 #PBS -l walltime=6:00:00
@@ -8,9 +8,9 @@
 #PBS -q short_cpuQ
 
 # Set name of job, output and error file
-#PBS -N Rec4CoreNormal
-#PBS -o Rec4CoreNormal.txt
-#PBS -e Rec4CoreNormal_error.txt
+#PBS -N Rec4CorePackedExcl
+#PBS -o Rec4CorePackedExcl.txt
+#PBS -e Rec4CorePackedExcl_error.txt
 
 # Load the library and execute the parallel application
 module load mpich-3.2
