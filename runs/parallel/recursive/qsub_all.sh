@@ -1,18 +1,24 @@
 echo "SENDING NORMAL JOBS"
-bash /home/kevin.depedri/hpc3/runs/parallel/recursive/normal/qsub_all_normal.sh
+cd normal
+bash ./qsub_all_normal.sh
 
 echo "SENDING PACKED JOBS"
-qsub /home/kevin.depedri/hpc3/runs/parallel/recursive/packed/qsub_all_packed.sh
+cd ../packed
+qsub ./qsub_all_packed.sh
 
 echo "SENDING PACKED EXCLUSIVE JOBS"
-qsub /home/kevin.depedri/hpc3/runs/parallel/recursive/packed_exclusive/qsub_all_packed_excl.sh
+cd ../packed_exclusive
+qsub ./qsub_all_packed_excl.sh
 
 echo "SENDING SCATTER JOBS"
-
+cd ../scatter
+qsub ./qsub_all_scatter.sh
 
 echo "SENDING SCATTER EXCLUSIVE JOBS"
+cd ../scatter_exclusive
+qsub ./qsub_all_scatter_excl.sh
 
-
+cd ..
 echo "FINAL LIST OF ALL SENT JOBS"
 qstat -u $USER
 watch qstat -u $USER
