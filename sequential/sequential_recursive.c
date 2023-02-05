@@ -63,7 +63,7 @@ int main(){
     Point *points;
     int num_points, num_dimensions;
 
-    FILE* fp = fopen("../point_generator/1H2d.txt", "r");
+    FILE* fp = fopen("/home/kevin.depedri/points/250M5d.txt", "r");
     if (fp == NULL){
         perror("Error opening file\n");
         return 1;
@@ -77,7 +77,7 @@ int main(){
     }
     // Allocate memory for the points
     points = (Point *)malloc(num_points * sizeof(Point));
-    for (int i = 0; i < num_points; i++){   
+    for (int i = 0; i < num_points; i++){
         points[i].num_dimensions = num_dimensions;
         points[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
         for (int j = 0; j < num_dimensions; j++){

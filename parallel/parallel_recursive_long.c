@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     int rank_process, comm_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank_process);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
-    char path[] = "../point_generator/10K5d.txt";
+    char path[] = "/home/kevin.depedri/points/250M5d.txt";
     // char path[] = argv[1];
 
     // Get the total number of points and the number of dimensions
