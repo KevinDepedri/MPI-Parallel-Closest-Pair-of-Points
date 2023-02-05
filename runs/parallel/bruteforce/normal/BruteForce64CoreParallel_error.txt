@@ -1,0 +1,3 @@
+Fatal error in PMPI_Pack: Invalid argument, error stack:
+PMPI_Pack(263): MPI_Pack(inbuf=0x8947e2f0, incount=5, MPI_INT, outbuf=0x2b44bc326010, outcount=1705032704, position=0x7ffc59ee492c, MPI_COMM_WORLD) failed
+PMPI_Pack(238): Size of data to pack (20 bytes) is larger than remaining space in pack buffer (4 bytes)
