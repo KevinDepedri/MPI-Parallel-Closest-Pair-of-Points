@@ -13,6 +13,11 @@ int main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
+    if(size == 1){
+        printf("Error: the number of processes must be greater than 1");
+        return 1;
+    }
+
     clock_t start, end;
     double cpu_time_used;
     start = clock();
@@ -51,9 +56,19 @@ int main(int argc, char *argv[])
     int local_num, starting_index;
     if (rank == 0)
     {
-        for (int i = 1; i < size; i++)
-            sendPointsPacked(points, num_points, i, 1, MPI_COMM_WORLD);
-        
+        for (int i = 1; i < size; i++){
+            // send first quarter of the points
+            int first_half = num_points / 4;
+            sendPointsPacked(points, first_half, i, 1, MPI_COMM_WORLD);
+            // send second quarter of the points
+            int second_half = first_half * 2;
+            sendPointsPacked(points + first_half, first_half, i, 1, MPI_COMM_WORLD);
+            // send third quarter of the points
+            sendPointsPacked(points + second_half, first_half, i, 1, MPI_COMM_WORLD);
+            // send fourth quarter of the points
+            sendPointsPacked(points + second_half + first_half, num_points - second_half - first_half, i, 1, MPI_COMM_WORLD);
+            //sendPointsPacked(points, num_points, i, 1, MPI_COMM_WORLD);
+        }
         local_num = num_points % (size - 1);
         starting_index = num_points - local_num;
     }
@@ -61,7 +76,17 @@ int main(int argc, char *argv[])
     {
         local_num = num_points / (size - 1);
         points = (Point *)malloc(num_points * sizeof(Point));
-        recvPointsPacked(points, num_points, 0, 1, MPI_COMM_WORLD);
+        // receive the first quarter of the points
+        int first_half = num_points / 4;
+        recvPointsPacked(points, first_half, 0, 1, MPI_COMM_WORLD);
+        // receive the second quarter of the points
+        int second_half = first_half * 2;
+        recvPointsPacked(points + first_half, first_half, 0, 1, MPI_COMM_WORLD);
+        // receive the third quarter of the points
+        recvPointsPacked(points + second_half, first_half, 0, 1, MPI_COMM_WORLD);
+        // receive the fourth quarter of the points
+        recvPointsPacked(points + second_half + first_half, num_points - second_half - first_half, 0, 1, MPI_COMM_WORLD);
+        //recvPointsPacked(points, num_points, 0, 1, MPI_COMM_WORLD);
         starting_index = (rank - 1) * local_num;
     }
     double min_distance = INT_MAX;
