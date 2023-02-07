@@ -8,10 +8,10 @@
 #PBS -q short_cpuQ
 
 # Set name of job, output and error file
-#PBS -N Rec16CoreScatter
-#PBS -o Rec16CoreScatter.txt
-#PBS -e Rec16CoreScatter_error.txt
+#PBS -N Rec48CoreScatter
+#PBS -o Rec48CoreScatter.txt
+#PBS -e Rec48CoreScatter_error.txt
 
 # Load the library and execute the parallel application
 module load mpich-3.2
-mpiexec -n 16 /home/kevin.depedri/hpc3/runs/parallel/recursive/mpi_recursive_short /home/kevin.depedri/points/250M5d.txt -e -p
+mpiexec -n 48 /home/kevin.depedri/hpc3/runs/parallel/recursive/mpi_recursive_short /home/kevin.depedri/points/250M5d.txt -e -p

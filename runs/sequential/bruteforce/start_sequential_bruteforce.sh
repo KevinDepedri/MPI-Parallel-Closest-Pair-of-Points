@@ -13,4 +13,4 @@
 #PBS -e BruteForce1CoreSeq_error.txt
 
 # Load the library and execute the parallel application
-/home/kevin.depedri/hpc3/runs/sequential/bruteforce/start_sequential_bruteforce.sh
+/home/kevin.depedri/hpc3/runs/sequential/bruteforce/start_sequential_bruteforce.sh /home/kevin.depedri/points/100M5d.txt -e -p

@@ -13,4 +13,4 @@
 #PBS -e Rec1CoreSeq_error.txt
 
 # Load the library and execute the parallel application
-/home/kevin.depedri/hpc3/runs/sequential/recursive/sequential_recursive_250M5d
+/home/kevin.depedri/hpc3/runs/sequential/recursive/sequential_recursive /home/kevin.depedri/points/250M5d.txt

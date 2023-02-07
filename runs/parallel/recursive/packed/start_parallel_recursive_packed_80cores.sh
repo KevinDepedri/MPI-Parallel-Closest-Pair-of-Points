@@ -8,10 +8,10 @@
 #PBS -q short_cpuQ
 
 # Set name of job, output and error file
-#PBS -N Rec16CorePacked
-#PBS -o Rec16CorePacked.txt
-#PBS -e Rec16CorePacked_error.txt
+#PBS -N Rec80CorePacked
+#PBS -o Rec80CorePacked.txt
+#PBS -e Rec80CorePacked_error.txt
 
 # Load the library and execute the parallel application
 module load mpich-3.2
-mpiexec -n 16 /home/kevin.depedri/hpc3/runs/parallel/recursive/mpi_recursive_short /home/kevin.depedri/points/250M5d.txt -e -p
+mpiexec -n 80 /home/kevin.depedri/hpc3/runs/parallel/recursive/mpi_recursive_short /home/kevin.depedri/points/250M5d.txt -e -p
