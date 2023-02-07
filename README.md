@@ -46,3 +46,12 @@ sudo apt-get update
 sudo apt-get upgrade
 sudo apt install mpich
 ```
+
+# Run the code in WSL
+```bash
+mpiexec -n <number_of_processes> mpi_<name_of_implementation> <path_to_points.txt> <flags>
+```
+Depending on the implementation there are different `flags` available, generally they are:
+- `-v` : verbose enabled during mergesort part of the algorithm 
+- `-e` : enumerate the pairs of point with smallest distance
+- `-p` : print the pairs of point with smallest distance
