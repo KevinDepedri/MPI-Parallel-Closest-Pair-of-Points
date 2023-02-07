@@ -24,15 +24,20 @@ int main(int argc, char *argv[])
     int rank_process, comm_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank_process);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
-    char path[] = "../point_generator/1H2d.txt"; //"/home/kevin.depedri/points/250M5d.txt";
-    // char path[] = argv[1];
+
+    if(argc != 2){
+        perror("Error: no file name or path has been provided as first argument\n");
+        return -1;
+    }
+    // char path[] = "../point_generator/1M5d.txt"; //"/home/kevin.depedri/points/250M5d.txt";
 
     // Get the total number of points and the number of dimensions
     int num_points, num_dimensions;
     if (rank_process == MASTER_PROCESS)
     {
         // Open input point file on master process
-        FILE *point_file = fopen(path, "r"); 
+        // FILE *point_file = fopen(path, "r"); 
+        FILE *point_file = fopen(argv[1], "r");
         if (point_file == NULL)
         {
             perror("Error opening file on master process\n");
@@ -62,7 +67,7 @@ int main(int argc, char *argv[])
 
     // Get the points data for all the points and order them according to x coordinate
     Point *all_points = NULL;
-    all_points = parallelMergeSort(all_points, path, rank_process, comm_size, MERGESORT_VERBOSE);
+    all_points = parallelMergeSort(all_points, argv[1], rank_process, comm_size, MERGESORT_VERBOSE);
     if (rank_process == MASTER_PROCESS)
     {
         if (all_points == NULL)

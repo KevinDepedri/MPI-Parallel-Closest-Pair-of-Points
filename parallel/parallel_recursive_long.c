@@ -24,15 +24,20 @@ int main(int argc, char *argv[])
     int rank_process, comm_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank_process);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
-    char path[] = "../point_generator/1H2d.txt"; //"/home/kevin.depedri/points/250M5d.txt";
-    // char path[] = argv[1];
+    
+    if(argc != 2){
+        perror("Error: no file name or path has been provided as first argument\n");
+        return -1;
+    }
+    // char path[] = "../point_generator/1M5d.txt"; //"/home/kevin.depedri/points/250M5d.txt";
 
     // Get the total number of points and the number of dimensions
     int num_points = 0, num_dimensions = 0;
     if (rank_process == MASTER_PROCESS)
     {
         // Open input point file on master process
-        FILE *point_file = fopen(path, "r"); 
+        // FILE *point_file = fopen(path, "r"); 
+        FILE *point_file = fopen(argv[1], "r"); 
         if (point_file == NULL){
             perror("Error opening file on master process\n");
             return -1;
@@ -73,7 +78,8 @@ int main(int argc, char *argv[])
     if (rank_process == MASTER_PROCESS)
     {
         // Open input point file on master process
-        FILE *point_file = fopen(path, "r"); 
+        // FILE *point_file = fopen(path, "r"); 
+        FILE *point_file = fopen(argv[1], "r"); 
         if (point_file == NULL){
             perror("Error opening file on master process\n");
             return -1;

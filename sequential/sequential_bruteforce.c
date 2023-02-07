@@ -4,37 +4,49 @@
 #include "utils/util.h"
 #include <time.h>
 
+#define PRINT_DISTANCE 0
+
+
 int main(int argc, char *argv[]){
     clock_t start, end;
     double cpu_time_used;
     start = clock();
 
-    Point* points;
+    Point *points;
     int num_points, num_dimensions;
-    FILE* fp = fopen("/home/kevin.depedri/points/250M5d.txt", "r");
-    if (fp == NULL)
-    {
-        perror("Error opening file");
+    if(argc != 2){
+        perror("Error: no file name or path has been provided as first argument\n");
+        return -1;
+    }
+    // char path[] = "../point_generator/1M5d.txt"; //"/home/kevin.depedri/points/250M5d.txt";
+
+    // Open input point file on master process
+    // FILE *point_file = fopen(path, "r"); 
+    FILE *point_file = fopen(argv[1], "r");
+    if (point_file == NULL){
+        perror("Error opening file\n");
         return 1;
     }
+
     // Read the number of points and dimensions from the first line of the file
-    fscanf(fp, "%d %d", &num_points, &num_dimensions);
+    fscanf(point_file, "%d %d", &num_points, &num_dimensions);
     if(num_points < 2){
         printf("Error: the number of points must be greater than 1");
         return 1;
     }
+
     // Allocate memory for the points
     points = (Point *)malloc(num_points * sizeof(Point));
-    for (int i = 0; i < num_points; i++)
-    {
+    for (int i = 0; i < num_points; i++){
         points[i].num_dimensions = num_dimensions;
         points[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
-        for (int j = 0; j < num_dimensions; j++)
-        {
-            fscanf(fp, "%d", &points[i].coordinates[j]);
+
+        for (int j = 0; j < num_dimensions; j++){
+            fscanf(point_file, "%d", &points[i].coordinates[j]);
         }
     }
-    fclose(fp);
+    fclose(point_file);
+
     // printf("Loaded %d points in %d dimensions\n", num_points, num_dimensions);
     // count and save all points indeces with minimum distance
     int *min_points1 = (int *)malloc(num_points * sizeof(int));
@@ -42,8 +54,10 @@ int main(int argc, char *argv[]){
     int points1_count = 0;
     int points2_count = 0;
     int count = 0;
+
     // Initialize the minimum distance to the distance between the first two points
     double min_distance = distance(points[0], points[1]);
+
     // Find the minimum distance between any two points
     for (int i = 0; i < num_points; i++){
         for (int j = i + 1; j < num_points; j++){
@@ -69,9 +83,11 @@ int main(int argc, char *argv[]){
         }
     }
     // print results
-    printf("The minimum distance is %f.", min_distance);
+    printf("The minimum distance is %f.\n", min_distance);
     printf("There are %d pairs with this distance.\n", count);
+    
     // for each point in min_points1 print point1 and point2 /n
+    if (PRINT_DISTANCE == 1){
     for (int i = 0; i < points1_count; i++){
         printf("Point #%d: ", min_points1[i]);
         for (int j = 0; j < num_dimensions; j++){
@@ -83,6 +99,8 @@ int main(int argc, char *argv[]){
         }
         printf("\n");
     }
+    }
+    
 
     // free the memory
     free(points);
