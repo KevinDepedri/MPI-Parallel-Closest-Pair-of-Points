@@ -5,3 +5,7 @@ hpc_venv/
 *.pdb
 omp_*
 new_core.*
+runs/parallel/bruteforce/mpi_bruteforce
+runs/parallel/recursive/mpi_recursive_short_250M5d
+runs/sequential/bruteforce/sequential_bruteforce
+runs/sequential/recursive/sequential_recursive_250M5d
