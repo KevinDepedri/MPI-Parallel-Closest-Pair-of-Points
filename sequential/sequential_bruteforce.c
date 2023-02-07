@@ -29,10 +29,8 @@ int main(int argc, char *argv[]){
         perror("ERROR: the only valid flag arguments are:\n \t-e : enumerate the pairs of point with smallest distance\n \t-p : print the pairs of point with smallest distance\n");
         return -1;
     }
-    // char path[] = "../point_generator/1M5d.txt"; //"/home/kevin.depedri/points/250M5d.txt";
 
     // Open input point file on master process
-    // FILE *point_file = fopen(path, "r"); 
     FILE *point_file = fopen(argv[1], "r");
     if (point_file == NULL){
         perror("Error opening file\n");

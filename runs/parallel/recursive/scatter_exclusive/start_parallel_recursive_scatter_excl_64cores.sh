@@ -14,4 +14,4 @@
 
 # Load the library and execute the parallel application
 module load mpich-3.2
-mpiexec -n 64 /home/kevin.depedri/hpc3/runs/parallel/recursive/mpi_recursive_short_250M5d
+mpiexec -n 64 /home/kevin.depedri/hpc3/runs/parallel/recursive/mpi_recursive_short /home/kevin.depedri/points/250M5d.txt -e -p

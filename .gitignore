@@ -6,6 +6,7 @@ hpc_venv/
 omp_*
 new_core.*
 runs/parallel/bruteforce/mpi_bruteforce
-runs/parallel/recursive/mpi_recursive_short_250M5d
+runs/parallel/recursive/mpi_recursive_short
+runs/parallel/recursive/mpi_recursive_long
 runs/sequential/bruteforce/sequential_bruteforce
-runs/sequential/recursive/sequential_recursive_250M5d
+runs/sequential/recursive/sequential_recursive

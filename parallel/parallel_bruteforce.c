@@ -48,7 +48,6 @@ int main(int argc, char *argv[])
     {
         int num_dimensions;
         // Open input point file on master process
-        // FILE *point_file = fopen(path, "r"); 
         FILE *point_file = fopen(argv[1], "r"); 
         if (point_file == NULL){
             perror("ERROR opening file on master process\n");

@@ -2,7 +2,7 @@
 #PBS -l select=1:ncpus=4:mem=28gb
 
 # Set max execution time
-#PBS -l walltime=24:00:00
+#PBS -l walltime=120:00:00
 
 # Set the excution on the short queue
 #PBS -q long_cpuQ
@@ -14,4 +14,4 @@
 
 # Load the library and execute the parallel application
 module load mpich-3.2
-mpiexec -n 4 /home/kevin.depedri/hpc3/runs/parallel/bruteforce/mpi_bruteforce
+mpiexec -n 4 /home/kevin.depedri/hpc3/runs/parallel/bruteforce/mpi_bruteforce /home/kevin.depedri/points/100M5d.txt -e -p
