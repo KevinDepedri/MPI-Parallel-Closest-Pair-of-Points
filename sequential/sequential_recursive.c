@@ -13,7 +13,7 @@ int main(int argc, char *argv[]){
     Point *points;
     int num_points, num_dimensions;
     if(argc != 2){
-        perror("Error: no file name or path has been provided as first argument\n");
+        perror("Error: no file name or path has been provided as first argument (points input file)\n");
         return -1;
     }
     // char path[] = "../point_generator/1M5d.txt"; //"/home/kevin.depedri/points/250M5d.txt";

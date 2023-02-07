@@ -7,9 +7,6 @@
 #define AXIS 0
 #define MASTER_PROCESS 0
 #define INT_MAX 2147483647
-#define MERGESORT_VERBOSE 0
-#define ENUMERATE_PAIRS_OF_POINTS 1
-#define PRINT_PAIRS_OF_POINTS 1
 
 
 int main(int argc, char *argv[])
@@ -25,8 +22,25 @@ int main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &rank_process);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
     
-    if(argc != 2){
-        perror("Error: no file name or path has been provided as first argument\n");
+    // Parse the input arguments
+    if(argc < 2){
+        if (rank_process == MASTER_PROCESS)
+            perror("ERROR: no file name or path has been provided as first argument (points input file)\n");
+        return -1;
+    }
+
+    int MERGESORT_VERBOSE = 0, ENUMERATE_PAIRS_OF_POINTS = 0, PRINT_PAIRS_OF_POINTS = 0, INVALID_FLAG = 0;
+    for (size_t option_id = 2; option_id < argc; option_id++) {
+        switch (argv[option_id][1]) {
+            case 'm': MERGESORT_VERBOSE = 1; break;
+            case 'e': ENUMERATE_PAIRS_OF_POINTS = 1; break;
+            case 'p': ENUMERATE_PAIRS_OF_POINTS = 1; PRINT_PAIRS_OF_POINTS = 1; break;
+            default: INVALID_FLAG = 1; break;
+        }   
+    }
+    if (INVALID_FLAG == 1){
+        if (rank_process == MASTER_PROCESS)
+            perror("ERROR: the only valid flag arguments are:\n \t-v : verbose enabled during mergesort part of the algorithm\n \t-e : enumerate the pairs of point with smallest distance\n \t-p : print the pairs of point with smallest distance\n");
         return -1;
     }
     // char path[] = "../point_generator/1M5d.txt"; //"/home/kevin.depedri/points/250M5d.txt";
@@ -39,7 +53,7 @@ int main(int argc, char *argv[])
         // FILE *point_file = fopen(path, "r"); 
         FILE *point_file = fopen(argv[1], "r"); 
         if (point_file == NULL){
-            perror("Error opening file on master process\n");
+            perror("ERROR opening file on master process\n");
             return -1;
         }
 
@@ -48,15 +62,15 @@ int main(int argc, char *argv[])
 
         // Give error if the points or processes are not enough
         if (num_points < 2){
-            perror("Error: the number of points must be greater than 1\n");
+            perror("ERROR: the number of points must be greater than 1\n");
             return -1;
         }
         if (num_points < comm_size){
-            perror("Error: the number of points must be greater than the number of processes\n");
+            perror("ERROR: the number of points must be greater than the number of processes\n");
             return -1;
         }
         if (comm_size < 2){
-            perror("Error: cannot run parallel application over just 1 process\n");
+            perror("ERROR: cannot run parallel application over just 1 process\n");
             return -1;
         }
         fclose(point_file);
@@ -81,7 +95,7 @@ int main(int argc, char *argv[])
         // FILE *point_file = fopen(path, "r"); 
         FILE *point_file = fopen(argv[1], "r"); 
         if (point_file == NULL){
-            perror("Error opening file on master process\n");
+            perror("ERROR opening file on master process\n");
             return -1;
         }
 
@@ -222,7 +236,7 @@ int main(int argc, char *argv[])
         }
 
         if (MERGESORT_VERBOSE == 1){
-            printf("ORDERED POINTS:\n");
+            printf("\nORDERED POINTS:\n");
             printPointsFromProcess(all_points, num_points, rank_process); 
         }
 

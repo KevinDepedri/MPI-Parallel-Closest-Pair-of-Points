@@ -371,7 +371,7 @@ Point * parallelMergeSort(Point *all_points, char path[], int rank_process, int 
         }
 
         if (verbose == 1){
-            printf("ORDERED POINTS:\n");
+            printf("\nORDERED POINTS:\n");
             printPointsFromProcess(all_points, num_points, rank_process); 
         }
 

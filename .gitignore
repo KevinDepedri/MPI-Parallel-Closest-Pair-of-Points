@@ -1,9 +1,7 @@
 .vscode/
 hpc_venv/
-*.exe
 *.ilk
 *.obj
 *.pdb
-mpi_*
 omp_*
 new_core.*

@@ -4,8 +4,6 @@
 #include "utils/util.h"
 #include <time.h>
 
-#define PRINT_DISTANCE 0
-
 
 int main(int argc, char *argv[]){
     clock_t start, end;
@@ -14,8 +12,21 @@ int main(int argc, char *argv[]){
 
     Point *points;
     int num_points, num_dimensions;
-    if(argc != 2){
-        perror("Error: no file name or path has been provided as first argument\n");
+    if(argc < 2){
+        perror("Error: no file name or path has been provided as first argument (points input file)\n");
+        return -1;
+    }
+
+    int ENUMERATE_PAIRS_OF_POINTS = 0, PRINT_PAIRS_OF_POINTS = 0, INVALID_FLAG = 0;
+    for (size_t option_id = 2; option_id < argc; option_id++) {
+        switch (argv[option_id][1]) {
+            case 'e': ENUMERATE_PAIRS_OF_POINTS = 1; break;
+            case 'p': PRINT_PAIRS_OF_POINTS = 1; break;
+            default: INVALID_FLAG = 1; break;
+        }   
+    }
+    if (INVALID_FLAG == 1){
+        perror("ERROR: the only valid flag arguments are:\n \t-e : enumerate the pairs of point with smallest distance\n \t-p : print the pairs of point with smallest distance\n");
         return -1;
     }
     // char path[] = "../point_generator/1M5d.txt"; //"/home/kevin.depedri/points/250M5d.txt";
@@ -84,10 +95,12 @@ int main(int argc, char *argv[]){
     }
     // print results
     printf("The minimum distance is %f.\n", min_distance);
-    printf("There are %d pairs with this distance.\n", count);
+
+    if (ENUMERATE_PAIRS_OF_POINTS == 1)
+        printf("There are %d pairs with this distance.\n", count);
     
     // for each point in min_points1 print point1 and point2 /n
-    if (PRINT_DISTANCE == 1){
+    if (PRINT_PAIRS_OF_POINTS == 1){
     for (int i = 0; i < points1_count; i++){
         printf("Point #%d: ", min_points1[i]);
         for (int j = 0; j < num_dimensions; j++){
