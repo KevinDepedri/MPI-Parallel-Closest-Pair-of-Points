@@ -7,16 +7,10 @@
 #define AXIS 0
 #define MASTER_PROCESS 0
 #define INT_MAX 2147483647
-#define VERBOSE 0
+#define MERGESORT_VERBOSE 0
 #define ENUMERATE_PAIRS_OF_POINTS 1
 #define PRINT_PAIRS_OF_POINTS 1
 
-/* COSE DA FARE
-0. Importare file da argomento
-1. Sistemare notazione funzioni e variabili\
-3. Definire come gestire print/VERBOSE
-4. Valutare come migliorare la leggibilitá del codice
-*/
 
 int main(int argc, char *argv[])
 {
@@ -30,7 +24,7 @@ int main(int argc, char *argv[])
     int rank_process, comm_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank_process);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
-    char path[] = "/home/kevin.depedri/points/250M5d.txt";
+    char path[] = "../point_generator/1H2d.txt"; //"/home/kevin.depedri/points/250M5d.txt";
     // char path[] = argv[1];
 
     // Get the total number of points and the number of dimensions
@@ -68,7 +62,7 @@ int main(int argc, char *argv[])
 
     // Get the points data for all the points and order them according to x coordinate
     Point *all_points = NULL;
-    all_points = parallelMergeSort(all_points, path, rank_process, comm_size, VERBOSE);
+    all_points = parallelMergeSort(all_points, path, rank_process, comm_size, MERGESORT_VERBOSE);
     if (rank_process == MASTER_PROCESS)
     {
         if (all_points == NULL)
@@ -84,7 +78,6 @@ int main(int argc, char *argv[])
     // Points are divided equally on all processes exept master process which takes the remaing points
     int num_points_normal_processes, num_points_master_process;
 
-
     // If the code is ran on two processes, then it run the sequential version of the problem.
     // Indeed, in this parallel implementation process 0 is supposed to be the MASTER_PROCESS, which just supervises the operations, manages the transfer 
     // of data and carries out computation over a reduced number of points (the reminder dividing the points on all the other processes). 
@@ -99,15 +92,15 @@ int main(int argc, char *argv[])
 
         pairs->points1 = (Point *)malloc((num_points) * sizeof(Point));
         pairs->points2 = (Point *)malloc((num_points) * sizeof(Point));
-        for (int i = 0; i < (num_points); i++){
-            pairs->points1[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
-            pairs->points2[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+        for (int point = 0; point < (num_points); point++){
+            pairs->points1[point].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+            pairs->points2[point].coordinates = (int *)malloc(num_dimensions * sizeof(int));
         }
         pairs->num_pairs = 0;
         pairs->min_distance = INT_MAX;
 
             printf("Launching sequential algorithm...\n");
-            recSplit(all_points, num_points, pairs, rank_process);
+            recSplit(all_points, num_points, pairs);
             double global_dmin = pairs->min_distance;
             printf("---GLOBAL DMIN: %f\n", global_dmin);
 

@@ -20,7 +20,7 @@ extern void mergeSortRec(Point *, int, int, int);
 
 extern void mergeSort(Point *, int, int);
 
-extern void print_points(Point *, int, int);
+extern void printPointsFromProcess(Point *, int, int);
 
 extern void sendPointsPacked(Point*, int, int, int, MPI_Comm);
 
@@ -32,7 +32,7 @@ extern double isMINof3(double, double, double);
 
 extern void printPoint(Point);
 
-extern void recSplit(Point*, int, Pairs*, int); 
+extern void recSplit(Point*, int, Pairs*); 
 
 extern Point *parallelMergeSort(Point *, char[], int, int, int);
 

@@ -7,16 +7,10 @@
 #define AXIS 0
 #define MASTER_PROCESS 0
 #define INT_MAX 2147483647
-#define VERBOSE 0
+#define MERGESORT_VERBOSE 0
 #define ENUMERATE_PAIRS_OF_POINTS 1
 #define PRINT_PAIRS_OF_POINTS 1
 
-/* COSE DA FARE
-0. Importare file da argomento
-1. Sistemare notazione funzioni e variabili
-3. Definire come gestire print/VERBOSE
-4. Valutare come migliorare la leggibilitá del codice
-*/
 
 int main(int argc, char *argv[])
 {
@@ -30,7 +24,7 @@ int main(int argc, char *argv[])
     int rank_process, comm_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank_process);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
-    char path[] = "/home/kevin.depedri/points/250M5d.txt";
+    char path[] = "../point_generator/1H2d.txt"; //"/home/kevin.depedri/points/250M5d.txt";
     // char path[] = argv[1];
 
     // Get the total number of points and the number of dimensions
@@ -68,22 +62,172 @@ int main(int argc, char *argv[])
     
     // Get the points data for all the points and order them according to x coordinate
     Point *all_points = NULL;
-    all_points = parallelMergeSort(all_points, path, rank_process, comm_size, VERBOSE); // PUT HERE BACK THE NON COMPRESSED VERSION
-    if (rank_process == MASTER_PROCESS)
-    {
-        if (all_points == NULL){
-            perror("Error in executing parallel_mergesort\n");
-            return -1;
-        }
-    }
-
-
-    // PASTE FROM HERE
-
-    // TO HERE
 
     // Points are divided equally on all processes exept master process which takes the remaing points
+    // int num_points_normal_processes = 0, num_points_master_process = 0, num_points_local_process = 0;
     int num_points_normal_processes = 0, num_points_master_process = 0, num_points_local_process = 0;
+    int index_first_point = 0, index_last_point = 0;
+
+    Point *local_points = NULL;
+
+    if (rank_process == MASTER_PROCESS)
+    {
+        // Open input point file on master process
+        FILE *point_file = fopen(path, "r"); 
+        if (point_file == NULL){
+            perror("Error opening file on master process\n");
+            return -1;
+        }
+
+        // Read the number of points and dimensions from the first line of the file
+        fscanf(point_file, "%d %d", &num_points, &num_dimensions);
+
+        // Points are divided equally on all processes exept master process which takes the remaing points
+        num_points_normal_processes = num_points / (comm_size-1);
+        num_points_master_process = num_points % (comm_size-1);
+
+        // Read the points and store them in the master process
+        all_points = (Point *)malloc(num_points * sizeof(Point));
+        for (int point = 0; point < num_points; point++){
+            all_points[point].num_dimensions = num_dimensions;
+            all_points[point].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+            for (int dimension = 0; dimension < num_dimensions; dimension++)
+                fscanf(point_file, "%d", &all_points[point].coordinates[dimension]);
+        }
+        fclose(point_file);
+
+        if (MERGESORT_VERBOSE == 1){
+            printf("INPUT LIST OF POINTS:\n");
+            printPointsFromProcess(all_points, num_points, rank_process);    
+        }        
+        
+        // Transfer total number of points and the correct slice of points to work on for every process
+        Point *points_to_send = NULL;
+        points_to_send = (Point *)malloc(num_points_normal_processes * sizeof(Point));
+        for (int process = 1; process < comm_size; process++){
+            for (int point = 0; point < num_points_normal_processes; point++){
+                points_to_send[point].num_dimensions = num_dimensions;
+                points_to_send[point].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+                for (int dimension = 0; dimension < num_dimensions; dimension++)
+                    points_to_send[point].coordinates[dimension] = all_points[point+num_points_normal_processes*(process-1)].coordinates[dimension];
+            }
+            MPI_Send(&num_points_normal_processes, 1, MPI_INT, process, 0, MPI_COMM_WORLD);
+            sendPointsPacked(points_to_send, num_points_normal_processes, process, 1, MPI_COMM_WORLD);
+        }
+
+        // Free points to send once the send for all the processes is done 
+        for (int point = 0; point < num_points_normal_processes; point++)
+            free(points_to_send[point].coordinates);
+        free(points_to_send);
+
+        // Store the points of the master process
+        num_points_local_process = num_points_master_process;
+        local_points = (Point *)malloc(num_points_local_process * sizeof(Point));
+        int starting_from = num_points_normal_processes * (comm_size - 1);
+        for (int point = 0; point + starting_from < num_points; point++){
+            local_points[point].num_dimensions = num_dimensions;
+            local_points[point].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+            for (int dimension = 0; dimension < num_dimensions; dimension++)
+                local_points[point].coordinates[dimension] = all_points[point + starting_from].coordinates[dimension];
+        }
+    }
+    else
+    {
+        // Receive total number of points and the points that will be processed by this process
+        MPI_Recv(&num_points_normal_processes, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        num_points_local_process = num_points_normal_processes;
+        local_points = (Point *)malloc(num_points_local_process * sizeof(Point));
+        recvPointsPacked(local_points, num_points_local_process, 0, 1, MPI_COMM_WORLD);
+    }
+
+    if (MERGESORT_VERBOSE == 1){
+        // Compute the number of points that will be read by each core and print it
+        if (rank_process != MASTER_PROCESS)
+        {
+            index_first_point = num_points_local_process * (rank_process-1);
+            index_last_point = index_first_point + num_points_local_process - 1;
+            printf("[NORMAL-PROCESS %d/%d] received %d points from point %d to point %d\n", rank_process, comm_size, num_points_local_process, index_first_point, index_last_point);
+        }
+        else
+        {
+            index_first_point = num_points_normal_processes * (comm_size-1);
+            if (num_points_local_process > 0){
+                index_last_point = index_first_point + num_points_local_process - 1;
+                printf("[MASTER-PROCESS %d/%d] received %d points from point %d to point %d\n", rank_process, comm_size, num_points_local_process, index_first_point, index_last_point);
+            }
+            else{
+                printf("[MASTER-PROCESS %d/%d] received %d points (point equally divided on the other cores)\n", rank_process, comm_size, num_points_local_process);
+            }
+        }
+
+        // Print received points
+        printPointsFromProcess(local_points, num_points_local_process, rank_process);  
+    }
+
+    // Sort the received points in each core
+    mergeSort(local_points, num_points_local_process, AXIS);
+
+
+    if (rank_process != MASTER_PROCESS)
+    {
+        // All the processes send their ordered points to the master process
+        sendPointsPacked(local_points, num_points_local_process, 0, 0, MPI_COMM_WORLD);
+    }
+    else
+    {
+        // The master process gather all the points from the other processes
+        Point **processes_sorted_points;
+        processes_sorted_points = (Point **)malloc(comm_size * sizeof(Point *));
+
+        processes_sorted_points[0] = (Point *)malloc((num_points_local_process) * sizeof(Point));
+        for (int process = 1; process < comm_size; process++)
+            processes_sorted_points[process] = (Point *)malloc(num_points_normal_processes * sizeof(Point));
+
+        // Save first the points ordered from the current process (master), then receive the ones from the other processes
+        processes_sorted_points[0] = local_points;
+        for (int process = 1; process < comm_size; process++)
+            recvPointsPacked(processes_sorted_points[process], num_points_normal_processes, process, 0, MPI_COMM_WORLD);
+
+        // Merge the ordere points from all the processes
+        int *temporary_indexes;
+        temporary_indexes = (int *)malloc(comm_size * sizeof(int));
+        for (int process = 0; process < comm_size; process++)
+            temporary_indexes[process] = 0;
+
+        // For each position of the final ordered array of points define an initial minimum value and the process that encompasses this value
+        for (int point = 0; point < num_points; point++){        
+            int min = INT_MAX;
+            int process_with_minimum_value = 0;
+
+            // For that previous position look in all the processes to find the minimum value
+            for (int process = 0; process < comm_size; process++){
+                // For each specific process look to its first point (since it is the lowest), if there are still points not used in that process 
+                if ((process == 0 && temporary_indexes[process] < num_points_master_process) || (process != 0 && temporary_indexes[process] < num_points_normal_processes)){
+                    // If a new minimum is reached then save it as minimum and save the process that led to it
+                    if (processes_sorted_points[process][temporary_indexes[process]].coordinates[AXIS] < min){
+                        min = processes_sorted_points[process][temporary_indexes[process]].coordinates[AXIS];
+                        process_with_minimum_value = process;
+                    }
+                }
+            }
+            // One a value is confirmed as the lowest between all the compared ones, then save it in the fianl array of ordered points
+            all_points[point] = processes_sorted_points[process_with_minimum_value][temporary_indexes[process_with_minimum_value]];
+            temporary_indexes[process_with_minimum_value]++;
+        }
+
+        if (MERGESORT_VERBOSE == 1){
+            printf("ORDERED POINTS:\n");
+            printPointsFromProcess(all_points, num_points, rank_process); 
+        }
+
+        free(temporary_indexes);
+        free(processes_sorted_points);
+    }
+
+    for (int point = 0; point < num_points_local_process; point++)
+        free(local_points[point].coordinates);
+    free(local_points);
+
     // Pairs will store the pairs of points with minimum distance and their distance data
     Pairs *pairs = NULL;
 
@@ -108,7 +252,7 @@ int main(int argc, char *argv[])
             pairs->min_distance = INT_MAX;
 
                 printf("Launching sequential algorithm...\n");
-                recSplit(all_points, num_points, pairs, rank_process);
+                recSplit(all_points, num_points, pairs);
                 double global_dmin = pairs->min_distance;
                 printf("---GLOBAL DMIN: %f\n", global_dmin);
 
@@ -121,6 +265,7 @@ int main(int argc, char *argv[])
             free(pairs);
         }   
 
+        // Use a barrier to alling all the cores and then get the execution time
         MPI_Barrier(MPI_COMM_WORLD);
         if(rank_process == MASTER_PROCESS){
             printf("Memory free\n");
@@ -132,26 +277,17 @@ int main(int argc, char *argv[])
         MPI_Finalize();
         return 0;
     }
+
     // If the code is ran on more than two processes, then run the parallel version of the problem.
-    else
-    {
-
-        // Points are divided equally on all processes exept master process which takes the remaing points
-        num_points_normal_processes = num_points / (comm_size-1);
-        num_points_master_process = num_points % (comm_size-1);
-    }
-
     if(rank_process == MASTER_PROCESS)
         printf("Launching parallel algorithm...\n");
-
-    Point *local_points = NULL;
 
     // POINT 1 - divide points and send them with their out_of_region values to each process
     int left_x_out_of_region = INT_MAX, right_x_out_of_region = INT_MAX;
     if (rank_process == MASTER_PROCESS)
     {
         // Transfer total number of points and the correct slice of points to work on for every process
-        Point *points_to_send;
+        Point *points_to_send = NULL;
         points_to_send = (Point *)malloc(num_points_normal_processes * sizeof(Point));
         int left_x_to_send = 0, right_x_to_send = 0;
         for (int process = 1; process < comm_size; process++){
@@ -192,12 +328,12 @@ int main(int argc, char *argv[])
         local_points = (Point *)malloc(num_points_local_process * sizeof(Point));
         int starting_from = num_points_normal_processes * (comm_size - 1);
 
-        for (int i = 0; i + starting_from < num_points; i++){
-            local_points[i].num_dimensions = num_dimensions;
-            local_points[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+        for (int point = 0; point + starting_from < num_points; point++){
+            local_points[point].num_dimensions = num_dimensions;
+            local_points[point].coordinates = (int *)malloc(num_dimensions * sizeof(int));
 
             for (int dimension = 0; dimension < num_dimensions; dimension++)
-                local_points[i].coordinates[dimension] = all_points[i + starting_from].coordinates[dimension];
+                local_points[point].coordinates[dimension] = all_points[point + starting_from].coordinates[dimension];
         }
         left_x_out_of_region = all_points[starting_from-1].coordinates[AXIS];
         right_x_out_of_region = INT_MAX;
@@ -231,7 +367,7 @@ int main(int argc, char *argv[])
     pairs->min_distance = INT_MAX;
 
     if (num_points_local_process > 1){
-        recSplit(local_points, num_points_local_process, pairs, rank_process);
+        recSplit(local_points, num_points_local_process, pairs);
         local_dmin = pairs->min_distance;
     }
     printf("PROCESS:%d DMIN:%f\n", rank_process, local_dmin);
@@ -332,18 +468,18 @@ int main(int argc, char *argv[])
         Point *local_strip_points = (Point *)malloc((num_points_local_strip) * sizeof(Point));
 
         // First push the values from the right strip
-        for (int i = 0; i < num_points_right_partial_strip; i++){
-            local_strip_points[i].num_dimensions = num_dimensions;
-            local_strip_points[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+        for (int point = 0; point < num_points_right_partial_strip; point++){
+            local_strip_points[point].num_dimensions = num_dimensions;
+            local_strip_points[point].coordinates = (int *)malloc(num_dimensions * sizeof(int));
             for (int dimension = 0; dimension < num_dimensions; dimension++)
-                local_strip_points[i].coordinates[dimension] = right_partial_strip_points[i].coordinates[dimension];
+                local_strip_points[point].coordinates[dimension] = right_partial_strip_points[point].coordinates[dimension];
         }
         // Then push the values recieved from the process on the right
-        for (int i = 0; i < num_points_received; i++){
-            local_strip_points[i+num_points_right_partial_strip].num_dimensions = num_dimensions;
-            local_strip_points[i+num_points_right_partial_strip].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+        for (int point = 0; point < num_points_received; point++){
+            local_strip_points[point+num_points_right_partial_strip].num_dimensions = num_dimensions;
+            local_strip_points[point+num_points_right_partial_strip].coordinates = (int *)malloc(num_dimensions * sizeof(int));
             for (int dimension = 0; dimension < num_dimensions; dimension++)
-                local_strip_points[i+num_points_right_partial_strip].coordinates[dimension] = received_points[i].coordinates[dimension];
+                local_strip_points[point+num_points_right_partial_strip].coordinates[dimension] = received_points[point].coordinates[dimension];
         }
         for (int point = 0; point < num_points_received; point++)
             free(received_points[point].coordinates);
@@ -355,9 +491,9 @@ int main(int argc, char *argv[])
         double dmin_local_strip = global_dmin;
 
         // Compare each point with the next point ordered according to y. As soon as the distance is greater than dmin_local_strip then break that cycle.
-        for (int i = 0; i < num_points_local_strip - 1; i++){
-            for (int k = i + 1; k < num_points_local_strip && abs(local_strip_points[k].coordinates[1] - local_strip_points[i].coordinates[1]) <= global_dmin; k++){
-                double current_distance = distance(local_strip_points[i], local_strip_points[k]);
+        for (int point = 0; point < num_points_local_strip - 1; point++){
+            for (int next_point = point + 1; next_point < num_points_local_strip && abs(local_strip_points[next_point].coordinates[1] - local_strip_points[point].coordinates[1]) <= global_dmin; next_point++){
+                double current_distance = distance(local_strip_points[point], local_strip_points[next_point]);
                 
                 // If the new distance is smaller than the dmin_local_strip then update it, then save a new min_distance in pairs and push the two points inside pairs
                 if (current_distance < dmin_local_strip){ // IS IT REDUNDAND?? WE CAN MERGE THIS IF WITH THE ONE BELOW AND PUT THE CONDITIONS IN &&
@@ -365,22 +501,20 @@ int main(int argc, char *argv[])
                 }
                 if(current_distance < pairs->min_distance){
                     pairs->min_distance = current_distance;
-                    pairs->points1[0] = local_strip_points[i];
-                    pairs->points2[0] = local_strip_points[k];
+                    pairs->points1[0] = local_strip_points[point];
+                    pairs->points2[0] = local_strip_points[next_point];
                     pairs->num_pairs = 1;
                 }
                 // If the new distance is equal to the smalles one found, then push the two points inside pairs and increment the num_pairs found with that distance
                 else if(current_distance == pairs->min_distance){
-                    pairs->points1[pairs->num_pairs] = local_strip_points[i];
-                    pairs->points2[pairs->num_pairs] = local_strip_points[k];
+                    pairs->points1[pairs->num_pairs] = local_strip_points[point];
+                    pairs->points2[pairs->num_pairs] = local_strip_points[next_point];
                     pairs->num_pairs++;
                 }
             }
         }
         // Update each local_dmin with the new dmin_local_strip just found. Then free local_strip_points
         local_dmin = dmin_local_strip;
-        // for (int point = 0; point < num_points_local_strip; point++)  // Using this we have crazy point coordinates with 1Hh2d using 6 cores
-        //     free(local_strip_points[point].coordinates);
         free(local_strip_points);
     }
     
@@ -397,16 +531,11 @@ int main(int argc, char *argv[])
             free(all_points[point].coordinates);
     free(all_points);
 
-    // Free local points, its internal parameter are deallocated only by the processes different from MASTER_PROCESS. since it is the only process which has them
-    // This because the one inside master process are deallocated once free(all_points) is performed since they are built as a copy of the addresse of all_points. 
-    // Instead local_points in other processes are rebuilt by MPI coying the values. For this reason they need to be deallocated singularly.
-    // if (rank_process != MASTER_PROCESS)
-
+    // Free all the memory previously allocated
     for (int point = 0; point < num_points_local_process; point++)
         free(local_points[point].coordinates);
     free(local_points);
 
-    // Left and right point are copy of local points and so are already deallocated in their internal parameters by the calls above
     for (int point = 0; point < num_points_left_partial_strip; point++)
         free(left_partial_strip_points[point].coordinates);
     free(left_partial_strip_points);
