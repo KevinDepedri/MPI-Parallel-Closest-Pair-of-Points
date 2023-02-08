@@ -18,12 +18,12 @@ int main(int argc, char *argv[]){
     }
 
     int ENUMERATE_PAIRS_OF_POINTS = 0, PRINT_PAIRS_OF_POINTS = 0, INVALID_FLAG = 0;
-    for (size_t option_id = 2; option_id < argc; option_id++) {
-        switch (argv[option_id][1]) {
+    for (size_t option_id = 2; option_id < argc; option_id++){
+        switch (argv[option_id][1]){
             case 'e': ENUMERATE_PAIRS_OF_POINTS = 1; break;
             case 'p': PRINT_PAIRS_OF_POINTS = 1; break;
             default: INVALID_FLAG = 1; break;
-        }   
+        }
     }
     if (INVALID_FLAG == 1){
         perror("ERROR: the only valid flag arguments are:\n \t-e : enumerate the pairs of point with smallest distance\n \t-p : print the pairs of point with smallest distance\n");

@@ -1,0 +1,319 @@
+*** Error in `/home/kevin.depedri/hpc3/runs/parallel/recursive/mpi_recursive_short': double free or corruption (out): 0x0000000343369ab0 ***
+======= Backtrace: =========
+/lib64/libc.so.6(+0x81299)[0x2b082711f299]
+/home/kevin.depedri/hpc3/runs/parallel/recursive/mpi_recursive_short[0x40122a]
+/lib64/libc.so.6(__libc_start_main+0xf5)[0x2b08270c0555]
+/home/kevin.depedri/hpc3/runs/parallel/recursive/mpi_recursive_short[0x400cd9]
+======= Memory map: ========
+00400000-00405000 r-xp 00000000 00:27 2160739548                         /home/kevin.depedri/hpc3/runs/parallel/recursive/mpi_recursive_short
+00604000-00605000 r--p 00004000 00:27 2160739548                         /home/kevin.depedri/hpc3/runs/parallel/recursive/mpi_recursive_short
+00605000-00606000 rw-p 00005000 00:27 2160739548                         /home/kevin.depedri/hpc3/runs/parallel/recursive/mpi_recursive_short
+023ef000-76c8f8000 rw-p 00000000 00:00 0                                 [heap]
+2b08266fa000-2b082671c000 r-xp 00000000 08:01 17045355                   /usr/lib64/ld-2.17.so
+2b082671c000-2b082671e000 rw-p 00000000 00:00 0 
+2b082672e000-2b0826875000 rw-p 00000000 00:00 0 
+2b0826875000-2b08268b6000 rw-s 00000000 00:13 48979563                   /dev/shm/mpich_shar_tmpQGjNyW (deleted)
+2b08268b6000-2b08268f7000 rw-s 00000000 00:13 48971518                   /dev/shm/mpich_shar_tmpiWdX9G (deleted)
+2b082691b000-2b082691c000 r--p 00021000 08:01 17045355                   /usr/lib64/ld-2.17.so
+2b082691c000-2b082691d000 rw-p 00022000 08:01 17045355                   /usr/lib64/ld-2.17.so
+2b082691d000-2b082691e000 rw-p 00000000 00:00 0 
+2b082691e000-2b0826a1f000 r-xp 00000000 08:01 17044905                   /usr/lib64/libm-2.17.so
+2b0826a1f000-2b0826c1e000 ---p 00101000 08:01 17044905                   /usr/lib64/libm-2.17.so
+2b0826c1e000-2b0826c1f000 r--p 00100000 08:01 17044905                   /usr/lib64/libm-2.17.so
+2b0826c1f000-2b0826c20000 rw-p 00101000 08:01 17044905                   /usr/lib64/libm-2.17.so
+2b0826c20000-2b0826e53000 r-xp 00000000 00:3b 35082                      /apps/mpich-3.2/lib/libmpi.so.12.1.0
+2b0826e53000-2b0827052000 ---p 00233000 00:3b 35082                      /apps/mpich-3.2/lib/libmpi.so.12.1.0
+2b0827052000-2b0827060000 r--p 00232000 00:3b 35082                      /apps/mpich-3.2/lib/libmpi.so.12.1.0
+2b0827060000-2b0827064000 rw-p 00240000 00:3b 35082                      /apps/mpich-3.2/lib/libmpi.so.12.1.0
+2b0827064000-2b082709e000 rw-p 00000000 00:00 0 
+2b082709e000-2b0827261000 r-xp 00000000 08:01 17044889                   /usr/lib64/libc-2.17.so
+2b0827261000-2b0827461000 ---p 001c3000 08:01 17044889                   /usr/lib64/libc-2.17.so
+2b0827461000-2b0827465000 r--p 001c3000 08:01 17044889                   /usr/lib64/libc-2.17.so
+2b0827465000-2b0827467000 rw-p 001c7000 08:01 17044889                   /usr/lib64/libc-2.17.so
+2b0827467000-2b082746c000 rw-p 00000000 00:00 0 
+2b082746c000-2b0827473000 r-xp 00000000 08:01 17044949                   /usr/lib64/librt-2.17.so
+2b0827473000-2b0827672000 ---p 00007000 08:01 17044949                   /usr/lib64/librt-2.17.so
+2b0827672000-2b0827673000 r--p 00006000 08:01 17044949                   /usr/lib64/librt-2.17.so
+2b0827673000-2b0827674000 rw-p 00007000 08:01 17044949                   /usr/lib64/librt-2.17.so
+2b0827674000-2b082768b000 r-xp 00000000 08:01 17044941                   /usr/lib64/libpthread-2.17.so
+2b082768b000-2b082788a000 ---p 00017000 08:01 17044941                   /usr/lib64/libpthread-2.17.so
+2b082788a000-2b082788b000 r--p 00016000 08:01 17044941                   /usr/lib64/libpthread-2.17.so
+2b082788b000-2b082788c000 rw-p 00017000 08:01 17044941                   /usr/lib64/libpthread-2.17.so
+2b082788c000-2b0827890000 rw-p 00000000 00:00 0 
+2b0827890000-2b08279af000 r-xp 00000000 08:01 17046377                   /usr/lib64/libgfortran.so.3.0.0
+2b08279af000-2b0827baf000 ---p 0011f000 08:01 17046377                   /usr/lib64/libgfortran.so.3.0.0
+2b0827baf000-2b0827bb0000 r--p 0011f000 08:01 17046377                   /usr/lib64/libgfortran.so.3.0.0
+2b0827bb0000-2b0827bb2000 rw-p 00120000 08:01 17046377                   /usr/lib64/libgfortran.so.3.0.0
+2b0827bb2000-2b0827bc7000 r-xp 00000000 08:01 17045349                   /usr/lib64/libgcc_s-4.8.5-20150702.so.1
+2b0827bc7000-2b0827dc6000 ---p 00015000 08:01 17045349                   /usr/lib64/libgcc_s-4.8.5-20150702.so.1
+2b0827dc6000-2b0827dc7000 r--p 00014000 08:01 17045349                   /usr/lib64/libgcc_s-4.8.5-20150702.so.1
+2b0827dc7000-2b0827dc8000 rw-p 00015000 08:01 17045349                   /usr/lib64/libgcc_s-4.8.5-20150702.so.1
+2b0827dc8000-2b0827e03000 r-xp 00000000 08:01 17046117                   /usr/lib64/libquadmath.so.0.0.0
+2b0827e03000-2b0828002000 ---p 0003b000 08:01 17046117                   /usr/lib64/libquadmath.so.0.0.0
+2b0828002000-2b0828003000 r--p 0003a000 08:01 17046117                   /usr/lib64/libquadmath.so.0.0.0
+2b0828003000-2b0828004000 rw-p 0003b000 08:01 17046117                   /usr/lib64/libquadmath.so.0.0.0
+2b0828004000-2b08381a0000 rw-s 00000000 00:13 48998212                   /dev/shm/mpich_shar_tmpp3xxCM (deleted)
+2b08381a0000-2b08381ac000 r-xp 00000000 08:01 17044925                   /usr/lib64/libnss_files-2.17.so
+2b08381ac000-2b08383ab000 ---p 0000c000 08:01 17044925                   /usr/lib64/libnss_files-2.17.so
+2b08383ab000-2b08383ac000 r--p 0000b000 08:01 17044925                   /usr/lib64/libnss_files-2.17.so
+2b08383ac000-2b08383ad000 rw-p 0000c000 08:01 17044925                   /usr/lib64/libnss_files-2.17.so
+2b08383ad000-2b092cd9b000 rw-p 00000000 00:00 0 
+2b092e5c0000-2b092e601000 rw-s 00000000 00:13 49030155                   /dev/shm/mpich_shar_tmpmyeXun (deleted)
+2b092e601000-2b092e642000 rw-s 00000000 00:13 48975759                   /dev/shm/mpich_shar_tmpszJbE8 (deleted)
+2b092e642000-2b092e683000 rw-s 00000000 00:13 48993618                   /dev/shm/mpich_shar_tmpX3gjdW (deleted)
+2b092e683000-2b092e6c4000 rw-s 00000000 00:13 49008894                   /dev/shm/mpich_shar_tmppGm1VG (deleted)
+2b092e6c4000-2b092e7a7000 rw-p 00000000 00:00 0 
+2b092e7a7000-2b092e7e8000 rw-s 00000000 00:13 49017321                   /dev/shm/mpich_shar_tmpT0Uo5n (deleted)
+2b092e7e8000-2b092e829000 rw-s 00000000 00:13 48972518                   /dev/shm/mpich_shar_tmpajVb0g (deleted)
+2b092e829000-2b092e86a000 rw-s 00000000 00:13 49007917                   /dev/shm/mpich_shar_tmpQVvXjW (deleted)
+2b092e86a000-2b092e8ab000 rw-s 00000000 00:13 49022986                   /dev/shm/mpich_shar_tmpaNc6xH (deleted)
+2b092e8ab000-2b092e8ec000 rw-s 00000000 00:13 49015140                   /dev/shm/mpich_shar_tmpO38S0o (deleted)
+2b092e8ec000-2b092e92d000 rw-s 00000000 00:13 49012866                   /dev/shm/mpich_shar_tmp3lehPg (deleted)
+2b092e92d000-2b092e96e000 rw-s 00000000 00:13 49016038                   /dev/shm/mpich_shar_tmpfmX38X (deleted)
+2b092e96e000-2b092e9af000 rw-s 00000000 00:13 48981964                   /dev/shm/mpich_shar_tmprXFHwD (deleted)
+2b092e9af000-2b092e9f0000 rw-s 00000000 00:13 48966423                   /dev/shm/mpich_shar_tmpPOYVvo (deleted)
+2b092e9f0000-2b092ea31000 rw-s 00000000 00:13 49018177                   /dev/shm/mpich_shar_tmpOdptSc (deleted)
+2b092ea31000-2b092ea72000 rw-s 00000000 00:13 48959319                   /dev/shm/mpich_shar_tmpkqPtLX (deleted)
+2b092ea72000-2b092eab3000 rw-s 00000000 00:13 48991595                   /dev/shm/mpich_shar_tmpYIYpyH (deleted)
+2b092eab3000-2b092eaf4000 rw-s 00000000 00:13 49000666                   /dev/shm/mpich_shar_tmpPTPXDv (deleted)
+2b092eaf4000-2b092eb35000 rw-s 00000000 00:13 49005012                   /dev/shm/mpich_shar_tmpNtg8Og (deleted)
+2b092eb35000-2b092eb76000 rw-s 00000000 00:13 49000090                   /dev/shm/mpich_shar_tmp7BHg5X (deleted)
+2b092eb76000-2b092ebb7000 rw-s 00000000 00:13 48961495                   /dev/shm/mpich_shar_tmpDn9ssE (deleted)
+2b092ebb7000-2b092ebf8000 rw-s 00000000 00:13 48998739                   /dev/shm/mpich_shar_tmpMA4TMt (deleted)
+2b092ebf8000-2b092ec39000 rw-s 00000000 00:13 48978750                   /dev/shm/mpich_shar_tmpYObWse (deleted)
+2b092ec39000-2b092ec7a000 rw-s 00000000 00:13 49031298                   /dev/shm/mpich_shar_tmpufmnbU (deleted)
+2b092ec7a000-2b092ecbb000 rw-s 00000000 00:13 48982708                   /dev/shm/mpich_shar_tmpRD6sAN (deleted)
+2b092ecbb000-2b092ecfc000 rw-s 00000000 00:13 49012465                   /dev/shm/mpich_shar_tmpbd7jbu (deleted)
+2b092ecfc000-2b092ed3d000 rw-s 00000000 00:13 49027215                   /dev/shm/mpich_shar_tmpBNuEhb (deleted)
+2b092ed3d000-2b092ed7e000 rw-s 00000000 00:13 48925624                   /dev/shm/mpich_shar_tmpSdn6Z3 (deleted)
+2b092ed7e000-2b092edbf000 rw-s 00000000 00:13 49026094                   /dev/shm/mpich_shar_tmpw9lkFJ (deleted)
+2b092edbf000-2b092ee00000 rw-s 00000000 00:13 48954229                   /dev/shm/mpich_shar_tmpif1qnq (deleted)
+2b092ee00000-2b092ee41000 rw-s 00000000 00:13 48968270                   /dev/shm/mpich_shar_tmpmEdHsb (deleted)
+2b092ee41000-2b092ee82000 rw-s 00000000 00:13 49010820                   /dev/shm/mpich_shar_tmpBVhjZ2 (deleted)
+2b092ee82000-2b092eec3000 rw-s 00000000 00:13 48989783                   /dev/shm/mpich_shar_tmphhvrEK (deleted)
+2b092eec3000-2b092ef04000 rw-s 00000000 00:13 49024384                   /dev/shm/mpich_shar_tmpxMRJ1q (deleted)
+2b092ef04000-2b092ef45000 rw-s 00000000 00:13 49003263                   /dev/shm/mpich_shar_tmpQHciyj (deleted)
+2b092ef45000-2b092ef86000 rw-s 00000000 00:13 49032549                   /dev/shm/mpich_shar_tmp6c3vFZ (deleted)
+2b092ef86000-2b092efc7000 rw-s 00000000 00:13 48986524                   /dev/shm/mpich_shar_tmp83AwOK (deleted)
+2b092efc7000-2b092f008000 rw-s 00000000 00:13 48974748                   /dev/shm/mpich_shar_tmpeIuips (deleted)
+2b092f008000-2b0a14600000 rw-p 00000000 00:00 0 
+2b0a18000000-2b0a18021000 rw-p 00000000 00:00 0 
+2b0a18021000-2b0a1c000000 ---p 00000000 00:00 0 
+7fffc2db7000-7fffc2dd8000 rw-p 00000000 00:00 0                          [stack]
+7fffc2dde000-7fffc2de0000 r-xp 00000000 00:00 0                          [vdso]
+ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
+Fatal error in PMPI_Barrier: Unknown error class, error stack:
+PMPI_Barrier(425).....................: MPI_Barrier(MPI_COMM_WORLD) failed
+MPIR_Barrier_impl(332)................: Failure during collective
+MPIR_Barrier_impl(327)................: 
+MPIR_Barrier(292).....................: 
+MPIR_Barrier_intra(150)...............: 
+barrier_smp_intra(96).................: 
+MPIR_Barrier_impl(332)................: Failure during collective
+MPIR_Barrier_impl(327)................: 
+MPIR_Barrier(292).....................: 
+MPIR_Barrier_intra(169)...............: 
+MPIDU_Complete_posted_with_error(1137): Process failed
+barrier_smp_intra(111)................: 
+MPIR_Bcast_impl(1452).................: 
+MPIR_Bcast(1476)......................: 
+MPIR_Bcast_intra(1287)................: 
+MPIR_Bcast_binomial(310)..............: Failure during collective
+Fatal error in PMPI_Barrier: Unknown error class, error stack:
+PMPI_Barrier(425).......: MPI_Barrier(MPI_COMM_WORLD) failed
+MPIR_Barrier_impl(332)..: Failure during collective
+MPIR_Barrier_impl(327)..: 
+MPIR_Barrier(292).......: 
+MPIR_Barrier_intra(150).: 
+barrier_smp_intra(111)..: 
+MPIR_Bcast_impl(1452)...: 
+MPIR_Bcast(1476)........: 
+MPIR_Bcast_intra(1287)..: 
+MPIR_Bcast_binomial(310): Failure during collective
+Fatal error in PMPI_Barrier: Unknown error class, error stack:
+PMPI_Barrier(425).......: MPI_Barrier(MPI_COMM_WORLD) failed
+MPIR_Barrier_impl(332)..: Failure during collective
+MPIR_Barrier_impl(327)..: 
+MPIR_Barrier(292).......: 
+MPIR_Barrier_intra(150).: 
+barrier_smp_intra(111)..: 
+MPIR_Bcast_impl(1452)...: 
+MPIR_Bcast(1476)........: 
+MPIR_Bcast_intra(1287)..: 
+MPIR_Bcast_binomial(310): Failure during collective
+Fatal error in PMPI_Barrier: Unknown error class, error stack:
+PMPI_Barrier(425).......: MPI_Barrier(MPI_COMM_WORLD) failed
+MPIR_Barrier_impl(332)..: Failure during collective
+MPIR_Barrier_impl(327)..: 
+MPIR_Barrier(292).......: 
+MPIR_Barrier_intra(150).: 
+barrier_smp_intra(111)..: 
+MPIR_Bcast_impl(1452)...: 
+MPIR_Bcast(1476)........: 
+MPIR_Bcast_intra(1287)..: 
+MPIR_Bcast_binomial(310): Failure during collective
+Fatal error in PMPI_Barrier: Unknown error class, error stack:
+PMPI_Barrier(425).......: MPI_Barrier(MPI_COMM_WORLD) failed
+MPIR_Barrier_impl(332)..: Failure during collective
+MPIR_Barrier_impl(327)..: 
+MPIR_Barrier(292).......: 
+MPIR_Barrier_intra(150).: 
+barrier_smp_intra(111)..: 
+MPIR_Bcast_impl(1452)...: 
+MPIR_Bcast(1476)........: 
+MPIR_Bcast_intra(1287)..: 
+MPIR_Bcast_binomial(310): Failure during collective
+Fatal error in PMPI_Barrier: Unknown error class, error stack:
+PMPI_Barrier(425).......: MPI_Barrier(MPI_COMM_WORLD) failed
+MPIR_Barrier_impl(332)..: Failure during collective
+MPIR_Barrier_impl(327)..: 
+MPIR_Barrier(292).......: 
+MPIR_Barrier_intra(150).: 
+barrier_smp_intra(111)..: 
+MPIR_Bcast_impl(1452)...: 
+MPIR_Bcast(1476)........: 
+MPIR_Bcast_intra(1287)..: 
+MPIR_Bcast_binomial(310): Failure during collective
+Fatal error in PMPI_Barrier: Unknown error class, error stack:
+PMPI_Barrier(425).......: MPI_Barrier(MPI_COMM_WORLD) failed
+MPIR_Barrier_impl(332)..: Failure during collective
+MPIR_Barrier_impl(327)..: 
+MPIR_Barrier(292).......: 
+MPIR_Barrier_intra(150).: 
+barrier_smp_intra(111)..: 
+MPIR_Bcast_impl(1452)...: 
+MPIR_Bcast(1476)........: 
+MPIR_Bcast_intra(1287)..: 
+MPIR_Bcast_binomial(310): Failure during collective
+Fatal error in PMPI_Barrier: Unknown error class, error stack:
+PMPI_Barrier(425).......: MPI_Barrier(MPI_COMM_WORLD) failed
+MPIR_Barrier_impl(332)..: Failure during collective
+MPIR_Barrier_impl(327)..: 
+MPIR_Barrier(292).......: 
+MPIR_Barrier_intra(150).: 
+barrier_smp_intra(111)..: 
+MPIR_Bcast_impl(1452)...: 
+MPIR_Bcast(1476)........: 
+MPIR_Bcast_intra(1287)..: 
+MPIR_Bcast_binomial(310): Failure during collective
+Fatal error in PMPI_Barrier: Unknown error class, error stack:
+PMPI_Barrier(425).......: MPI_Barrier(MPI_COMM_WORLD) failed
+MPIR_Barrier_impl(332)..: Failure during collective
+MPIR_Barrier_impl(327)..: 
+MPIR_Barrier(292).......: 
+MPIR_Barrier_intra(150).: 
+barrier_smp_intra(111)..: 
+MPIR_Bcast_impl(1452)...: 
+MPIR_Bcast(1476)........: 
+MPIR_Bcast_intra(1287)..: 
+MPIR_Bcast_binomial(310): Failure during collective
+Fatal error in PMPI_Barrier: Unknown error class, error stack:
+PMPI_Barrier(425).......: MPI_Barrier(MPI_COMM_WORLD) failed
+MPIR_Barrier_impl(332)..: Failure during collective
+MPIR_Barrier_impl(327)..: 
+MPIR_Barrier(292).......: 
+MPIR_Barrier_intra(150).: 
+barrier_smp_intra(111)..: 
+MPIR_Bcast_impl(1452)...: 
+MPIR_Bcast(1476)........: 
+MPIR_Bcast_intra(1287)..: 
+MPIR_Bcast_binomial(310): Failure during collective
+Fatal error in PMPI_Barrier: Unknown error class, error stack:
+PMPI_Barrier(425).......: MPI_Barrier(MPI_COMM_WORLD) failed
+MPIR_Barrier_impl(332)..: Failure during collective
+MPIR_Barrier_impl(327)..: 
+MPIR_Barrier(292).......: 
+MPIR_Barrier_intra(150).: 
+barrier_smp_intra(111)..: 
+MPIR_Bcast_impl(1452)...: 
+MPIR_Bcast(1476)........: 
+MPIR_Bcast_intra(1287)..: 
+MPIR_Bcast_binomial(310): Failure during collective
+Fatal error in PMPI_Barrier: Unknown error class, error stack:
+PMPI_Barrier(425).......: MPI_Barrier(MPI_COMM_WORLD) failed
+MPIR_Barrier_impl(332)..: Failure during collective
+MPIR_Barrier_impl(327)..: 
+MPIR_Barrier(292).......: 
+MPIR_Barrier_intra(150).: 
+barrier_smp_intra(111)..: 
+MPIR_Bcast_impl(1452)...: 
+MPIR_Bcast(1476)........: 
+MPIR_Bcast_intra(1287)..: 
+MPIR_Bcast_binomial(310): Failure during collective
+Fatal error in PMPI_Barrier: Unknown error class, error stack:
+PMPI_Barrier(425).......: MPI_Barrier(MPI_COMM_WORLD) failed
+MPIR_Barrier_impl(332)..: Failure during collective
+MPIR_Barrier_impl(327)..: 
+MPIR_Barrier(292).......: 
+MPIR_Barrier_intra(150).: 
+barrier_smp_intra(111)..: 
+MPIR_Bcast_impl(1452)...: 
+MPIR_Bcast(1476)........: 
+MPIR_Bcast_intra(1287)..: 
+MPIR_Bcast_binomial(310): Failure during collective
+Fatal error in PMPI_Barrier: Unknown error class, error stack:
+PMPI_Barrier(425).......: MPI_Barrier(MPI_COMM_WORLD) failed
+MPIR_Barrier_impl(332)..: Failure during collective
+MPIR_Barrier_impl(327)..: 
+MPIR_Barrier(292).......: 
+MPIR_Barrier_intra(150).: 
+barrier_smp_intra(111)..: 
+MPIR_Bcast_impl(1452)...: 
+MPIR_Bcast(1476)........: 
+MPIR_Bcast_intra(1287)..: 
+MPIR_Bcast_binomial(310): Failure during collective
+Fatal error in PMPI_Barrier: Unknown error class, error stack:
+PMPI_Barrier(425).......: MPI_Barrier(MPI_COMM_WORLD) failed
+MPIR_Barrier_impl(332)..: Failure during collective
+MPIR_Barrier_impl(327)..: 
+MPIR_Barrier(292).......: 
+MPIR_Barrier_intra(150).: 
+barrier_smp_intra(111)..: 
+MPIR_Bcast_impl(1452)...: 
+MPIR_Bcast(1476)........: 
+MPIR_Bcast_intra(1287)..: 
+MPIR_Bcast_binomial(310): Failure during collective
+Fatal error in PMPI_Barrier: Unknown error class, error stack:
+PMPI_Barrier(425).......: MPI_Barrier(MPI_COMM_WORLD) failed
+MPIR_Barrier_impl(332)..: Failure during collective
+MPIR_Barrier_impl(327)..: 
+MPIR_Barrier(292).......: 
+MPIR_Barrier_intra(150).: 
+barrier_smp_intra(111)..: 
+MPIR_Bcast_impl(1452)...: 
+MPIR_Bcast(1476)........: 
+MPIR_Bcast_intra(1287)..: 
+MPIR_Bcast_binomial(310): Failure during collective
+Fatal error in PMPI_Barrier: Unknown error class, error stack:
+PMPI_Barrier(425).......: MPI_Barrier(MPI_COMM_WORLD) failed
+MPIR_Barrier_impl(332)..: Failure during collective
+MPIR_Barrier_impl(327)..: 
+MPIR_Barrier(292).......: 
+MPIR_Barrier_intra(150).: 
+barrier_smp_intra(111)..: 
+MPIR_Bcast_impl(1452)...: 
+MPIR_Bcast(1476)........: 
+MPIR_Bcast_intra(1287)..: 
+MPIR_Bcast_binomial(310): Failure during collective
+Fatal error in PMPI_Barrier: Unknown error class, error stack:
+PMPI_Barrier(425).......: MPI_Barrier(MPI_COMM_WORLD) failed
+MPIR_Barrier_impl(332)..: Failure during collective
+MPIR_Barrier_impl(327)..: 
+MPIR_Barrier(292).......: 
+MPIR_Barrier_intra(150).: 
+barrier_smp_intra(111)..: 
+MPIR_Bcast_impl(1452)...: 
+MPIR_Bcast(1476)........: 
+MPIR_Bcast_intra(1287)..: 
+MPIR_Bcast_binomial(310): Failure during collective
+Fatal error in PMPI_Barrier: Unknown error class, error stack:
+PMPI_Barrier(425).......: MPI_Barrier(MPI_COMM_WORLD) failed
+MPIR_Barrier_impl(332)..: Failure during collective
+MPIR_Barrier_impl(327)..: 
+MPIR_Barrier(292).......: 
+MPIR_Barrier_intra(150).: 
+barrier_smp_intra(111)..: 
+MPIR_Bcast_impl(1452)...: 
+MPIR_Bcast(1476)........: 
+MPIR_Bcast_intra(1287)..: 
+MPIR_Bcast_binomial(310): Failure during collective

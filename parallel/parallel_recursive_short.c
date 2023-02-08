@@ -30,13 +30,13 @@ int main(int argc, char *argv[])
     }
 
     int MERGESORT_VERBOSE = 0, ENUMERATE_PAIRS_OF_POINTS = 0, PRINT_PAIRS_OF_POINTS = 0, INVALID_FLAG=0;
-    for (size_t option_id = 2; option_id < argc; option_id++) {
-        switch (argv[option_id][1]) {
+    for (size_t option_id = 2; option_id < argc; option_id++){
+        switch (argv[option_id][1]){
             case 'v': MERGESORT_VERBOSE = 1; break;
             case 'e': ENUMERATE_PAIRS_OF_POINTS = 1; break;
             case 'p': ENUMERATE_PAIRS_OF_POINTS = 1; PRINT_PAIRS_OF_POINTS = 1; break;
             default: INVALID_FLAG = 1; break;
-        }   
+        }
     }
     if (INVALID_FLAG == 1){
         if (rank_process == MASTER_PROCESS)
@@ -77,6 +77,10 @@ int main(int argc, char *argv[])
         fclose(point_file);
     }
 
+    // Send num_points to all the processes, it is used to compute the num_points variables
+    MPI_Bcast(&num_points, 1, MPI_INT, MASTER_PROCESS, MPI_COMM_WORLD);
+    MPI_Bcast(&num_dimensions, 1, MPI_INT, MASTER_PROCESS, MPI_COMM_WORLD);
+    
     // Get the points data for all the points and order them according to x coordinate
     Point *all_points = NULL;
     all_points = parallelMergeSort(all_points, argv[1], rank_process, comm_size, MERGESORT_VERBOSE);
@@ -88,9 +92,6 @@ int main(int argc, char *argv[])
             return -1;
         }
     }
-    // Send num_points to all the processes, it is used to compute the num_points variables
-    MPI_Bcast(&num_points, 1, MPI_INT, MASTER_PROCESS, MPI_COMM_WORLD);
-    MPI_Bcast(&num_dimensions, 1, MPI_INT, MASTER_PROCESS, MPI_COMM_WORLD);
 
     // Points are divided equally on all processes exept master process which takes the remaing points
     int num_points_normal_processes, num_points_master_process;
@@ -117,7 +118,7 @@ int main(int argc, char *argv[])
         pairs->min_distance = INT_MAX;
 
             printf("Launching sequential algorithm...\n");
-            recSplit(all_points, num_points, pairs);
+            recSplit(all_points, num_points, pairs, rank_process);
             double global_dmin = pairs->min_distance;
             printf("---GLOBAL DMIN: %f\n", global_dmin);
 

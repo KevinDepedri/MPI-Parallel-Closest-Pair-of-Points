@@ -30,13 +30,13 @@ int main(int argc, char *argv[])
     }
 
     int MERGESORT_VERBOSE = 0, ENUMERATE_PAIRS_OF_POINTS = 0, PRINT_PAIRS_OF_POINTS = 0, INVALID_FLAG = 0;
-    for (size_t option_id = 2; option_id < argc; option_id++) {
-        switch (argv[option_id][1]) {
+    for (size_t option_id = 2; option_id < argc; option_id++){
+        switch (argv[option_id][1]){
             case 'v': MERGESORT_VERBOSE = 1; break;
             case 'e': ENUMERATE_PAIRS_OF_POINTS = 1; break;
             case 'p': ENUMERATE_PAIRS_OF_POINTS = 1; PRINT_PAIRS_OF_POINTS = 1; break;
             default: INVALID_FLAG = 1; break;
-        }   
+        }
     }
     if (INVALID_FLAG == 1){
         if (rank_process == MASTER_PROCESS)
@@ -239,10 +239,13 @@ int main(int argc, char *argv[])
         }
 
         free(temporary_indexes);
-        free(processes_sorted_points);
+        // for (int process = 1; process < comm_size; process++)
+        //     free(processes_sorted_points[process];)
+        free(processes_sorted_points); //SHOULD ALSO CHECK ITS SUB COMPONENTS BEFORE FREEING IT? TEST THE LINES ABOVE
     }
-
-    for (int point = 0; point < num_points_local_process; point++)
+    
+    //if (rank_process != MASTER_PROCESS)
+    for (int point = 0; point < num_points_local_process; point++) // AS AT END OF PHASE 2 SHOULD WE NOT FREE IT FOR MASTER_PROCESS ??
         free(local_points[point].coordinates);
     free(local_points);
 
@@ -257,7 +260,6 @@ int main(int argc, char *argv[])
     if(comm_size == 2)
     {
         if(rank_process == MASTER_PROCESS){
-            // Pairs will store the pairs of points with minimum distance and their distance data
             pairs = (Pairs *)malloc(sizeof(Pairs));
 
             pairs->points1 = (Point *)malloc((num_points) * sizeof(Point));
@@ -269,12 +271,12 @@ int main(int argc, char *argv[])
             pairs->num_pairs = 0;
             pairs->min_distance = INT_MAX;
 
-                printf("Launching sequential algorithm...\n");
-                recSplit(all_points, num_points, pairs);
-                double global_dmin = pairs->min_distance;
-                printf("---GLOBAL DMIN: %f\n", global_dmin);
+            printf("Launching sequential algorithm...\n");
+            recSplit(all_points, num_points, pairs, rank_process);
+            double global_dmin = pairs->min_distance;
+            printf("---GLOBAL DMIN: %f\n", global_dmin);
 
-                getUniquePairs(pairs, global_dmin, rank_process, comm_size, ENUMERATE_PAIRS_OF_POINTS, PRINT_PAIRS_OF_POINTS);
+            getUniquePairs(pairs, global_dmin, rank_process, comm_size, ENUMERATE_PAIRS_OF_POINTS, PRINT_PAIRS_OF_POINTS);
           
             // Free all points and pairs
             for (int point = 0; point < num_points; point++)
@@ -369,7 +371,6 @@ int main(int argc, char *argv[])
         MPI_Recv(&right_x_out_of_region, 1, MPI_INT, 0, 3, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
 
-
     // POINT 2 - compute min distance for each process
     double local_dmin = INT_MAX;
     pairs = (Pairs *)malloc(sizeof(Pairs));
@@ -385,11 +386,10 @@ int main(int argc, char *argv[])
     pairs->min_distance = INT_MAX;
 
     if (num_points_local_process > 1){
-        recSplit(local_points, num_points_local_process, pairs);
+        recSplit(local_points, num_points_local_process, pairs, rank_process);
         local_dmin = pairs->min_distance;
     }
     printf("PROCESS:%d DMIN:%f\n", rank_process, local_dmin);
-
 
     // POINT 3 - Allreduce the local_dmin of each process to find the global_dmin and give this value to all the processes
     double global_dmin = INT_MAX;
@@ -499,10 +499,6 @@ int main(int argc, char *argv[])
             for (int dimension = 0; dimension < num_dimensions; dimension++)
                 local_strip_points[point+num_points_right_partial_strip].coordinates[dimension] = received_points[point].coordinates[dimension];
         }
-        for (int point = 0; point < num_points_received; point++)
-            free(received_points[point].coordinates);
-        free(received_points);
-
 
         // POINT 7 - Reorder point in the local_strip_points over y. Then each process compute the min distance for its strip
         mergeSort(local_strip_points, num_points_local_strip, 1);
@@ -531,8 +527,13 @@ int main(int argc, char *argv[])
                 }
             }
         }
-        // Update each local_dmin with the new dmin_local_strip just found. Then free local_strip_points
+        // Update each local_dmin with the new dmin_local_strip just found. 
         local_dmin = dmin_local_strip;
+
+        // Free received_points and local_strip_points
+        for (int point = 0; point < num_points_received; point++)
+            free(received_points[point].coordinates);
+        free(received_points);
         free(local_strip_points);
     }
     
@@ -543,24 +544,32 @@ int main(int argc, char *argv[])
 
     getUniquePairs(pairs, global_dmin, rank_process, comm_size, ENUMERATE_PAIRS_OF_POINTS, PRINT_PAIRS_OF_POINTS);
 
+    // Free all the memory previously allocated
     // Free all points, its internal parameter are deallocated only by MASTER_PROCESS since it is the only process which has them
+    printf("Free all points...\n");
     if (rank_process == MASTER_PROCESS)
         for (int point = 0; point < num_points; point++)
             free(all_points[point].coordinates);
     free(all_points);
 
-    // Free all the memory previously allocated
-    for (int point = 0; point < num_points_local_process; point++)
-        free(local_points[point].coordinates);
+    // Local points internal parameter for MASTER_PROCESS are already deallocated calling free on all_points since they are the same inside MASTER_PROCESS
+    printf("Free local points...\n");
+    if (rank_process != MASTER_PROCESS)
+        for (int point = 0; point < num_points_local_process; point++) // SHOULD WE DO THE SAME AT END OF PHASE 1 (MERGESORT) ??
+            free(local_points[point].coordinates);
     free(local_points);
 
+    printf("Free left strip points...\n");
     for (int point = 0; point < num_points_left_partial_strip; point++)
-        free(left_partial_strip_points[point].coordinates);
+        free(left_partial_strip_points[point].coordinates); // THIS COULD LEAD TO ERROR SINCE IT IS FILLED WITH LOCAL POINTS (FREED ABOVE)??
     free(left_partial_strip_points);
 
+    printf("Free right strip points...\n");
     for (int point = 0; point < num_points_right_partial_strip; point++)
-        free(right_partial_strip_points[point].coordinates);
+        free(right_partial_strip_points[point].coordinates); // THIS COULD LEAD TO ERROR SINCE IT IS FILLED WITH LOCAL POINTS (FREED ABOVE) ??
     free(right_partial_strip_points);
+
+    printf("Free pairs...\n");
     free(pairs);
     
     // Use a barrier to alling all the cores and then get the execution time

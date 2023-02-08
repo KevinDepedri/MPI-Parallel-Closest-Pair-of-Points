@@ -12,4 +12,4 @@ PROCESS:7 DMIN:3.464102
 (31, -1263, 590, 474, 1499)(31, -1263, 589, 474, 1500)
 Found a total of 1 pairs of points with DMIN=1.414214
 Memory free
-Time elapsed: 2259.160000
+Time elapsed: 2778.170000

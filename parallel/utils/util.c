@@ -151,39 +151,47 @@ void printPoint(Point p){
     printf(")");
 }
 
-void UpdatePairs(Point point1, Point point2, Pairs* p){
-    double current_distance = distance(point1, point2);
-    
-    if(current_distance < p->min_distance){
-        p->min_distance = current_distance;
-        p->points1[0] = point1;
-        p->points2[0] = point2;
-        p->num_pairs = 1;
+void UpdatePairs(Point point1, Point point2, Pairs* p, int rank){
+    if (differPoint(point1, point2)){
+        double current_distance = distance(point1, point2);
         
+        if(current_distance < p->min_distance){
+            p->min_distance = current_distance;
+            p->points1[0] = point1;
+            p->points2[0] = point2;
+            p->num_pairs = 1;
+            // if (rank == 1){
+            //     printf("New min found: %f using points: [",current_distance);
+            //     printPoint(point1);
+            //     printPoint(point2);
+            //     printf("]\n");
+            // }
+            
+        }
+        else if (current_distance == p->min_distance){   
+            p->points1[p->num_pairs] = point1;
+            p->points2[p->num_pairs] = point2;
+            p->num_pairs++;
+        }
+        return;
     }
-    else if (current_distance == p->min_distance){   
-        p->points1[p->num_pairs] = point1;
-        p->points2[p->num_pairs] = point2;
-        p->num_pairs++;
-    }
-    return;
 }
 
-void recSplit(Point* points, int dim, Pairs* p){
+void recSplit(Point* points, int dim, Pairs* p, int rank){
     if (dim == 2){
-        UpdatePairs(points[0], points[1], p);
+        UpdatePairs(points[0], points[1], p, rank);
         return;
     }
     else if (dim == 3){
-        UpdatePairs(points[0], points[1], p);
-        UpdatePairs(points[0], points[2], p);
-        UpdatePairs(points[2], points[1], p);
+        UpdatePairs(points[0], points[1], p, rank);
+        UpdatePairs(points[0], points[2], p, rank);
+        UpdatePairs(points[2], points[1], p, rank);
         return;
     }
     else{
         int mid = dim / 2;
-        recSplit(points, mid, p);
-        recSplit(points + mid, dim - mid, p);
+        recSplit(points, mid, p, rank);
+        recSplit(points + mid, dim - mid, p, rank);
         double d = p->min_distance;
         
         Point *strip = (Point *)malloc(dim * sizeof(Point));
@@ -198,18 +206,25 @@ void recSplit(Point* points, int dim, Pairs* p){
         mergeSort(strip, num_points_in_strip, 1);
         for (int point = 0; point < num_points_in_strip - 1; point++){
             for (int next_point = point + 1; next_point < num_points_in_strip && abs(strip[next_point].coordinates[1] - strip[point].coordinates[1]) <= d; next_point++){
-                double current_distance = distance(strip[point], strip[next_point]);
-                if (current_distance < p->min_distance){
-                    p->min_distance = current_distance;
-                    p->points1[0] = strip[point];
-                    p->points2[0] = strip[next_point];
-                    p->num_pairs = 1;
-                    
-                }
-                else if (current_distance == p->min_distance){
-                    p->points1[p->num_pairs] = strip[point];
-                    p->points2[p->num_pairs] = strip[next_point];
-                    p->num_pairs++;
+                if (differPoint(strip[point], strip[next_point])){
+                    double current_distance = distance(strip[point], strip[next_point]);
+                    if (current_distance < p->min_distance){
+                        p->min_distance = current_distance;
+                        p->points1[0] = strip[point];
+                        p->points2[0] = strip[next_point];
+                        p->num_pairs = 1;
+                        // if (rank == 1){
+                        //     printf("STRIP: New min found: %f using points: [",current_distance);
+                        //     printPoint(strip[point]);
+                        //     printPoint(strip[next_point]);
+                        //     printf("] which are in strip in position %d and %d\n",point,next_point);
+                        // }
+                    }
+                    else if (current_distance == p->min_distance){
+                        p->points1[p->num_pairs] = strip[point];
+                        p->points2[p->num_pairs] = strip[next_point];
+                        p->num_pairs++;
+                    }
                 }
             }
         }
@@ -478,7 +493,7 @@ void parallelClosestPair(Point *all_points, int num_points, int num_dimensions, 
     pairs->min_distance = INT_MAX;
 
     if (num_points_local_process > 1){
-        recSplit(local_points, num_points_local_process, pairs);
+        recSplit(local_points, num_points_local_process, pairs, rank_process);
         local_dmin = pairs->min_distance;
     }
     printf("PROCESS:%d DMIN:%f\n", rank_process, local_dmin);

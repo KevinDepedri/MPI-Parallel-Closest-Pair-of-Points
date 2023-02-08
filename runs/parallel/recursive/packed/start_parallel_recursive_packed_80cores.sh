@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -l select=2:ncpus=8:mem=2gb -l place=pack
+#PBS -l select=2:ncpus=40:mem=2gb -l place=pack
 
 # Set max execution time
 #PBS -l walltime=1:00:00

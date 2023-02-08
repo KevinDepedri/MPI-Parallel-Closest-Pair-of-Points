@@ -32,7 +32,7 @@ extern double isMINof3(double, double, double);
 
 extern void printPoint(Point);
 
-extern void recSplit(Point*, int, Pairs*); 
+extern void recSplit(Point*, int, Pairs*, int); 
 
 extern Point *parallelMergeSort(Point *, char[], int, int, int);
 
