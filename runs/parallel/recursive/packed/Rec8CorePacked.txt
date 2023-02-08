@@ -5,11 +5,16 @@ PROCESS:1 DMIN:2.449490
 PROCESS:6 DMIN:2.828427
 PROCESS:4 DMIN:1.414214
 PROCESS:3 DMIN:3.162278
-PROCESS:5 DMIN:1.732051
 PROCESS:7 DMIN:3.464102
+PROCESS:5 DMIN:1.732051
 ---GLOBAL DMIN: 1.414214
 ---NEW GLOBAL DMIN: 1.414214
 (31, -1263, 590, 474, 1499)(31, -1263, 589, 474, 1500)
 Found a total of 1 pairs of points with DMIN=1.414214
+Free local points...
+Free left strip points...
+Free right strip points...
+Free pairs...
+Free all points...
 Memory free
-Time elapsed: 2654.460000
+Time elapsed: 2837.260000
