@@ -391,11 +391,14 @@ Point * parallelMergeSort(Point *all_points, char path[], int rank_process, int 
         }
 
         free(temporary_indexes);
+        for (int process = 1; process < comm_size; process++)
+            free(processes_sorted_points[process]);
         free(processes_sorted_points);
     }
 
-    for (int point = 0; point < num_points_local_process; point++)
-        free(local_points[point].coordinates);
+    if (rank_process != MASTER_PROCESS)
+        for (int point = 0; point < num_points_local_process; point++)
+            free(local_points[point].coordinates);
     free(local_points);
 
     return all_points;
@@ -652,17 +655,27 @@ void parallelClosestPair(Point *all_points, int num_points, int num_dimensions, 
     getUniquePairs(pairs, global_dmin, rank_process, comm_size, enumerate, print);
 
     // Free all the memory previously allocated
-    for (int point = 0; point < num_points_local_process; point++)
-        free(local_points[point].coordinates);
+    // local_points internal parameter for MASTER_PROCESS are already deallocated calling free on all_points since they are the same inside MASTER_PROCESS
+    if (rank_process == MASTER_PROCESS)
+        printf("Free local points...\n");
+    if (rank_process != MASTER_PROCESS)
+        for (int point = 0; point < num_points_local_process; point++)
+            free(local_points[point].coordinates);
     free(local_points);
 
-    for (int point = 0; point < num_points_left_partial_strip; point++)
-        free(left_partial_strip_points[point].coordinates);
+    // left_partial_strip_points internal parameter are already deallocated calling free on local_points since they are the same
+    if (rank_process == MASTER_PROCESS)
+        printf("Free left strip points...\n");
     free(left_partial_strip_points);
 
-    for (int point = 0; point < num_points_right_partial_strip; point++)
-        free(right_partial_strip_points[point].coordinates);
+    // right_partial_strip_points internal parameter are already deallocated calling free on local_points since they are the same
+    if (rank_process == MASTER_PROCESS)
+        printf("Free right strip points...\n");
     free(right_partial_strip_points);
+
+    // pairs internal parameter are already deallocated calling free on local_points since they are the same
+    if (rank_process == MASTER_PROCESS)
+        printf("Free pairs...\n");
     free(pairs);
 }
 

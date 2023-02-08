@@ -10,3 +10,4 @@ runs/parallel/recursive/mpi_recursive_short
 runs/parallel/recursive/mpi_recursive_long
 runs/sequential/bruteforce/sequential_bruteforce
 runs/sequential/recursive/sequential_recursive
+parallel/mpi_*.*

@@ -239,14 +239,14 @@ int main(int argc, char *argv[])
         }
 
         free(temporary_indexes);
-        // for (int process = 1; process < comm_size; process++)
-        //     free(processes_sorted_points[process];)
-        free(processes_sorted_points); //SHOULD ALSO CHECK ITS SUB COMPONENTS BEFORE FREEING IT? TEST THE LINES ABOVE
+        for (int process = 1; process < comm_size; process++)
+            free(processes_sorted_points[process]);
+        free(processes_sorted_points);
     }
     
-    //if (rank_process != MASTER_PROCESS)
-    for (int point = 0; point < num_points_local_process; point++) // AS AT END OF PHASE 2 SHOULD WE NOT FREE IT FOR MASTER_PROCESS ??
-        free(local_points[point].coordinates);
+    if (rank_process != MASTER_PROCESS)
+        for (int point = 0; point < num_points_local_process; point++)
+            free(local_points[point].coordinates);
     free(local_points);
 
     // Pairs will store the pairs of points with minimum distance and their distance data
@@ -396,7 +396,6 @@ int main(int argc, char *argv[])
     MPI_Allreduce(&local_dmin, &global_dmin, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
     if (rank_process == MASTER_PROCESS)
         printf("---GLOBAL DMIN: %f\n", global_dmin);
-    
 
     // POINT 4 - compute the boundary between processes
     double left_boundary = -INT_MAX, right_boundary = INT_MAX;
@@ -407,7 +406,6 @@ int main(int argc, char *argv[])
     if(rank_process != MASTER_PROCESS && (rank_process != comm_size - 1 || num_points_master_process != 0))
         right_boundary = (right_x_out_of_region + local_points[num_points_local_process-1].coordinates[AXIS])/2.0;
     
-
     // POINT 5 - get the points in the lateral strips for each process, get for both left side strip and right side strip
     int num_points_left_partial_strip = 0, num_points_right_partial_strip = 0;
     Point *left_partial_strip_points = (Point *)malloc(num_points_local_process * sizeof(Point));
@@ -442,7 +440,6 @@ int main(int argc, char *argv[])
         else
             break;
     }
-
 
     // POINT 6 - move points of left side strip to the point to the left process. Then merge the moved left points with the right points of the target process
     if (rank_process != 1  && rank_process != MASTER_PROCESS)
@@ -545,31 +542,35 @@ int main(int argc, char *argv[])
     getUniquePairs(pairs, global_dmin, rank_process, comm_size, ENUMERATE_PAIRS_OF_POINTS, PRINT_PAIRS_OF_POINTS);
 
     // Free all the memory previously allocated
-    // Free all points, its internal parameter are deallocated only by MASTER_PROCESS since it is the only process which has them
-    printf("Free all points...\n");
+    // Free all_points, its internal parameter are deallocated only by MASTER_PROCESS since it is the only process which has them
+    if (rank_process == MASTER_PROCESS)
+        printf("Free all points...\n");
     if (rank_process == MASTER_PROCESS)
         for (int point = 0; point < num_points; point++)
             free(all_points[point].coordinates);
     free(all_points);
 
-    // Local points internal parameter for MASTER_PROCESS are already deallocated calling free on all_points since they are the same inside MASTER_PROCESS
-    printf("Free local points...\n");
+    // local_points internal parameter for MASTER_PROCESS are already deallocated calling free on all_points since they are the same inside MASTER_PROCESS
+    if (rank_process == MASTER_PROCESS)
+        printf("Free local points...\n");
     if (rank_process != MASTER_PROCESS)
-        for (int point = 0; point < num_points_local_process; point++) // SHOULD WE DO THE SAME AT END OF PHASE 1 (MERGESORT) ??
+        for (int point = 0; point < num_points_local_process; point++)
             free(local_points[point].coordinates);
     free(local_points);
 
-    printf("Free left strip points...\n");
-    for (int point = 0; point < num_points_left_partial_strip; point++)
-        free(left_partial_strip_points[point].coordinates); // THIS COULD LEAD TO ERROR SINCE IT IS FILLED WITH LOCAL POINTS (FREED ABOVE)??
+    // left_partial_strip_points internal parameter are already deallocated calling free on local_points since they are the same
+    if (rank_process == MASTER_PROCESS)
+        printf("Free left strip points...\n");
     free(left_partial_strip_points);
 
-    printf("Free right strip points...\n");
-    for (int point = 0; point < num_points_right_partial_strip; point++)
-        free(right_partial_strip_points[point].coordinates); // THIS COULD LEAD TO ERROR SINCE IT IS FILLED WITH LOCAL POINTS (FREED ABOVE) ??
+    // right_partial_strip_points internal parameter are already deallocated calling free on local_points since they are the same
+    if (rank_process == MASTER_PROCESS)
+        printf("Free right strip points...\n");
     free(right_partial_strip_points);
 
-    printf("Free pairs...\n");
+    // pairs internal parameter are already deallocated calling free on local_points since they are the same
+    if (rank_process == MASTER_PROCESS)
+        printf("Free pairs...\n");
     free(pairs);
     
     // Use a barrier to alling all the cores and then get the execution time
