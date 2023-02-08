@@ -278,10 +278,14 @@ int main(int argc, char *argv[])
 
             getUniquePairs(pairs, global_dmin, rank_process, comm_size, ENUMERATE_PAIRS_OF_POINTS, PRINT_PAIRS_OF_POINTS);
           
-            // Free all points and pairs
+            // Free all the memory previously allocated
+            // Free all_points, its internal parameter are deallocated only by MASTER_PROCESS since it is the only process which has them
+            printf("Free all points...\n");
             for (int point = 0; point < num_points; point++)
                 free(all_points[point].coordinates);
             free(all_points);
+            // pairs internal parameter are already deallocated calling free on all_points since they are the same
+            printf("Free pairs...\n");
             free(pairs);
         }   
 

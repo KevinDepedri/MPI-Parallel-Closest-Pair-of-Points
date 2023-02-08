@@ -124,6 +124,8 @@ int main(int argc, char *argv[])
 
             getUniquePairs(pairs, global_dmin, rank_process, comm_size, ENUMERATE_PAIRS_OF_POINTS, PRINT_PAIRS_OF_POINTS);
         
+        if (rank_process == MASTER_PROCESS)
+            printf("Free pairs...\n");
         free(pairs);
         }
     }
@@ -142,6 +144,8 @@ int main(int argc, char *argv[])
     }
 
     // Print the final minimum distance and free the memory
+    if (rank_process == MASTER_PROCESS)
+        printf("Free all points...\n");
     if (rank_process == MASTER_PROCESS)
         for (int point = 0; point < num_points; point++)
             free(all_points[point].coordinates);
