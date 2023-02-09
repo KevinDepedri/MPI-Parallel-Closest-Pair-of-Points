@@ -142,7 +142,7 @@ void sendPointsPackedAuto(Point* points, int numPoints, int destination, int tag
 
         for (int point = 0; point < num_points_per_tranche; point++){
             MPI_Pack(&points[point+(num_points_per_tranche*tranche)].num_dimensions, 1, MPI_INT, buffer, sendBufferSize, &position, comm);
-            MPI_Pack(points[point+(num_points_per_tranche*tranch)].coordinates, points[point+(num_points_per_tranche*tranch)].num_dimensions, MPI_INT, buffer, sendBufferSize, &position, comm);
+            MPI_Pack(points[point+(num_points_per_tranche*tranche)].coordinates, points[point+(num_points_per_tranche*tranche)].num_dimensions, MPI_INT, buffer, sendBufferSize, &position, comm);
         }
 
         MPI_Send(buffer, position, MPI_PACKED, destination, tag, comm);
@@ -183,7 +183,7 @@ void recvPointsPackedAuto(Point* points, int numPoints, int source, int tag, MPI
 
     int tranches_sent = 0;
     int position = 0; // DO WE NEED TO UPDATE IT?? I DON'T KNOW ITS USE, SAME FOR POSITION IN THE SEND
-    for (int tranch; tranch < num_tranches; tranch++){
+    for (int tranche; tranche < num_tranches; tranche++){
         int receivedBufferSize = size_of_point*num_points_per_tranche;
         void* buffer = malloc(receivedBufferSize);
 
