@@ -87,6 +87,7 @@ double recSplit(Point* points, int dim){
         double d1 = recSplit(points, mid);
         double d2 = recSplit(points + mid, dim - mid);
         double d = isMIN(d1, d2);
+
         Point *strip = (Point *)malloc(dim * sizeof(Point));
         int j = 0;
         for (int i = 0; i < dim; i++){
@@ -95,6 +96,7 @@ double recSplit(Point* points, int dim){
                 j++;
             }
         }
+        
         mergeSort(strip, j, 1);
         double min = d;
         for (int i = 0; i < j - 1; i++){
