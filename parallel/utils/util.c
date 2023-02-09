@@ -114,28 +114,97 @@ void sendPointsPacked(Point* points, int numPoints, int destination, int tag, MP
 
 void sendPointsPackedAuto(Point* points, int numPoints, int destination, int tag, MPI_Comm comm){
     int size_of_point = (sizeof(int) + sizeof(int)*points[0].num_dimensions);
-    // unsigned long totalSendBufferSize = numPoints * size_of_point; // COULD BE USELESS
-
     int num_points_per_tranche = INT_MAX/size_of_point;
-    int num_full_tranches = numPoints/num_points_per_tranche;
+    int num_tranches = 0;
     int num_points_final_partial_tranche = 0;
-    // if ()
-    //     num_points_final_partial_tranche = numPoints - num_full_tranches * num_points_per_tranche; 
 
-    MPI_Send(&num_full_tranches, 1, MPI_INT, destination, tag, comm);
-    MPI_Send(&num_points_final_partial_tranche, 1, MPI_INT, destination, tag, comm);
+    // Compute the number of tranches, of point per tranches and the number of points in the final partial last tranche
+    if (numPoints > num_points_per_tranche){
+        num_tranches = numPoints/num_points_per_tranche;
+        num_points_final_partial_tranche = numPoints - num_tranches * num_points_per_tranche;
+    }else{
+        num_tranches = 1;
+        num_points_per_tranche = numPoints;
+    }
+    
+    // Send all the information required for the reception loop
+    MPI_Send(&size_of_point, 1, MPI_INT, destination, 0, comm);
+    MPI_Send(&num_points_per_tranche, 1, MPI_INT, destination, 1, comm);
+    MPI_Send(&num_tranches, 1, MPI_INT, destination, 2, comm);
+    MPI_Send(&num_points_final_partial_tranche, 1, MPI_INT, destination, 3, comm);
 
-    for (int tranche = 0; tranche < num_full_tranches; tranche++){
+    // Send the normal tranches with full size, or just one single tranch with lower size if it is enough
+    int tranches_sent = 0;
+    for (int tranche = 0; tranche < num_tranches; tranche++){
         int sendBufferSize = num_points_per_tranche * size_of_point;
         void *buffer = malloc(sendBufferSize);
-        int position = 0;
+        int position = 0; // DO WE NEED TO UPDATE IT?? I DON'T KNOW ITS USE, SAME FOR POSITION IN THE RECEIVE
 
         for (int point = 0; point < num_points_per_tranche; point++){
-            MPI_Pack(&points[point].num_dimensions, 1, MPI_INT, buffer, sendBufferSize, &position, comm);
-            MPI_Pack(points[point].coordinates, points[point].num_dimensions, MPI_INT, buffer, sendBufferSize, &position, comm);
+            MPI_Pack(&points[point+(num_points_per_tranche*tranche)].num_dimensions, 1, MPI_INT, buffer, sendBufferSize, &position, comm);
+            MPI_Pack(points[point+(num_points_per_tranche*tranch)].coordinates, points[point+(num_points_per_tranche*tranch)].num_dimensions, MPI_INT, buffer, sendBufferSize, &position, comm);
         }
 
         MPI_Send(buffer, position, MPI_PACKED, destination, tag, comm);
+        free(buffer);
+        tranches_sent++;
+    }
+
+    // If the normal tranches have left out some points, then send them in a final partial last tranche
+    if (num_points_final_partial_tranche > 0){
+        int sendBufferSize = num_points_final_partial_tranche * size_of_point;
+        void *buffer = malloc(sendBufferSize);
+        int position = 0; // DO WE NEED TO UPDATE IT?? I DON'T KNOW ITS USE, SAME FOR POSITION IN THE RECEIVE
+
+        for (int point = 0; point < num_points_final_partial_tranche; point++){
+            MPI_Pack(&points[point+(num_points_per_tranche*tranches_sent)].num_dimensions, 1, MPI_INT, buffer, sendBufferSize, &position, comm);
+            MPI_Pack(points[point+(num_points_per_tranche*tranches_sent)].coordinates, points[point+(num_points_per_tranche*tranches_sent)].num_dimensions, MPI_INT, buffer, sendBufferSize, &position, comm);
+        }
+
+        MPI_Send(buffer, position, MPI_PACKED, destination, tag, comm);
+        free(buffer);
+    }
+}
+
+void recvPointsPackedAuto(Point* points, int numPoints, int source, int tag, MPI_Comm comm){
+    int size_of_point, num_points_per_tranche = 0, num_tranches = 0, num_points_final_partial_tranche = 0;
+
+    // Receive all the information required for the reception loop
+    MPI_Recv(&size_of_point, 1, MPI_INT, source, 0, comm, MPI_STATUS_IGNORE);
+    MPI_Recv(&num_points_per_tranche, 1, MPI_INT, source, 1, comm, MPI_STATUS_IGNORE);
+    MPI_Recv(&num_tranches, 1, MPI_INT, source, 2, comm, MPI_STATUS_IGNORE);
+    MPI_Recv(&num_points_final_partial_tranche, 1, MPI_INT, source, 3, comm, MPI_STATUS_IGNORE);
+
+    // I THINK THIS BELOW CAN BE LEFT OUT IN THIS CASE SINCE WE ALREADY SENT-RECEIVE ALL THE INFORMATION TO BUILD THE RECEPTION LOOP. RIGHT????
+    // MPI_Status status;
+    // MPI_Probe(source, tag, comm, &status);
+    // MPI_Get_count(&status, MPI_PACKED, &receivedBufferSize);
+    // MPI_Recv(buffer, receivedBufferSize, MPI_PACKED, source, tag, comm, MPI_STATUS_IGNORE);
+
+    int tranches_sent = 0;
+    int position = 0; // DO WE NEED TO UPDATE IT?? I DON'T KNOW ITS USE, SAME FOR POSITION IN THE SEND
+    for (int tranch; tranch < num_tranches; tranch++){
+        int receivedBufferSize = size_of_point*num_points_per_tranche;
+        void* buffer = malloc(receivedBufferSize);
+
+        for (int point = 0; point < num_points_per_tranche; point++) {
+            MPI_Unpack(buffer, receivedBufferSize, &position, &points[point+(num_points_per_tranche*tranche)].num_dimensions, 1, MPI_INT, comm);
+            points[point].coordinates = (int*)malloc(points[point+(num_points_per_tranche*tranche)].num_dimensions * sizeof(int));
+            MPI_Unpack(buffer, receivedBufferSize, &position, points[point+(num_points_per_tranche*tranche)].coordinates, points[point+(num_points_per_tranche*tranche)].num_dimensions, MPI_INT, comm);
+        }
+        free(buffer);
+        tranches_sent++;
+    }
+
+    if (num_points_final_partial_tranche > 0){
+        int receivedBufferSize = size_of_point*num_points_final_partial_tranche;
+        void* buffer = malloc(receivedBufferSize);
+
+        for (int point = 0; point < num_points_final_partial_tranche; point++) {
+            MPI_Unpack(buffer, receivedBufferSize, &position, &points[point+(num_points_per_tranche*tranches_sent)].num_dimensions, 1, MPI_INT, comm);
+            points[point].coordinates = (int*)malloc(points[point+(num_points_per_tranche*tranches_sent)].num_dimensions * sizeof(int));
+            MPI_Unpack(buffer, receivedBufferSize, &position, points[point+(num_points_per_tranche*tranches_sent)].coordinates, points[point+(num_points_per_tranche*tranches_sent)].num_dimensions, MPI_INT, comm);
+        }
         free(buffer);
     }
 }
