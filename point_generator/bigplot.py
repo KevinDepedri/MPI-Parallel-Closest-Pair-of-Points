@@ -1,13 +1,12 @@
 # file to create the big plot for the report
 cores = [1, 2, 4, 8, 16, 32, 64]
-times_pack = [4500.0, 4500.0, 3267.99, 2559.39, 1364.78, 1216.56, 933.45]
+times_pack = [49000.0, 49000.0, 3267.99, 2559.39, 1364.78, 1216.56, 933.45]
 # filled with dummy data for now
 times_scater = [4343.12, 4343.12, 3354.87, 2559.39, 1364.78, 1216.56, 933.45]
 times_exc_p = [4555.23, 4555.23, 3267.99, 2559.39, 1364.78, 1216.56, 933.45]
 times_exc_s = [4300.12, 4300.12, 3334.87, 2767.39, 1364.78, 1216.56, 933.45]
 
 import matplotlib.pyplot as plt
-import numpy as np
 
 fig, ax = plt.subplots()
 ax.plot(cores, times_pack, label='Pack', color='darkblue')
