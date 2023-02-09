@@ -45,7 +45,8 @@ int main(int argc, char *argv[]){
 
     // sort the points by the first dimension
     mergeSort(points, num_points, 0);
-
+    printf("MERGESORT DONE\n");
+    
     // find the closest pair of points
     double d = recSplit(points, num_points);
 

@@ -17,3 +17,4 @@ sequential/sequential_bruteforce
 sequential/sequential_bruteforce.exe
 sequential/sequential_recursive
 sequential/sequential_recursive.exe
+sequential/mpi_test
