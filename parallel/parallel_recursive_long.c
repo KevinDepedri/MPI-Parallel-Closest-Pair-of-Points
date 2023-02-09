@@ -122,10 +122,13 @@ int main(int argc, char *argv[])
         // Transfer total number of points and the correct slice of points to work on for every process
         Point *points_to_send = NULL;
         points_to_send = (Point *)malloc(num_points_normal_processes * sizeof(Point));
+        for (int point = 0; point < num_points_normal_processes; point++)
+                points_to_send[point].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+
         for (int process = 1; process < comm_size; process++){
             for (int point = 0; point < num_points_normal_processes; point++){
                 points_to_send[point].num_dimensions = num_dimensions;
-                points_to_send[point].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+                
                 for (int dimension = 0; dimension < num_dimensions; dimension++)
                     points_to_send[point].coordinates[dimension] = all_points[point+num_points_normal_processes*(process-1)].coordinates[dimension];
             }
@@ -313,12 +316,14 @@ int main(int argc, char *argv[])
         // Transfer total number of points and the correct slice of points to work on for every process
         Point *points_to_send = NULL;
         points_to_send = (Point *)malloc(num_points_normal_processes * sizeof(Point));
+        for (int point = 0; point < num_points_normal_processes; point++)
+            points_to_send[point].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+
         int left_x_to_send = 0, right_x_to_send = 0;
         for (int process = 1; process < comm_size; process++){
 
             for (int point = 0; point < num_points_normal_processes; point++){
                 points_to_send[point].num_dimensions = num_dimensions;
-                points_to_send[point].coordinates = (int *)malloc(num_dimensions * sizeof(int));
             
                 for (int dimension = 0; dimension < num_dimensions; dimension++)
                     points_to_send[point].coordinates[dimension] = all_points[point+num_points_normal_processes*(process-1)].coordinates[dimension];

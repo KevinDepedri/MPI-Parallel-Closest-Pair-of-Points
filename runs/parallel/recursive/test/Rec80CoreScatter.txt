@@ -1,0 +1,120 @@
+Launching parallel algorithm...
+New min found: 3391.690729 using points: [(-2500, -1862, -509, 2230, 1882)(-2500, 824, 140, 267, 2002)]
+New min found: 3082.083711 using points: [(-2500, 2322, 2106, -685, 426)(-2500, 824, 140, 267, 2002)]
+New min found: 1910.714788 using points: [(-2500, 2061, -1011, 1047, 165)(-2500, 567, 158, 900, -10)]
+New min found: 1803.516010 using points: [(-2500, -2320, 1915, -556, 167)(-2500, -1368, 2237, 223, -1112)]
+STRIP: New min found: 582.102225 using points: [(-2500, -1862, -509, 2230, 1882)(-2500, -1793, -740, 1719, 2022)] which are in strip in position 3 and 4
+STRIP: New min found: 438.883812 using points: [(-2500, 838, -2230, 2334, 2053)(-2500, 965, -2409, 2054, 2310)] which are in strip in position 31 and 33
+STRIP: New min found: 203.710579 using points: [(-2500, -2447, 2095, -2158, -1010)(-2500, -2380, 2188, -2320, -964)] which are in strip in position 1 and 5
+STRIP: New min found: 186.072566 using points: [(-2500, 2275, -1429, 27, 1593)(-2500, 2386, -1320, 116, 1543)] which are in strip in position 45 and 47
+STRIP: New min found: 166.379085 using points: [(-2500, -2310, -609, 273, 2148)(-2500, -2210, -530, 193, 2219)] which are in strip in position 36 and 53
+STRIP: New min found: 161.127279 using points: [(-2500, 722, -115, -1704, 1162)(-2500, 834, -71, -1803, 1203)] which are in strip in position 501 and 526
+STRIP: New min found: 146.488907 using points: [(-2500, -1988, -1293, 143, -990)(-2500, -1917, -1320, 51, -905)] which are in strip in position 79 and 93
+STRIP: New min found: 121.474277 using points: [(-2500, -1994, 1545, -275, -23)(-2500, -1966, 1467, -223, 49)] which are in strip in position 172 and 183
+STRIP: New min found: 46.454279 using points: [(-2500, -2177, 1175, 1113, 115)(-2500, -2174, 1169, 1145, 82)] which are in strip in position 35 and 36
+STRIP: New min found: 44.497191 using points: [(-2500, -2367, -1782, -2361, -2308)(-2500, -2339, -1808, -2343, -2322)] which are in strip in position 312 and 392
+STRIP: New min found: 40.422766 using points: [(-2500, -397, 1915, -327, -1802)(-2500, -384, 1921, -304, -1832)] which are in strip in position 5239 and 5264
+STRIP: New min found: 22.315914 using points: [(-2500, 221, 2038, 1634, -1297)(-2500, 231, 2055, 1631, -1307)] which are in strip in position 13439 and 13481
+STRIP: New min found: 21.095023 using points: [(-2500, -776, -2083, -2311, 891)(-2500, -764, -2077, -2308, 875)] which are in strip in position 17156 and 17275
+STRIP: New min found: 16.522712 using points: [(-2500, 1015, 1443, 617, -752)(-2500, 1027, 1445, 622, -762)] which are in strip in position 34665 and 34798
+STRIP: New min found: 15.716234 using points: [(-2500, -2204, 2122, -1515, -400)(-2499, -2193, 2116, -1507, -405)] which are in strip in position 5936 and 6169
+STRIP: New min found: 15.099669 using points: [(-2499, -1374, 154, 1561, -1192)(-2500, -1373, 169, 1561, -1193)] which are in strip in position 22319 and 22331
+STRIP: New min found: 11.789826 using points: [(-2500, 273, -2346, -1641, -1385)(-2499, 274, -2357, -1645, -1385)] which are in strip in position 54689 and 54718
+STRIP: New min found: 9.055385 using points: [(-2499, -1546, 1581, 2024, -260)(-2498, -1544, 1577, 2018, -255)] which are in strip in position 37962 and 38027
+STRIP: New min found: 7.937254 using points: [(-2493, -2121, 1539, -563, -767)(-2497, -2118, 1538, -562, -761)] which are in strip in position 30300 and 30489
+STRIP: New min found: 7.280110 using points: [(-2499, -188, -432, -2321, 883)(-2496, -186, -434, -2321, 877)] which are in strip in position 183264 and 183447
+PROCESS:0 DMIN:362.162947
+STRIP: New min found: 6.782330 using points: [(-2488, -1527, 1232, -954, 1797)(-2491, -1523, 1234, -953, 1801)] which are in strip in position 77208 and 77510
+PROCESS:3 DMIN:2.449490
+PROCESS:54 DMIN:1.732051
+PROCESS:16 DMIN:2.449490
+STRIP: New min found: 5.830952 using points: [(-2475, -2421, 1348, 385, 2298)(-2472, -2421, 1348, 385, 2293)] which are in strip in position 6148 and 6178
+STRIP: New min found: 5.099020 using points: [(-2474, 2033, -2401, 1558, 917)(-2470, 2035, -2400, 1560, 916)] which are in strip in position 358790 and 358976
+PROCESS:10 DMIN:3.316625
+PROCESS:14 DMIN:2.645751
+PROCESS:22 DMIN:3.316625
+PROCESS:52 DMIN:3.872983
+PROCESS:18 DMIN:3.872983
+PROCESS:58 DMIN:3.605551
+PROCESS:12 DMIN:3.162278
+PROCESS:44 DMIN:3.741657
+PROCESS:64 DMIN:2.828427
+PROCESS:27 DMIN:3.872983
+PROCESS:15 DMIN:3.872983
+PROCESS:13 DMIN:3.000000
+PROCESS:7 DMIN:4.123106
+PROCESS:65 DMIN:3.162278
+PROCESS:34 DMIN:3.162278
+PROCESS:17 DMIN:3.162278
+STRIP: New min found: 4.898979 using points: [(-2450, 1271, -395, 1474, 968)(-2453, 1272, -397, 1473, 971)] which are in strip in position 149333 and 149341
+PROCESS:28 DMIN:4.242641
+PROCESS:19 DMIN:4.358899
+PROCESS:4 DMIN:3.605551
+PROCESS:9 DMIN:3.000000
+PROCESS:30 DMIN:3.464102
+PROCESS:41 DMIN:4.242641
+PROCESS:38 DMIN:4.000000
+PROCESS:70 DMIN:3.605551
+PROCESS:67 DMIN:4.795832
+PROCESS:31 DMIN:3.316625
+PROCESS:77 DMIN:3.464102
+PROCESS:39 DMIN:4.242641
+PROCESS:23 DMIN:4.690416
+PROCESS:51 DMIN:4.795832
+PROCESS:46 DMIN:4.358899
+PROCESS:40 DMIN:1.414214
+PROCESS:57 DMIN:4.242641
+PROCESS:43 DMIN:4.000000
+PROCESS:8 DMIN:4.242641
+PROCESS:55 DMIN:4.358899
+PROCESS:1 DMIN:4.898979
+PROCESS:60 DMIN:4.000000
+PROCESS:24 DMIN:3.316625
+PROCESS:42 DMIN:4.000000
+PROCESS:45 DMIN:4.123106
+PROCESS:68 DMIN:4.690416
+PROCESS:62 DMIN:4.690416
+PROCESS:20 DMIN:4.123106
+PROCESS:75 DMIN:3.872983
+PROCESS:78 DMIN:4.472136
+PROCESS:26 DMIN:4.582576
+PROCESS:74 DMIN:3.605551
+PROCESS:21 DMIN:4.690416
+PROCESS:73 DMIN:4.242641
+PROCESS:49 DMIN:5.567764
+PROCESS:5 DMIN:5.099020
+PROCESS:25 DMIN:5.196152
+PROCESS:59 DMIN:4.582576
+PROCESS:79 DMIN:4.795832
+PROCESS:50 DMIN:3.605551
+PROCESS:32 DMIN:5.196152
+PROCESS:66 DMIN:5.385165
+PROCESS:2 DMIN:4.690416
+PROCESS:63 DMIN:5.196152
+PROCESS:6 DMIN:5.000000
+PROCESS:36 DMIN:5.477226
+PROCESS:29 DMIN:4.242641
+PROCESS:53 DMIN:5.656854
+PROCESS:76 DMIN:5.000000
+PROCESS:56 DMIN:4.582576
+PROCESS:47 DMIN:5.196152
+PROCESS:72 DMIN:4.472136
+PROCESS:37 DMIN:4.582576
+PROCESS:61 DMIN:4.690416
+PROCESS:69 DMIN:4.358899
+PROCESS:35 DMIN:5.099020
+PROCESS:11 DMIN:5.477226
+PROCESS:71 DMIN:4.690416
+PROCESS:48 DMIN:4.358899
+PROCESS:33 DMIN:6.480741
+---GLOBAL DMIN: 1.414214
+---NEW GLOBAL DMIN: 1.414214
+(31, -1263, 589, 474, 1500)(31, -1263, 590, 474, 1499)
+Found a total of 1 pairs of points with DMIN=1.414214
+Free all points...
+Free local points...
+Free left strip points...
+Free right strip points...
+Free pairs...
+Memory free
+Time elapsed: 960.220000

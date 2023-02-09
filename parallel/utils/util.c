@@ -112,6 +112,34 @@ void sendPointsPacked(Point* points, int numPoints, int destination, int tag, MP
     free(buffer);
 }
 
+void sendPointsPackedAuto(Point* points, int numPoints, int destination, int tag, MPI_Comm comm){
+    int size_of_point = (sizeof(int) + sizeof(int)*points[0].num_dimensions);
+    // unsigned long totalSendBufferSize = numPoints * size_of_point; // COULD BE USELESS
+
+    int num_points_per_tranche = INT_MAX/size_of_point;
+    int num_full_tranches = numPoints/num_points_per_tranche;
+    int num_points_final_partial_tranche = 0;
+    // if ()
+    //     num_points_final_partial_tranche = numPoints - num_full_tranches * num_points_per_tranche; 
+
+    MPI_Send(&num_full_tranches, 1, MPI_INT, destination, tag, comm);
+    MPI_Send(&num_points_final_partial_tranche, 1, MPI_INT, destination, tag, comm);
+
+    for (int tranche = 0; tranche < num_full_tranches; tranche++){
+        int sendBufferSize = num_points_per_tranche * size_of_point;
+        void *buffer = malloc(sendBufferSize);
+        int position = 0;
+
+        for (int point = 0; point < num_points_per_tranche; point++){
+            MPI_Pack(&points[point].num_dimensions, 1, MPI_INT, buffer, sendBufferSize, &position, comm);
+            MPI_Pack(points[point].coordinates, points[point].num_dimensions, MPI_INT, buffer, sendBufferSize, &position, comm);
+        }
+
+        MPI_Send(buffer, position, MPI_PACKED, destination, tag, comm);
+        free(buffer);
+    }
+}
+
 void recvPointsPacked(Point* points, int numPoints, int source, int tag, MPI_Comm comm){
     MPI_Status status;
     MPI_Probe(source, tag, comm, &status);
@@ -152,7 +180,7 @@ void printPoint(Point p){
 }
 
 void UpdatePairs(Point point1, Point point2, Pairs* p, int rank){
-    if (differPoint(point1, point2)){
+    // if (differPoint(point1, point2)){
         double current_distance = distance(point1, point2);
         
         if(current_distance < p->min_distance){
@@ -174,7 +202,7 @@ void UpdatePairs(Point point1, Point point2, Pairs* p, int rank){
             p->num_pairs++;
         }
         return;
-    }
+    // }
 }
 
 void recSplit(Point* points, int dim, Pairs* p, int rank){
@@ -206,7 +234,7 @@ void recSplit(Point* points, int dim, Pairs* p, int rank){
         mergeSort(strip, num_points_in_strip, 1);
         for (int point = 0; point < num_points_in_strip - 1; point++){
             for (int next_point = point + 1; next_point < num_points_in_strip && abs(strip[next_point].coordinates[1] - strip[point].coordinates[1]) <= d; next_point++){
-                if (differPoint(strip[point], strip[next_point])){
+                // if (differPoint(strip[point], strip[next_point])){
                     double current_distance = distance(strip[point], strip[next_point]);
                     if (current_distance < p->min_distance){
                         p->min_distance = current_distance;
@@ -225,7 +253,7 @@ void recSplit(Point* points, int dim, Pairs* p, int rank){
                         p->points2[p->num_pairs] = strip[next_point];
                         p->num_pairs++;
                     }
-                }
+                // }
             }
         }
         free(strip);
@@ -274,10 +302,13 @@ Point * parallelMergeSort(Point *all_points, char path[], int rank_process, int 
         // Transfer total number of points and the correct slice of points to work on for every process
         Point *points_to_send = NULL;
         points_to_send = (Point *)malloc(num_points_normal_processes * sizeof(Point));
+        for (int point = 0; point < num_points_normal_processes; point++)
+                points_to_send[point].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+
         for (int process = 1; process < comm_size; process++){
             for (int point = 0; point < num_points_normal_processes; point++){
                 points_to_send[point].num_dimensions = num_dimensions;
-                points_to_send[point].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+                
                 for (int dimension = 0; dimension < num_dimensions; dimension++)
                     points_to_send[point].coordinates[dimension] = all_points[point+num_points_normal_processes*(process-1)].coordinates[dimension];
             }
@@ -418,12 +449,14 @@ void parallelClosestPair(Point *all_points, int num_points, int num_dimensions, 
         // Transfer total number of points and the correct slice of points to work on for every process
         Point *points_to_send = NULL;
         points_to_send = (Point *)malloc(num_points_normal_processes * sizeof(Point));
+        for (int point = 0; point < num_points_normal_processes; point++)
+            points_to_send[point].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+
         int left_x_to_send = 0, right_x_to_send = 0;
         for (int process = 1; process < comm_size; process++){
 
             for (int point = 0; point < num_points_normal_processes; point++){
                 points_to_send[point].num_dimensions = num_dimensions;
-                points_to_send[point].coordinates = (int *)malloc(num_dimensions * sizeof(int));
             
                 for (int dimension = 0; dimension < num_dimensions; dimension++)
                     points_to_send[point].coordinates[dimension] = all_points[point+num_points_normal_processes*(process-1)].coordinates[dimension];
