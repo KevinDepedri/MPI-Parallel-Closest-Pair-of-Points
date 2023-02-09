@@ -157,8 +157,18 @@ int main(int argc, char *argv[])
 
     if (rank_process != MASTER_PROCESS)
     {
-        // All the processes send their ordered points to the master process
-        sendPointsPacked(local_points, num_points_local_process, 0, 0, MPI_COMM_WORLD);
+        // All the processes send their ordered points to the master process 
+        // fisrt quarter of the points
+        int first_half = num_points_local_process / 4;
+        sendPointsPacked(local_points, first_half, 0, 1, MPI_COMM_WORLD);
+        // second quarter of the points
+        int second_half = first_half * 2;
+        sendPointsPacked(local_points + first_half, first_half, 0, 1, MPI_COMM_WORLD);
+        // third quarter of the points
+        sendPointsPacked(local_points + second_half, first_half, 0, 1, MPI_COMM_WORLD);
+        // fourth quarter of the points
+        sendPointsPacked(local_points + second_half + first_half, num_points - second_half - first_half, 0, 1, MPI_COMM_WORLD);
+
     }
     else
     {
@@ -172,8 +182,19 @@ int main(int argc, char *argv[])
 
         // Save first the points ordered from the current process (master), then receive the ones from the other processes
         processes_sorted_points[0] = local_points;
-        for (int process = 1; process < comm_size; process++)
-            recvPointsPacked(processes_sorted_points[process], num_points_normal_processes, process, 0, MPI_COMM_WORLD);
+        for (int process = 1; process < comm_size; process++){
+            // first quarter
+            int first_half = num_points_normal_processes / 4;
+            recvPointsPacked(processes_sorted_points[process], first_half, process, 1, MPI_COMM_WORLD);
+            // second quarter
+            int second_half = first_half * 2;
+            recvPointsPacked(processes_sorted_points[process] + first_half, first_half, process, 1, MPI_COMM_WORLD);
+            // third quarter
+            recvPointsPacked(processes_sorted_points[process] + second_half, first_half, process, 1, MPI_COMM_WORLD);
+            // fourth quarter
+            recvPointsPacked(processes_sorted_points[process] + second_half + first_half, num_points_normal_processes - second_half - first_half, process, 1, MPI_COMM_WORLD);
+            
+        }
 
         all_points = processes_sorted_points[1];
         for (int process = 1; process < comm_size; process++)
