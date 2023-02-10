@@ -1,0 +1,23 @@
+Launching parallel algorithm...
+PROCESS:0 DMIN:5122.334038
+PROCESS:3 DMIN:3.464102
+PROCESS:5 DMIN:3.872983
+PROCESS:1 DMIN:3.162278
+PROCESS:4 DMIN:3.741657
+PROCESS:2 DMIN:4.000000
+PROCESS:7 DMIN:3.162278
+PROCESS:6 DMIN:4.472136
+---GLOBAL DMIN: 3.162278
+---NEW GLOBAL DMIN: 3.162278
+(-2351, (2219, 891, -1509, 2262, -416)(2220, 893, -1509, 2263, -418)
+(2212, 1238, 80, -200, Found a total of 4 pairs of points with DMIN=3.162278
+Free all points...
+538, 1626, -288, 319)(-2349, 538, 1625, -290, 320)
+397)(2213, 1238, 78, -198, 396)
+(2438, -1973, 481, 1690, 1944)(2438, -1972, 479, 1691, 1942)
+Free local points...
+Free left strip points...
+Free right strip points...
+Free pairs...
+Memory free
+Time elapsed: 735.300000

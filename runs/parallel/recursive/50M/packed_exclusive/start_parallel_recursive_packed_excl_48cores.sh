@@ -8,10 +8,10 @@
 #PBS -q short_cpuQ
 
 # Set name of job, output and error file
-#PBS -N 24PackedExcl
-#PBS -o 24PackedExcl.txt
-#PBS -e 24PackedExcl_error.txt
+#PBS -N 48PackedExcl
+#PBS -o 48PackedExcl.txt
+#PBS -e 48PackedExcl_error.txt
 
 # Load the library and execute the parallel application
 module load mpich-3.2
-mpiexec -n 48 /home/kevin.depedri/hpc3/runs/parallel/recursive/mpi_recursive_long /home/kevin.depedri/points/100M5d.txt -e -p
+mpiexec -n 48 /home/kevin.depedri/hpc3/runs/parallel/recursive/mpi_recursive_long /home/kevin.depedri/points/50M5d.txt -e -p

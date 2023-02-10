@@ -1,0 +1,3 @@
+PROCESS:0 DMIN:1.414214
+Memory free
+Time elapsed: 8723.650000
