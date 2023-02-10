@@ -1,4 +1,5 @@
 echo "SENDING PACKED EXCLUSIVE JOBS"
+qsub /home/kevin.depedri/hpc3/runs/parallel/recursive/packed_exclusive/start_parallel_recursive_packed_excl_1core.sh
 qsub /home/kevin.depedri/hpc3/runs/parallel/recursive/packed_exclusive/start_parallel_recursive_packed_excl_2cores.sh
 qsub /home/kevin.depedri/hpc3/runs/parallel/recursive/packed_exclusive/start_parallel_recursive_packed_excl_4cores.sh
 qsub /home/kevin.depedri/hpc3/runs/parallel/recursive/packed_exclusive/start_parallel_recursive_packed_excl_8cores.sh

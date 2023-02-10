@@ -8,9 +8,9 @@
 #PBS -q short_cpuQ
 
 # Set name of job, output and error file
-#PBS -N Rec32CoreScatterExcl
-#PBS -o Rec32CoreScatterExcl.txt
-#PBS -e Rec32CoreScatterExcl_error.txt
+#PBS -N 32CoreScatterExcl
+#PBS -o 32CoreScatterExcl.txt
+#PBS -e 32CoreScatterExcl_error.txt
 
 # Load the library and execute the parallel application
 module load mpich-3.2

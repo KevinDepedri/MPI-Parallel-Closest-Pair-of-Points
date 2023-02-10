@@ -8,9 +8,9 @@
 #PBS -q short_cpuQ
 
 # Set name of job, output and error file
-#PBS -N Rec80CorePacked
-#PBS -o Rec80CorePacked.txt
-#PBS -e Rec80CorePacked_error.txt
+#PBS -N 80CorePacked
+#PBS -o 80CorePacked.txt
+#PBS -e 80CorePacked_error.txt
 
 # Load the library and execute the parallel application
 module load mpich-3.2

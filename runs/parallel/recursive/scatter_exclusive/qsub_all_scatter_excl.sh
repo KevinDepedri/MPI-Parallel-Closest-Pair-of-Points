@@ -1,4 +1,5 @@
 echo "SENDING SCATTER EXCLUSIVE JOBS"
+qsub /home/kevin.depedri/hpc3/runs/parallel/recursive/scatter_exclusive/start_parallel_recursive_scatter_excl_1core.sh
 qsub /home/kevin.depedri/hpc3/runs/parallel/recursive/scatter_exclusive/start_parallel_recursive_scatter_excl_2cores.sh
 qsub /home/kevin.depedri/hpc3/runs/parallel/recursive/scatter_exclusive/start_parallel_recursive_scatter_excl_4cores.sh
 qsub /home/kevin.depedri/hpc3/runs/parallel/recursive/scatter_exclusive/start_parallel_recursive_scatter_excl_8cores.sh

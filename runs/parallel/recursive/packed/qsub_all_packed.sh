@@ -1,4 +1,5 @@
 echo "SENDING PACKED JOBS"
+qsub /home/kevin.depedri/hpc3/runs/parallel/recursive/packed/start_parallel_recursive_packed_1core.sh
 qsub /home/kevin.depedri/hpc3/runs/parallel/recursive/packed/start_parallel_recursive_packed_2cores.sh
 qsub /home/kevin.depedri/hpc3/runs/parallel/recursive/packed/start_parallel_recursive_packed_4cores.sh
 qsub /home/kevin.depedri/hpc3/runs/parallel/recursive/packed/start_parallel_recursive_packed_8cores.sh

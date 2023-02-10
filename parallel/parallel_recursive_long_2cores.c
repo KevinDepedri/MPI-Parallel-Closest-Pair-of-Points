@@ -22,6 +22,12 @@ int main(int argc, char *argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
 
     // Parse the input arguments
+    if (comm_size < 1 || comm_size > 2)
+    {
+        if (rank_process == MASTER_PROCESS)
+            perror("ERROR: this code is suitable only for runs with 1 or 2 cores\n");
+        return -1;
+    }
     if (argc < 2)
     {
         if (rank_process == MASTER_PROCESS)
@@ -74,8 +80,13 @@ int main(int argc, char *argv[])
         fscanf(point_file, "%d %d", &num_points, &num_dimensions);
 
         // Points are divided equally on all processes exept master process which takes the remaing points
-        num_points_normal_processes = num_points / (comm_size - 1);
-        num_points_master_process = num_points % (comm_size - 1);
+        if (comm_size == 2){
+            num_points_normal_processes = num_points / (comm_size - 1);
+            num_points_master_process = num_points % (comm_size - 1);
+        }else{
+            num_points_normal_processes = num_points;
+            num_points_master_process = 0;
+        }
 
         // Read the points and store them in the master process
         all_points = (Point *)malloc(num_points * sizeof(Point));

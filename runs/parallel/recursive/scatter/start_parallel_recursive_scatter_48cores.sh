@@ -8,9 +8,9 @@
 #PBS -q short_cpuQ
 
 # Set name of job, output and error file
-#PBS -N Rec48CoreScatter
-#PBS -o Rec48CoreScatter.txt
-#PBS -e Rec48CoreScatter_error.txt
+#PBS -N 48CoreScatter
+#PBS -o 48CoreScatter.txt
+#PBS -e 48CoreScatter_error.txt
 
 # Load the library and execute the parallel application
 module load mpich-3.2
