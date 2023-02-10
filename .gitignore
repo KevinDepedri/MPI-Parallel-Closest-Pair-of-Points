@@ -14,14 +14,13 @@ runs/parallel/recursive/mpi_recursive_long_2cores
 runs/sequential/bruteforce/sequential_bruteforce
 runs/sequential/recursive/sequential_recursive
 
+parallel/mpi_bruteforce
 parallel/mpi_recursive_short
 parallel/mpi_recursive_long
-parallel/mpi_bruteforce
+parallel/mpi_recursive_long_2cores
 
 sequential/sequential_bruteforce
 sequential/sequential_bruteforce.exe
 sequential/sequential_recursive
 sequential/sequential_recursive.exe
 sequential/mpi_test
-
-runs/parallel/recursive/250M
