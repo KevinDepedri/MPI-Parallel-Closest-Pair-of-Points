@@ -8,9 +8,9 @@
 #PBS -q short_cpuQ
 
 # Set name of job, output and error file
-#PBS -N Rec2CoreScatter
-#PBS -o Rec2CoreScatter.txt
-#PBS -e Rec2CoreScatter_error.txt
+#PBS -N 2CoreScatter
+#PBS -o 2CoreScatter.txt
+#PBS -e 2CoreScatter_error.txt
 
 # Load the library and execute the parallel application
 module load mpich-3.2

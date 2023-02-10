@@ -1,4 +1,5 @@
 echo "SENDING NORMAL JOBS"
+qsub /home/kevin.depedri/hpc3/runs/parallel/recursive/normal/start_parallel_recursive_normal_1core.sh
 qsub /home/kevin.depedri/hpc3/runs/parallel/recursive/normal/start_parallel_recursive_normal_2cores.sh
 qsub /home/kevin.depedri/hpc3/runs/parallel/recursive/normal/start_parallel_recursive_normal_4cores.sh
 qsub /home/kevin.depedri/hpc3/runs/parallel/recursive/normal/start_parallel_recursive_normal_8cores.sh

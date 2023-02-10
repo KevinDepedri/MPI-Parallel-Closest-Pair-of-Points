@@ -8,9 +8,9 @@
 #PBS -q short_cpuQ
 
 # Set name of job, output and error file
-#PBS -N Rec16CorePackedExcl
-#PBS -o Rec16CorePackedExcl.txt
-#PBS -e Rec16CorePackedExcl_error.txt
+#PBS -N 16CorePackedExcl
+#PBS -o 16CorePackedExcl.txt
+#PBS -e 16CorePackedExcl_error.txt
 
 # Load the library and execute the parallel application
 module load mpich-3.2

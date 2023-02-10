@@ -8,9 +8,9 @@
 #PBS -q short_cpuQ
 
 # Set name of job, output and error file
-#PBS -N Rec1CoreNormal
-#PBS -o Rec1CoreNormal.txt
-#PBS -e Rec1CoreNormal_error.txt
+#PBS -N 1CoreNormal
+#PBS -o 1CoreNormal.txt
+#PBS -e 1CoreNormal_error.txt
 
 # Load the library and execute the parallel application
 module load mpich-3.2
