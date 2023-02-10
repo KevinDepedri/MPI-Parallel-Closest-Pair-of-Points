@@ -63,22 +63,27 @@ int main(int argc, char *argv[])
 
             // sort the points by the first dimension
             mergeSort(points, num_points, 0);
-            printf("MERGESORT DONE\n");
+            end = clock();
+            cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+            printf("MERGESORT DONE in %f\n", cpu_time_used);
             
             // find the closest pair of points
             double d = recSplit(points, num_points);
+            end = clock();
+            cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+            printf("RECSPLIT DONE in %f\n", cpu_time_used);
+            printf("The closest pair of points is separated by a distance of %f", d);
 
             // free the memory
             for (int i = 0; i < num_points; i++){
                 free(points[i].coordinates);
             }
-            free(points);
 
-            //wait for user input
-            printf("The closest pair of points is separated by a distance of %f", d);
+            free(points);
             end = clock();
             cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
             printf("\nTime elapsed: %f\n", cpu_time_used);
+            //wait for user input
             getchar();
 
             
