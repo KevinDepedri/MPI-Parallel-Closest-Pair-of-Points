@@ -22,17 +22,79 @@ int main(int argc, char *argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
 
     // Parse the input arguments
-    if (comm_size < 1 || comm_size > 2)
-    {
-        if (rank_process == MASTER_PROCESS)
-            perror("ERROR: this code is suitable only for runs with 1 or 2 cores\n");
-        return -1;
-    }
     if (argc < 2)
     {
         if (rank_process == MASTER_PROCESS)
             perror("ERROR: no file name or path has been provided as first argument (points input file)\n");
         return -1;
+    }
+    if (comm_size == 1)
+    {
+        // Get the total number of points and the number of dimensions
+        int num_points = 0, num_dimensions = 0;
+
+        // Send num_points to all the processes, it is used to compute the num_points variables
+        MPI_Bcast(&num_points, 1, MPI_INT, MASTER_PROCESS, MPI_COMM_WORLD);
+        MPI_Bcast(&num_dimensions, 1, MPI_INT, MASTER_PROCESS, MPI_COMM_WORLD);
+        // Get the points data for all the points and order them according to x coordinate
+        Point *all_points = NULL;
+
+        // Points are divided equally on all processes exept master process which takes the remaing points
+        // int num_points_normal_processes = 0, num_points_master_process = 0, num_points_local_process = 0;
+
+        // Open input point file on master process
+        // FILE *point_file = fopen(path, "r");
+        FILE *point_file = fopen(argv[1], "r");
+        if (point_file == NULL)
+        {
+            perror("ERROR opening file on master process\n");
+            return -1;
+        }
+
+        // Read the number of points and dimensions from the first line of the file
+        fscanf(point_file, "%d %d", &num_points, &num_dimensions);
+
+        // Read the points and store them in the master process
+        all_points = (Point *)malloc(num_points * sizeof(Point));
+        for (int point = 0; point < num_points; point++)
+        {
+            all_points[point].num_dimensions = num_dimensions;
+            all_points[point].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+            for (int dimension = 0; dimension < num_dimensions; dimension++)
+                fscanf(point_file, "%d", &all_points[point].coordinates[dimension]);
+        }
+        fclose(point_file);
+
+        // Transfer total number of points and the correct slice of points to work on for every process
+
+        // Sort the received points in each core
+        mergeSort(all_points, num_points, AXIS);
+
+        // POINT 2 - compute min distance for each process
+        double local_dmin = INT_MAX;
+        Pairs *pairs = (Pairs *)malloc(sizeof(Pairs));
+
+        pairs->points1 = (Point *)malloc((num_points) * sizeof(Point));
+        pairs->points2 = (Point *)malloc((num_points) * sizeof(Point));
+        for (int i = 0; i < (num_points); i++)
+        {
+            pairs->points1[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+            pairs->points2[i].coordinates = (int *)malloc(num_dimensions * sizeof(int));
+        }
+
+        pairs->num_pairs = 0;
+        pairs->min_distance = INT_MAX;
+        recSplit(all_points, num_points, pairs, rank_process);
+        local_dmin = pairs->min_distance;
+        printf("PROCESS:%d DMIN:%f\n", rank_process, local_dmin);
+        printf("Memory free\n");
+        end = clock();
+        cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+        printf("Time elapsed: %f\n", cpu_time_used);
+
+        // Finalize the MPI application
+        MPI_Finalize();
+        return 0;
     }
 
     // Get the total number of points and the number of dimensions
@@ -80,13 +142,8 @@ int main(int argc, char *argv[])
         fscanf(point_file, "%d %d", &num_points, &num_dimensions);
 
         // Points are divided equally on all processes exept master process which takes the remaing points
-        if (comm_size == 2){
-            num_points_normal_processes = num_points / (comm_size - 1);
-            num_points_master_process = num_points % (comm_size - 1);
-        }else{
-            num_points_normal_processes = num_points;
-            num_points_master_process = 0;
-        }
+        num_points_normal_processes = num_points / (comm_size - 1);
+        num_points_master_process = num_points % (comm_size - 1);
 
         // Read the points and store them in the master process
         all_points = (Point *)malloc(num_points * sizeof(Point));
@@ -168,7 +225,7 @@ int main(int argc, char *argv[])
 
     if (rank_process != MASTER_PROCESS)
     {
-        // All the processes send their ordered points to the master process 
+        // All the processes send their ordered points to the master process
         // fisrt quarter of the points
         int first_half = num_points_local_process / 4;
         sendPointsPacked(local_points, first_half, 0, 1, MPI_COMM_WORLD);
@@ -179,7 +236,6 @@ int main(int argc, char *argv[])
         sendPointsPacked(local_points + second_half, first_half, 0, 1, MPI_COMM_WORLD);
         // fourth quarter of the points
         sendPointsPacked(local_points + second_half + first_half, num_points - second_half - first_half, 0, 1, MPI_COMM_WORLD);
-
     }
     else
     {
@@ -193,7 +249,8 @@ int main(int argc, char *argv[])
 
         // Save first the points ordered from the current process (master), then receive the ones from the other processes
         processes_sorted_points[0] = local_points;
-        for (int process = 1; process < comm_size; process++){
+        for (int process = 1; process < comm_size; process++)
+        {
             // first quarter
             int first_half = num_points_normal_processes / 4;
             recvPointsPacked(processes_sorted_points[process], first_half, process, 1, MPI_COMM_WORLD);
@@ -204,7 +261,6 @@ int main(int argc, char *argv[])
             recvPointsPacked(processes_sorted_points[process] + second_half, first_half, process, 1, MPI_COMM_WORLD);
             // fourth quarter
             recvPointsPacked(processes_sorted_points[process] + second_half + first_half, num_points_normal_processes - second_half - first_half, process, 1, MPI_COMM_WORLD);
-            
         }
 
         all_points = processes_sorted_points[1];
@@ -215,7 +271,7 @@ int main(int argc, char *argv[])
 
     // POINT 2 - compute min distance for each process
     double local_dmin = INT_MAX;
-    Pairs* pairs = (Pairs *)malloc(sizeof(Pairs));
+    Pairs *pairs = (Pairs *)malloc(sizeof(Pairs));
 
     pairs->points1 = (Point *)malloc((num_points_local_process) * sizeof(Point));
     pairs->points2 = (Point *)malloc((num_points_local_process) * sizeof(Point));
