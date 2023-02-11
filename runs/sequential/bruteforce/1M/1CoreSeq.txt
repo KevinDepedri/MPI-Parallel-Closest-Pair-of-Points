@@ -1,0 +1,5 @@
+The minimum distance is 35.242020.
+There are 1 pairs with this distance.
+Point #49050: -2165 -2907 -1889 4814 2964 Point #820141: -2149 -2892 -1903 4836 2955 
+Memory free
+Time elapsed: 25771.830000

@@ -1,1 +1,0 @@
-/home/kevin.depedri/hpc3/runs/sequential/bruteforce/start_sequential_bruteforce.sh: fork: Cannot allocate memory
