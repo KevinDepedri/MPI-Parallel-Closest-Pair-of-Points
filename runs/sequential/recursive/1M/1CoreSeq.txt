@@ -1,0 +1,2 @@
+The closest pair of points is separated by a distance of 35.242020
+Time elapsed: 28.300000

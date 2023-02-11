@@ -1,0 +1,9 @@
+qsub /home/kevin.depedri/hpc3/runs/parallel/bruteforce/500K/scatter/start_parallel_bruteforce_normal_2cores.sh
+qsub /home/kevin.depedri/hpc3/runs/parallel/bruteforce/500K/scatter/start_parallel_bruteforce_normal_4cores.sh
+qsub /home/kevin.depedri/hpc3/runs/parallel/bruteforce/500K/scatter/start_parallel_bruteforce_normal_8cores.sh
+qsub /home/kevin.depedri/hpc3/runs/parallel/bruteforce/500K/scatter/start_parallel_bruteforce_normal_16cores.sh
+qsub /home/kevin.depedri/hpc3/runs/parallel/bruteforce/500K/scatter/start_parallel_bruteforce_normal_24cores.sh
+qsub /home/kevin.depedri/hpc3/runs/parallel/bruteforce/500K/scatter/start_parallel_bruteforce_normal_32cores.sh
+qsub /home/kevin.depedri/hpc3/runs/parallel/bruteforce/500K/scatter/start_parallel_bruteforce_normal_48cores.sh
+qsub /home/kevin.depedri/hpc3/runs/parallel/bruteforce/500K/scatter/start_parallel_bruteforce_normal_64cores.sh
+qsub /home/kevin.depedri/hpc3/runs/parallel/bruteforce/500K/scatter/start_parallel_bruteforce_normal_80cores.sh

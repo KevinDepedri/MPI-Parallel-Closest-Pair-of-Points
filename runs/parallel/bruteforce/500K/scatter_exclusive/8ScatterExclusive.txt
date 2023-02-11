@@ -1,0 +1,5 @@
+The minimum distance is 17.860571
+Time elapsed: 1662.470000
+[R 2] Points that got the minimum distance:
+(669, 1380, -2201, 840, -1641) - (673, 1387, -2192, 842, -1628)
+[R 2] Number of pairs with minimum distance: 1
