@@ -39,15 +39,15 @@ sudo apt install mpich
 
 # Run the code in WSL
 Once that Ubuntu has been correctly installed and updated with the necessary package, it will now be possible to run the code using the following commands.
-- If you would like to use a number n, up to the number of cores physically avaiable in your cpu then use one of the flowing command
+- If you would like to use a number of processes n, up to the number of cores physically avaiable in your cpu then use the flowing command
   ```bash
   mpiexec -n <number_of_processes> mpi_<name_of_implementation> <path_to_points.txt> <flags>
   ```
-- If you would like to use a bigger n, up to the number of threads physically avaiable in your cpu then use one of the flowing command
+- If you would like to use a bigger of processes n, up to the number of threads physically avaiable in your cpu then use the flowing command
   ```bash
   mpiexec -use-hwthread-cpus -n <number_of_processes> mpi_<name_of_implementation> <path_to_points.txt> <flags>
   ```
-- If you would like to use a bigger n, up to an arbitrary number, then use one of the flowing command
+- If you would like to use an arbitrary number of processes n, then use the flowing command
   ```bash
   mpiexec -oversubscribe -n <number_of_processes> mpi_<name_of_implementation> <path_to_points.txt> <flags>
   ```
