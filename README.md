@@ -5,10 +5,10 @@ This repository is a student project developed by Kevin Depedri and Davide Modol
 The repository is organized in the following way:
 - In the folder `point generator` the smallest set of input point are provided, together with the python codes to generate bigger set of input points
 - In the folder `sequential` the sequential implementation of the Bruteforce approach and of the Divide et Impera approach are provided, together with their executable files
-- In the folder `parallel` the parallel implementation of the Bruteforce approach and of the Divide et Impera approach are provided, together with their executable files (they requires the command `mpiexec` from the library `mpitch` to be run, see more below). In particular, fr the Divide et Impera approach two implementations can be found:
+- In the folder `parallel` the parallel implementation of the Bruteforce approach and of the Divide et Impera approach are provided, together with their executable files (they requires the command `mpiexec` from the library `mpitch` to be run, see more below). In particular, for the Divide et Impera approach two implementations can be found:
   - `parallel_recursive_short`, it shows the logic behind the algorithm from a higher level, abstracting much of what is happening in the Merge Sort and in the Divide et Impera parts of the algorithm
   - `parallel_recursive_long`, it shows all the logic behind all the algorithm in a single file, useful to understand in an easier way the communications between processes
-- In the folder `runs` it is possible to access all the data relative to the runs performed using the Univeristy of Trento Cluster. These runs have been performed using 5 sizes of input point (see point generator), 4 node configurations and an increasing number of cores, from 1 to 80
+- In the folder `runs` it is possible to access all the data relative to the runs performed using the Univeristy of Trento HPC-Cluster. These runs have been performed using 5 sizes of input point (see point generator), 4 node configurations and an increasing number of cores, from 1 to 80
 - In the folder `data` it is possible to visualize the data of the runs inserted in tables and plotted as charts to allow a better understanging of the results
 
 As writtem above, all the experiments have been ran on a HPC-cluster, but the code can also be tested on your own computer exploiting the cores and threads of your CPU. This readme file presents all the steps to follow to correctly test the code on your machine.
