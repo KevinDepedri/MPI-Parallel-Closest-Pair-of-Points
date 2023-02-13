@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
             return -1;
         }
         if (comm_size < 2){
-            perror("ERROR: cannot run parallel application over just 1 process\n");
+            perror("ERROR: use the 2cores file\n");
             return -1;
         }
         fclose(point_file);
