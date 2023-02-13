@@ -113,35 +113,35 @@ fig, axs = plt.subplots(2, 2, constrained_layout = True)
 # fig.tight_layout(pad=1.0)
 
 # plot cpu counts as x axis, speedups as y axis taking values from rec packed
-axs[0, 0].plot(cpu_counts, rec50M_packed_speedups, label='50M packed')
-axs[0, 0].plot(cpu_counts, rec100M_packed_speedups, label='100M packed')
-axs[0, 0].plot(cpu_counts, rec200M_packed_speedups, label='200M packed')
-axs[0, 0].plot(cpu_counts, rec250M_packed_speedups, label='250M packed')
-axs[0, 0].set_xlabel('Number of CPUs')
+axs[0, 0].plot(cpu_counts, rec50M_packed_speedups, label='50M')
+axs[0, 0].plot(cpu_counts, rec100M_packed_speedups, label='100M')
+axs[0, 0].plot(cpu_counts, rec200M_packed_speedups, label='200M')
+axs[0, 0].plot(cpu_counts, rec250M_packed_speedups, label='250M')
+axs[0, 0].set_xlabel('Number of cores')
 axs[0, 0].set_ylabel('Speedup')
 
 # plot cpu counts as x axis, speedups as y axis taking values from rec packed excl
-axs[0, 1].plot(cpu_counts, rec50M_packed_excl_speedups, label='50M packed excl')
-axs[0, 1].plot(cpu_counts, rec100M_packed_excl_speedups, label='100M packed excl')
-axs[0, 1].plot(cpu_counts, rec200M_packed_excl_speedups, label='200M packed excl')
-axs[0, 1].plot(cpu_counts, rec250M_packed_excl_speedups, label='250M packed excl')
-axs[0, 1].set_xlabel('Number of CPUs')
+axs[0, 1].plot(cpu_counts, rec50M_packed_excl_speedups, label='50M')
+axs[0, 1].plot(cpu_counts, rec100M_packed_excl_speedups, label='100M')
+axs[0, 1].plot(cpu_counts, rec200M_packed_excl_speedups, label='200M')
+axs[0, 1].plot(cpu_counts, rec250M_packed_excl_speedups, label='250M')
+axs[0, 1].set_xlabel('Number of cores')
 axs[0, 1].set_ylabel('Speedup')
 
 # plot cpu counts as x axis, speedups as y axis taking values from rec scatter
-axs[1, 0].plot(cpu_counts, rec50M_scatter_speedups, label='50M scatter')
-axs[1, 0].plot(cpu_counts, rec100M_scatter_speedups, label='100M scatter')
-axs[1, 0].plot(cpu_counts, rec200M_scatter_speedups, label='200M scatter')
-axs[1, 0].plot(cpu_counts, rec250M_scatter_speedups, label='250M scatter')
-axs[1, 0].set_xlabel('Number of CPUs')
+axs[1, 0].plot(cpu_counts, rec50M_scatter_speedups, label='50M')
+axs[1, 0].plot(cpu_counts, rec100M_scatter_speedups, label='100M')
+axs[1, 0].plot(cpu_counts, rec200M_scatter_speedups, label='200M')
+axs[1, 0].plot(cpu_counts, rec250M_scatter_speedups, label='250M')
+axs[1, 0].set_xlabel('Number of cores')
 axs[1, 0].set_ylabel('Speedup')
 
 # plot cpu counts as x axis, speedups as y axis taking values from rec scatter excl
-axs[1, 1].plot(cpu_counts, rec50M_scatter_excl_speedups, label='50M scatter excl')
-axs[1, 1].plot(cpu_counts, rec100M_scatter_excl_speedups, label='100M scatter excl')
-axs[1, 1].plot(cpu_counts, rec200M_scatter_excl_speedups, label='200M scatter excl')
-axs[1, 1].plot(cpu_counts, rec250M_scatter_excl_speedups, label='250M scatter excl')
-axs[1, 1].set_xlabel('Number of CPUs')
+axs[1, 1].plot(cpu_counts, rec50M_scatter_excl_speedups, label='50M')
+axs[1, 1].plot(cpu_counts, rec100M_scatter_excl_speedups, label='100M')
+axs[1, 1].plot(cpu_counts, rec200M_scatter_excl_speedups, label='200M')
+axs[1, 1].plot(cpu_counts, rec250M_scatter_excl_speedups, label='250M')
+axs[1, 1].set_xlabel('Number of cores')
 axs[1, 1].set_ylabel('Speedup')
 
 # set titles for each subplot
@@ -158,12 +158,12 @@ axs[1, 1].set_ylim(0, 11)
 
 # set legend for each subplot
 axs[0, 0].legend()
-axs[0, 1].legend()
+axs[0, 1].legend(loc='upper left')
 axs[1, 0].legend()
 axs[1, 1].legend()
 
 # set figure title
-fig.suptitle('Speedup of 50M, 100M, 200M, 250M points with recusive algorithm')
+fig.suptitle('Speedup of 50M, 100M, 200M, 250M points with Divide et Impera algorithm')
 
 # show the plot
 plt.show()
@@ -171,35 +171,35 @@ plt.show()
 # now the same but with efficiencies
 fig, axs = plt.subplots(2, 2, constrained_layout = True)
 # plot cpu counts as x axis, speedups as y axis taking values from rec packed
-axs[0, 0].plot(cpu_counts, rec50M_packed_efficiencies, label='50M packed')
-axs[0, 0].plot(cpu_counts, rec100M_packed_efficiencies, label='100M packed')
-axs[0, 0].plot(cpu_counts, rec200M_packed_efficiencies, label='200M packed')
-axs[0, 0].plot(cpu_counts, rec250M_packed_efficiencies, label='250M packed')
-axs[0, 0].set_xlabel('Number of CPUs')
+axs[0, 0].plot(cpu_counts, rec50M_packed_efficiencies, label='50M')
+axs[0, 0].plot(cpu_counts, rec100M_packed_efficiencies, label='100M')
+axs[0, 0].plot(cpu_counts, rec200M_packed_efficiencies, label='200M')
+axs[0, 0].plot(cpu_counts, rec250M_packed_efficiencies, label='250M')
+axs[0, 0].set_xlabel('Number of cores')
 axs[0, 0].set_ylabel('Efficiency')
 
 # plot cpu counts as x axis, speedups as y axis taking values from rec packed excl
-axs[0, 1].plot(cpu_counts, rec50M_packed_excl_efficiencies, label='50M packed excl')
-axs[0, 1].plot(cpu_counts, rec100M_packed_excl_efficiencies, label='100M packed excl')
-axs[0, 1].plot(cpu_counts, rec200M_packed_excl_efficiencies, label='200M packed excl')
-axs[0, 1].plot(cpu_counts, rec250M_packed_excl_efficiencies, label='250M packed excl')
-axs[0, 1].set_xlabel('Number of CPUs')
+axs[0, 1].plot(cpu_counts, rec50M_packed_excl_efficiencies, label='50M')
+axs[0, 1].plot(cpu_counts, rec100M_packed_excl_efficiencies, label='100M')
+axs[0, 1].plot(cpu_counts, rec200M_packed_excl_efficiencies, label='200M')
+axs[0, 1].plot(cpu_counts, rec250M_packed_excl_efficiencies, label='250M')
+axs[0, 1].set_xlabel('Number of cores')
 axs[0, 1].set_ylabel('Efficiency')
 
 # plot cpu counts as x axis, speedups as y axis taking values from rec scatter
-axs[1, 0].plot(cpu_counts, rec50M_scatter_efficiencies, label='50M scatter')
-axs[1, 0].plot(cpu_counts, rec100M_scatter_efficiencies, label='100M scatter')
-axs[1, 0].plot(cpu_counts, rec200M_scatter_efficiencies, label='200M scatter')
-axs[1, 0].plot(cpu_counts, rec250M_scatter_efficiencies, label='250M scatter')
-axs[1, 0].set_xlabel('Number of CPUs')
+axs[1, 0].plot(cpu_counts, rec50M_scatter_efficiencies, label='50M')
+axs[1, 0].plot(cpu_counts, rec100M_scatter_efficiencies, label='100M')
+axs[1, 0].plot(cpu_counts, rec200M_scatter_efficiencies, label='200M')
+axs[1, 0].plot(cpu_counts, rec250M_scatter_efficiencies, label='250M')
+axs[1, 0].set_xlabel('Number of cores')
 axs[1, 0].set_ylabel('Efficiency')
 
 # plot cpu counts as x axis, speedups as y axis taking values from rec scatter excl
-axs[1, 1].plot(cpu_counts, rec50M_scatter_excl_efficiencies, label='50M scatter excl')
-axs[1, 1].plot(cpu_counts, rec100M_scatter_excl_efficiencies, label='100M scatter excl')
-axs[1, 1].plot(cpu_counts, rec200M_scatter_excl_efficiencies, label='200M scatter excl')
-axs[1, 1].plot(cpu_counts, rec250M_scatter_excl_efficiencies, label='250M scatter excl')
-axs[1, 1].set_xlabel('Number of CPUs')
+axs[1, 1].plot(cpu_counts, rec50M_scatter_excl_efficiencies, label='50M')
+axs[1, 1].plot(cpu_counts, rec100M_scatter_excl_efficiencies, label='100M')
+axs[1, 1].plot(cpu_counts, rec200M_scatter_excl_efficiencies, label='200M')
+axs[1, 1].plot(cpu_counts, rec250M_scatter_excl_efficiencies, label='250M')
+axs[1, 1].set_xlabel('Number of cores')
 axs[1, 1].set_ylabel('Efficiency')
 
 # set titles for each subplot
@@ -221,45 +221,45 @@ axs[1, 0].legend()
 axs[1, 1].legend()
 
 # set figure title
-fig.suptitle('Efficiency of 50M, 100M, 200M, 250M points with recusive algorithm')
+fig.suptitle('Efficiency of 50M, 100M, 200M, 250M points with Divide et Impera algorithm')
 
 # show the plot
 plt.show()
 
 import numpy as np
 
-# now the same, 4 plots with cpus as x axis and times as y axis; each subplot has 4 lines
+# now the same, 4 plots with cores as x axis and times as y axis; each subplot has 4 lines
 fig, axs = plt.subplots(2, 2, constrained_layout = True)
 # plot cpu counts as x axis, speedups as y axis taking values from rec packed
-axs[0, 0].plot(cpu_counts, np.log(rec50M_packed_times), label='50M packed')
-axs[0, 0].plot(cpu_counts, np.log(rec100M_packed_times), label='100M packed')
-axs[0, 0].plot(cpu_counts, np.log(rec200M_packed_times), label='200M packed')
-axs[0, 0].plot(cpu_counts, np.log(rec250M_packed_times), label='250M packed')
-axs[0, 0].set_xlabel('Number of CPUs')
+axs[0, 0].plot(cpu_counts, np.log(rec50M_packed_times), label='50M')
+axs[0, 0].plot(cpu_counts, np.log(rec100M_packed_times), label='100M')
+axs[0, 0].plot(cpu_counts, np.log(rec200M_packed_times), label='200M')
+axs[0, 0].plot(cpu_counts, np.log(rec250M_packed_times), label='250M')
+axs[0, 0].set_xlabel('Number of cores')
 axs[0, 0].set_ylabel('Log(Time(ms))')
 
 # plot cpu counts as x axis, speedups as y axis taking values from rec packed excl
-axs[0, 1].plot(cpu_counts, np.log(rec50M_packed_excl_times), label='50M packed excl')
-axs[0, 1].plot(cpu_counts, np.log(rec100M_packed_excl_times), label='100M packed excl')
-axs[0, 1].plot(cpu_counts, np.log(rec200M_packed_excl_times), label='200M packed excl')
-axs[0, 1].plot(cpu_counts, np.log(rec250M_packed_excl_times), label='250M packed excl')
-axs[0, 1].set_xlabel('Number of CPUs')
+axs[0, 1].plot(cpu_counts, np.log(rec50M_packed_excl_times), label='50M')
+axs[0, 1].plot(cpu_counts, np.log(rec100M_packed_excl_times), label='100M')
+axs[0, 1].plot(cpu_counts, np.log(rec200M_packed_excl_times), label='200M')
+axs[0, 1].plot(cpu_counts, np.log(rec250M_packed_excl_times), label='250M')
+axs[0, 1].set_xlabel('Number of cores')
 axs[0, 1].set_ylabel('Log(Time(ms))')
 
 # plot cpu counts as x axis, speedups as y axis taking values from rec scatter
-axs[1, 0].plot(cpu_counts, np.log(rec50M_scatter_times), label='50M scatter')
-axs[1, 0].plot(cpu_counts, np.log(rec100M_scatter_times), label='100M scatter')
-axs[1, 0].plot(cpu_counts, np.log(rec200M_scatter_times), label='200M scatter')
-axs[1, 0].plot(cpu_counts, np.log(rec250M_scatter_times), label='250M scatter')
-axs[1, 0].set_xlabel('Number of CPUs')
+axs[1, 0].plot(cpu_counts, np.log(rec50M_scatter_times), label='50M')
+axs[1, 0].plot(cpu_counts, np.log(rec100M_scatter_times), label='100M')
+axs[1, 0].plot(cpu_counts, np.log(rec200M_scatter_times), label='200M')
+axs[1, 0].plot(cpu_counts, np.log(rec250M_scatter_times), label='250M')
+axs[1, 0].set_xlabel('Number of cores')
 axs[1, 0].set_ylabel('Log(Time(ms))')
 
 # plot cpu counts as x axis, speedups as y axis taking values from rec scatter excl
-axs[1, 1].plot(cpu_counts, np.log(rec50M_scatter_excl_times), label='50M scatter excl')
-axs[1, 1].plot(cpu_counts, np.log(rec100M_scatter_excl_times), label='100M scatter excl')
-axs[1, 1].plot(cpu_counts, np.log(rec200M_scatter_excl_times), label='200M scatter excl')
-axs[1, 1].plot(cpu_counts, np.log(rec250M_scatter_excl_times), label='250M scatter excl')
-axs[1, 1].set_xlabel('Number of CPUs')
+axs[1, 1].plot(cpu_counts, np.log(rec50M_scatter_excl_times), label='50M')
+axs[1, 1].plot(cpu_counts, np.log(rec100M_scatter_excl_times), label='100M')
+axs[1, 1].plot(cpu_counts, np.log(rec200M_scatter_excl_times), label='200M')
+axs[1, 1].plot(cpu_counts, np.log(rec250M_scatter_excl_times), label='250M')
+axs[1, 1].set_xlabel('Number of cores')
 axs[1, 1].set_ylabel('Log(Time(ms))')
 
 # set titles for each subplot
@@ -275,7 +275,7 @@ axs[1, 0].legend()
 axs[1, 1].legend()
 
 # set figure title
-fig.suptitle('Time of 50M, 100M, 200M, 250M points with recusive algorithm')
+fig.suptitle('Time of 50M, 100M, 200M, 250M points with Divide et Impera algorithm')
 
 # show the plot
 plt.show()
@@ -288,7 +288,7 @@ axs[0, 0].plot(cpu_counts, np.log(rec50M_packed_times), label='packed')
 axs[0, 0].plot(cpu_counts, np.log(rec50M_packed_excl_times), label='packed excl')
 axs[0, 0].plot(cpu_counts, np.log(rec50M_scatter_times), label='scatter')
 axs[0, 0].plot(cpu_counts, np.log(rec50M_scatter_excl_times), label='scatter excl')
-axs[0, 0].set_xlabel('Number of CPUs')
+axs[0, 0].set_xlabel('Number of cores')
 axs[0, 0].set_ylabel('Log(Time(ms))')
 axs[0, 0].set_title('50M points')
 
@@ -297,7 +297,7 @@ axs[0, 1].plot(cpu_counts, np.log(rec100M_packed_times), label='packed')
 axs[0, 1].plot(cpu_counts, np.log(rec100M_packed_excl_times), label='packed excl')
 axs[0, 1].plot(cpu_counts, np.log(rec100M_scatter_times), label='scatter')
 axs[0, 1].plot(cpu_counts, np.log(rec100M_scatter_excl_times), label='scatter excl')
-axs[0, 1].set_xlabel('Number of CPUs')
+axs[0, 1].set_xlabel('Number of cores')
 axs[0, 1].set_ylabel('Log(Time(ms))')
 axs[0, 1].set_title('100M points')
 
@@ -306,7 +306,7 @@ axs[1, 0].plot(cpu_counts, np.log(rec200M_packed_times), label='packed')
 axs[1, 0].plot(cpu_counts, np.log(rec200M_packed_excl_times), label='packed excl')
 axs[1, 0].plot(cpu_counts, np.log(rec200M_scatter_times), label='scatter')
 axs[1, 0].plot(cpu_counts, np.log(rec200M_scatter_excl_times), label='scatter excl')
-axs[1, 0].set_xlabel('Number of CPUs')
+axs[1, 0].set_xlabel('Number of cores')
 axs[1, 0].set_ylabel('Log(Time(ms))')
 axs[1, 0].set_title('200M points')
 
@@ -315,7 +315,7 @@ axs[1, 1].plot(cpu_counts, np.log(rec250M_packed_times), label='packed')
 axs[1, 1].plot(cpu_counts, np.log(rec250M_packed_excl_times), label='packed excl')
 axs[1, 1].plot(cpu_counts, np.log(rec250M_scatter_times), label='scatter')
 axs[1, 1].plot(cpu_counts, np.log(rec250M_scatter_excl_times), label='scatter excl')
-axs[1, 1].set_xlabel('Number of CPUs')
+axs[1, 1].set_xlabel('Number of cores')
 axs[1, 1].set_ylabel('Log(Time(ms))')
 axs[1, 1].set_title('250M points')
 
@@ -326,7 +326,7 @@ axs[1, 0].legend()
 axs[1, 1].legend()
 
 # set figure title
-fig.suptitle('Log(Time) of 50M, 100M, 200M, 250M points with recusive algorithm')
+fig.suptitle('Log(Time) of 50M, 100M, 200M, 250M points with Divide et Impera algorithm')
 
 # show the plot
 plt.show()
@@ -339,7 +339,7 @@ axs[0].plot(cpu_counts, np.log(packed_times_BF500K), label='packed')
 axs[0].plot(cpu_counts, np.log(packed_excl_times_BF500K), label='packed excl')
 axs[0].plot(cpu_counts, np.log(scatter_times_BF500K), label='scatter')
 axs[0].plot(cpu_counts, np.log(scatter_excl_times_BF500K), label='scatter excl')
-axs[0].set_xlabel('Number of CPUs')
+axs[0].set_xlabel('Number of cores')
 axs[0].set_ylabel('Log(Time(ms))')
 axs[0].set_title('500K points')
 
@@ -348,7 +348,7 @@ axs[1].plot(cpu_counts, np.log(packed_times_BF1M), label='packed')
 axs[1].plot(cpu_counts, np.log(packed_excl_times_BF1M), label='packed excl')
 axs[1].plot(cpu_counts, np.log(scatter_times_BF1M), label='scatter')
 axs[1].plot(cpu_counts, np.log(scatter_excl_times_BF1M), label='scatter excl')
-axs[1].set_xlabel('Number of CPUs')
+axs[1].set_xlabel('Number of cores')
 axs[1].set_ylabel('Log(Time(ms))')
 axs[1].set_title('1M points')
 
@@ -357,35 +357,35 @@ axs[0].legend()
 axs[1].legend()
 
 # set figure title
-fig.suptitle('Log(Time) of 500K, 1M points with bruteforce algorithm')
+fig.suptitle('Log(Time) of 500K, 1M points with Bruteforce algorithm')
 
 # show the plot
 plt.show()
 
 # now the speedup but with bruteforce
 fig, axs = plt.subplots(2, 2, constrained_layout = True)
-axs[0, 0].plot(cpu_counts, packed_speedups_BF500K, label='500K packed')
-axs[0, 0].plot(cpu_counts, packed_speedups_BF1M, label='1M packed excl')
+axs[0, 0].plot(cpu_counts, packed_speedups_BF500K, label='500K')
+axs[0, 0].plot(cpu_counts, packed_speedups_BF1M, label='1M')
 axs[0,0].set_title('Packed')
-axs[0,0].set_xlabel('Number of CPUs')
+axs[0,0].set_xlabel('Number of cores')
 axs[0,0].set_ylabel('Speedup')
 
-axs[0, 1].plot(cpu_counts, scatter_speedups_BF500K, label='500K scatter')
-axs[0, 1].plot(cpu_counts, scatter_speedups_BF1M, label='1M scatter')
+axs[0, 1].plot(cpu_counts, scatter_speedups_BF500K, label='500K')
+axs[0, 1].plot(cpu_counts, scatter_speedups_BF1M, label='1M')
 axs[0,1].set_title('Scatter')
-axs[0,1].set_xlabel('Number of CPUs')
+axs[0,1].set_xlabel('Number of cores')
 axs[0,1].set_ylabel('Speedup')
 
-axs[1, 0].plot(cpu_counts, packed_excl_speedups_BF500K, label='500K packed excl')
-axs[1, 0].plot(cpu_counts, packed_excl_speedups_BF1M, label='1M packed excl')
-axs[1,0].set_title('Packed excl')
-axs[1,0].set_xlabel('Number of CPUs')
+axs[1, 0].plot(cpu_counts, packed_excl_speedups_BF500K, label='500K')
+axs[1, 0].plot(cpu_counts, packed_excl_speedups_BF1M, label='1M')
+axs[1,0].set_title('Packed exclusive')
+axs[1,0].set_xlabel('Number of cores')
 axs[1,0].set_ylabel('Speedup')
 
-axs[1, 1].plot(cpu_counts, scatter_excl_speedups_BF500K, label='500K scatter excl')
-axs[1, 1].plot(cpu_counts, scatter_excl_speedups_BF1M, label='1M scatter excl')
-axs[1,1].set_title('Scatter excl')
-axs[1,1].set_xlabel('Number of CPUs')
+axs[1, 1].plot(cpu_counts, scatter_excl_speedups_BF500K, label='500K')
+axs[1, 1].plot(cpu_counts, scatter_excl_speedups_BF1M, label='1M ')
+axs[1,1].set_title('Scatter exclusive')
+axs[1,1].set_xlabel('Number of cores')
 axs[1,1].set_ylabel('Speedup')
 
 # set legend for each subplot
@@ -395,35 +395,35 @@ axs[1, 0].legend()
 axs[1, 1].legend()
 
 # set figure title
-fig.suptitle('Speedup of 500K, 1M points with bruteforce algorithm')
+fig.suptitle('Speedup of 500K, 1M points with Bruteforce algorithm')
 
 # show the plot
 plt.show()
 
 # now the same but with efficiency
 fig, axs = plt.subplots(2, 2, constrained_layout = True)
-axs[0, 0].plot(cpu_counts, packed_efficiencies_BF500K, label='500K packed')
-axs[0, 0].plot(cpu_counts, packed_efficiencies_BF1M, label='1M packed excl')
+axs[0, 0].plot(cpu_counts, packed_efficiencies_BF500K, label='500K')
+axs[0, 0].plot(cpu_counts, packed_efficiencies_BF1M, label='1M')
 axs[0, 0].set_title('Packed')
-axs[0, 0].set_xlabel('Number of CPUs')
+axs[0, 0].set_xlabel('Number of cores')
 axs[0, 0].set_ylabel('Efficiency')
 
-axs[0, 1].plot(cpu_counts, scatter_efficiencies_BF500K, label='500K scatter')
-axs[0, 1].plot(cpu_counts, scatter_efficiencies_BF1M, label='1M scatter')
+axs[0, 1].plot(cpu_counts, scatter_efficiencies_BF500K, label='500K')
+axs[0, 1].plot(cpu_counts, scatter_efficiencies_BF1M, label='1M')
 axs[0, 1].set_title('Scatter')
-axs[0, 1].set_xlabel('Number of CPUs')
+axs[0, 1].set_xlabel('Number of cores')
 axs[0, 1].set_ylabel('Efficiency')
 
-axs[1, 0].plot(cpu_counts, packed_excl_efficiencies_BF500K, label='500K packed excl')
-axs[1, 0].plot(cpu_counts, packed_excl_efficiencies_BF1M, label='1M packed excl')
-axs[1, 0].set_title('Packed excl')
-axs[1, 0].set_xlabel('Number of CPUs')
+axs[1, 0].plot(cpu_counts, packed_excl_efficiencies_BF500K, label='500K')
+axs[1, 0].plot(cpu_counts, packed_excl_efficiencies_BF1M, label='1M')
+axs[1, 0].set_title('Packed exclusive')
+axs[1, 0].set_xlabel('Number of cores')
 axs[1, 0].set_ylabel('Efficiency')
 
-axs[1, 1].plot(cpu_counts, scatter_excl_efficiencies_BF500K, label='500K scatter excl')
-axs[1, 1].plot(cpu_counts, scatter_excl_efficiencies_BF1M, label='1M scatter excl')
-axs[1, 1].set_title('Scatter excl')
-axs[1, 1].set_xlabel('Number of CPUs')
+axs[1, 1].plot(cpu_counts, scatter_excl_efficiencies_BF500K, label='500K')
+axs[1, 1].plot(cpu_counts, scatter_excl_efficiencies_BF1M, label='1M')
+axs[1, 1].set_title('Scatter exclusive')
+axs[1, 1].set_xlabel('Number of cores')
 axs[1, 1].set_ylabel('Efficiency')
 
 # set legend for each subplot
@@ -433,35 +433,35 @@ axs[1, 0].legend()
 axs[1, 1].legend()
 
 # set figure title
-fig.suptitle('Efficiency of 500K, 1M points with bruteforce algorithm')
+fig.suptitle('Efficiency of 500K, 1M points with Bruteforce algorithm')
 
 # show the plot
 plt.show()
 
 # bruteforce times by configuration
 fig, axs = plt.subplots(2, 2, constrained_layout = True)
-axs[0, 0].plot(cpu_counts, np.log(packed_times_BF500K), label='500K packed')
-axs[0, 0].plot(cpu_counts, np.log(packed_times_BF1M), label='1M packed excl')
+axs[0, 0].plot(cpu_counts, np.log(packed_times_BF500K), label='500K')
+axs[0, 0].plot(cpu_counts, np.log(packed_times_BF1M), label='1M')
 axs[0, 0].set_title('Packed')
-axs[0, 0].set_xlabel('Number of CPUs')
+axs[0, 0].set_xlabel('Number of cores')
 axs[0, 0].set_ylabel('Log(Time(ms))')
 
-axs[0, 1].plot(cpu_counts, np.log(scatter_times_BF500K), label='500K scatter')
-axs[0, 1].plot(cpu_counts, np.log(scatter_times_BF1M), label='1M scatter')
+axs[0, 1].plot(cpu_counts, np.log(scatter_times_BF500K), label='500K')
+axs[0, 1].plot(cpu_counts, np.log(scatter_times_BF1M), label='1M')
 axs[0, 1].set_title('Scatter')
-axs[0, 1].set_xlabel('Number of CPUs')
+axs[0, 1].set_xlabel('Number of cores')
 axs[0, 1].set_ylabel('Log(Time(ms))')
 
-axs[1, 0].plot(cpu_counts, np.log(packed_excl_times_BF500K), label='500K packed excl')
-axs[1, 0].plot(cpu_counts, np.log(packed_excl_times_BF1M), label='1M packed excl')
-axs[1, 0].set_title('Packed excl')
-axs[1, 0].set_xlabel('Number of CPUs')
+axs[1, 0].plot(cpu_counts, np.log(packed_excl_times_BF500K), label='500K')
+axs[1, 0].plot(cpu_counts, np.log(packed_excl_times_BF1M), label='1M')
+axs[1, 0].set_title('Packed exclusive')
+axs[1, 0].set_xlabel('Number of cores')
 axs[1, 0].set_ylabel('Log(Time(ms))')
 
-axs[1, 1].plot(cpu_counts, np.log(scatter_excl_times_BF500K), label='500K scatter excl')
-axs[1, 1].plot(cpu_counts, np.log(scatter_excl_times_BF1M), label='1M scatter excl')
-axs[1, 1].set_title('Scatter excl')
-axs[1, 1].set_xlabel('Number of CPUs')
+axs[1, 1].plot(cpu_counts, np.log(scatter_excl_times_BF500K), label='500K')
+axs[1, 1].plot(cpu_counts, np.log(scatter_excl_times_BF1M), label='1M')
+axs[1, 1].set_title('Scatter exclusive')
+axs[1, 1].set_xlabel('Number of cores')
 axs[1, 1].set_ylabel('Log(Time(ms))')
 
 # set legend for each subplot
@@ -471,7 +471,7 @@ axs[1, 0].legend()
 axs[1, 1].legend()
 
 # set figure title
-fig.suptitle('Log(Time) of 500K, 1M points with bruteforce algorithm')
+fig.suptitle('Log(Time) of 500K, 1M points with Bruteforce algorithm')
 
 # show the plot
 plt.show()
