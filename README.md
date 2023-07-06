@@ -24,7 +24,7 @@ vcpkg integrate install
 ```
 
 # Install WSL with Ubuntu
-Windows Subsystem for Linux (WSL) allows to install a linux kernerl directly in Windows. This is the quickest way to have access to MPICH in windows. To install WSL with Ubuntu follow the ensuing commands in Windows Powershell
+Windows Subsystem for Linux (WSL) allows to install a linux kernel directly in Windows. This is the quickest way to have access to MPICH in windows. To install WSL with Ubuntu follow the ensuing commands in Windows Powershell
 Install WSL from powershell:
 ```powershell
 wsl --install
